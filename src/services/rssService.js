@@ -68,8 +68,12 @@ let cacheDeNoticiasRSS = [];
 let servidorRssPronto = false;
 
 const buscarComTimeoutRSS = (portal) => {
+  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(portal.url)}`;
   return Promise.race([
-    parser.parseURL(portal.url).then((feed) => ({ feed, config: portal })),
+    parser
+      .parseURL(proxyUrl)
+      .catch(() => parser.parseURL(portal.url))
+      .then((feed) => ({ feed, config: portal })),
     new Promise((_, reject) =>
       setTimeout(
         () => reject(new Error(`Timeout no portal ${portal.nome}`)),
@@ -230,8 +234,9 @@ async function atualizarCacheDeNoticiasRSS() {
       await new Promise((resolve) => setTimeout(resolve, index * 800));
       if (portal.nome === "FOGÃONET") {
         try {
+          const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(portal.url)}`;
           const feedResponse = await Promise.race([
-            fetch(portal.url, {
+            fetch(proxyUrl, {
               headers: {
                 "User-Agent":
                   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -260,9 +265,8 @@ async function atualizarCacheDeNoticiasRSS() {
             `[Robô RSS] Bloqueio no FogãoNET (${e.message}). Acionando rota alternativa via Google News...`,
           );
           try {
-            const fallbackFeed = await parser.parseURL(
-              "https://news.google.com/rss/search?q=site:fogaonet.com+Botafogo&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-            );
+            const fallbackProxy = `https://api.allorigins.win/raw?url=${encodeURIComponent("https://news.google.com/rss/search?q=site:fogaonet.com+Botafogo&hl=pt-BR&gl=BR&ceid=BR:pt-419")}`;
+            const fallbackFeed = await parser.parseURL(fallbackProxy);
             return { feed: fallbackFeed, config: portal };
           } catch (err2) {
             console.log(
