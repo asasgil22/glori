@@ -60,10 +60,17 @@ async function tentarBuscador(url) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
   try {
+    const userAgents = [
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Safari/605.1.15",
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0",
+      "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    ];
+    const randomUA = userAgents[Math.floor(Math.random() * userAgents.length)];
+
     const res = await fetch(url, {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "User-Agent": randomUA,
         Accept: "application/rss+xml, application/xml, text/xml, */*",
         "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
       },
@@ -117,6 +124,9 @@ async function buscarFeedSeguro(portal) {
     );
     urlsParaTentar.push(
       `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.bing.com/news/search?q=${q}&format=rss`)}`,
+    );
+    urlsParaTentar.push(
+      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`)}`,
     );
   }
 
@@ -287,12 +297,17 @@ async function atualizarCacheDeNoticiasRSS() {
     });
     let mudouStats = false;
 
-    const promessas = portaisAtivos.map(async (portal, index) => {
-      await new Promise((resolve) => setTimeout(resolve, index * 1000)); // Delay para não baterem todos juntos
-      return await buscarFeedSeguro(portal);
-    });
+    const resultados = [];
+    // Executa as requisições em Fila (Sequencialmente) com delay aleatório para evitar bloqueio de IP por excesso de requisições na nuvem
+    for (let i = 0; i < portaisAtivos.length; i++) {
+      const portal = portaisAtivos[i];
+      const res = await buscarFeedSeguro(portal);
+      resultados.push({ status: "fulfilled", value: res });
+      await new Promise((resolve) =>
+        setTimeout(resolve, 2000 + Math.random() * 2000),
+      );
+    }
 
-    const resultados = await Promise.allSettled(promessas);
     resultados.forEach((resultado) => {
       if (resultado.status === "fulfilled") {
         const { feed, config } = resultado.value;
