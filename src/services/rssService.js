@@ -21,45 +21,34 @@ const parser = new Parser({
 });
 
 const portaisRSS = [
-  { nome: "FOGÃONET", url: "https://www.fogaonet.com/feed/", passeLivre: true },
+  {
+    nome: "FOGÃONET",
+    query: "site:fogaonet.com Botafogo",
+    urlOriginal: "https://www.fogaonet.com/feed/",
+    passeLivre: true,
+  },
   {
     nome: "GLOBO ESPORTE",
-    url: "https://news.google.com/rss/search?q=Botafogo+site:ge.globo.com&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+    query: "Botafogo site:ge.globo.com",
     passeLivre: false,
   },
-  {
-    nome: "UOL ESPORTE",
-    url: "https://news.google.com/rss/search?q=Botafogo+site:uol.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-    passeLivre: false,
-  },
-  {
-    nome: "LANCE!",
-    url: "https://news.google.com/rss/search?q=Botafogo+site:lance.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-    passeLivre: false,
-  },
-  {
-    nome: "OGOL",
-    url: "https://news.google.com/rss/search?q=Botafogo+site:ogol.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-    passeLivre: false,
-  },
-  {
-    nome: "O DIA",
-    url: "https://news.google.com/rss/search?q=Botafogo+site:odia.ig.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-    passeLivre: false,
-  },
+  { nome: "UOL ESPORTE", query: "Botafogo site:uol.com.br", passeLivre: false },
+  { nome: "LANCE!", query: "Botafogo site:lance.com.br", passeLivre: false },
+  { nome: "OGOL", query: "Botafogo site:ogol.com.br", passeLivre: false },
+  { nome: "O DIA", query: "Botafogo site:odia.ig.com.br", passeLivre: false },
   {
     nome: "ESPN BRASIL",
-    url: "https://news.google.com/rss/search?q=Botafogo+site:espn.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+    query: "Botafogo site:espn.com.br",
     passeLivre: false,
   },
   {
     nome: "TNT SPORTS",
-    url: "https://news.google.com/rss/search?q=Botafogo+site:tntsports.com.br&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+    query: "Botafogo site:tntsports.com.br",
     passeLivre: false,
   },
   {
     nome: "365SCORES",
-    url: "https://news.google.com/rss/search?q=Botafogo+site:365scores.com&hl=pt-BR&gl=BR&ceid=BR:pt-419",
+    query: "Botafogo site:365scores.com",
     passeLivre: false,
   },
 ];
@@ -67,17 +56,86 @@ const portaisRSS = [
 let cacheDeNoticiasRSS = [];
 let servidorRssPronto = false;
 
-const buscarComTimeoutRSS = (portal) => {
-  return Promise.race([
-    parser.parseURL(portal.url).then((feed) => ({ feed, config: portal })),
-    new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error(`Timeout no portal ${portal.nome}`)),
-        12000,
-      ),
-    ),
-  ]);
-};
+async function tentarBuscador(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        Accept: "application/rss+xml, application/xml, text/xml, */*",
+        "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`Status HTTP ${res.status}`);
+    let xml = await res.text();
+
+    xml = xml.replace(
+      /\b(allowfullscreen|async|defer|controls|autoplay|muted|loop|ismap|checked|readonly|disabled|multiple|required)\b(?=[\s>])/gi,
+      '$1="true"',
+    );
+
+    if (
+      !xml.includes("<rss") &&
+      !xml.includes("<feed") &&
+      !xml.includes("<?xml")
+    ) {
+      throw new Error("Resposta não é um XML válido");
+    }
+    return await parser.parseString(xml);
+  } catch (e) {
+    clearTimeout(timeout);
+    throw e;
+  }
+}
+
+async function buscarFeedSeguro(portal) {
+  const urlsParaTentar = [];
+
+  if (portal.nome === "FOGÃONET") {
+    urlsParaTentar.push(portal.urlOriginal);
+    urlsParaTentar.push(
+      `https://corsproxy.io/?url=${encodeURIComponent(portal.urlOriginal)}`,
+    );
+    urlsParaTentar.push(
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(portal.urlOriginal)}`,
+    );
+    urlsParaTentar.push(
+      `https://news.google.com/rss/search?q=${encodeURIComponent(portal.query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`,
+    );
+  } else {
+    const q = encodeURIComponent(portal.query);
+    urlsParaTentar.push(
+      `https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`,
+    );
+    urlsParaTentar.push(`https://www.bing.com/news/search?q=${q}&format=rss`);
+    urlsParaTentar.push(
+      `https://corsproxy.io/?url=${encodeURIComponent(`https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`)}`,
+    );
+    urlsParaTentar.push(
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.bing.com/news/search?q=${q}&format=rss`)}`,
+    );
+  }
+
+  for (const url of urlsParaTentar) {
+    try {
+      const feed = await tentarBuscador(url);
+      if (feed && feed.items && feed.items.length > 0) {
+        return { feed, config: portal };
+      }
+    } catch (e) {
+      // Tenta o próximo link da lista silenciosamente
+    }
+  }
+
+  console.log(
+    `[Robô RSS] ⚠️ Falha total ao ler portal: ${portal.nome} (Tentou todas as rotas e proxies)`,
+  );
+  return { feed: { items: [] }, config: portal };
+}
 
 async function obterLinkRealRSS(linkGoogle) {
   try {
@@ -91,7 +149,8 @@ async function obterLinkRealRSS(linkGoogle) {
     if (
       res.url &&
       !res.url.includes("news.google.com") &&
-      !res.url.includes("consent.google.com")
+      !res.url.includes("consent.google.com") &&
+      !res.url.includes("bing.com")
     ) {
       return res.url;
     }
@@ -229,52 +288,8 @@ async function atualizarCacheDeNoticiasRSS() {
     let mudouStats = false;
 
     const promessas = portaisAtivos.map(async (portal, index) => {
-      await new Promise((resolve) => setTimeout(resolve, index * 800));
-      if (portal.nome === "FOGÃONET") {
-        try {
-          const feedResponse = await Promise.race([
-            fetch(portal.url, {
-              headers: {
-                "User-Agent":
-                  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-                Accept:
-                  "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-                "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
-                "Upgrade-Insecure-Requests": "1",
-              },
-              signal: AbortSignal.timeout(8000),
-            }).then(async (res) => {
-              if (!res.ok) throw new Error(`Status code ${res.status}`);
-              let xml = await res.text();
-              xml = xml.replace(
-                /\b(allowfullscreen|async|defer|controls|autoplay|muted|loop|ismap|checked|readonly|disabled|multiple|required)\b(?=[\s>])/gi,
-                '$1="true"',
-              );
-              return parser.parseString(xml);
-            }),
-            new Promise((_, rj) =>
-              setTimeout(() => rj(new Error("Timeout no FogãoNET")), 12000),
-            ),
-          ]);
-          return { feed: feedResponse, config: portal };
-        } catch (e) {
-          console.log(
-            `[Robô RSS] Bloqueio no FogãoNET (${e.message}). Acionando rota alternativa via Google News...`,
-          );
-          try {
-            const fallbackFeed = await parser.parseURL(
-              "https://news.google.com/rss/search?q=site:fogaonet.com+Botafogo&hl=pt-BR&gl=BR&ceid=BR:pt-419",
-            );
-            return { feed: fallbackFeed, config: portal };
-          } catch (err2) {
-            console.log(
-              `[Robô RSS] Falha total ao ler FogãoNET: ${err2.message}`,
-            );
-            return { feed: { items: [] }, config: portal };
-          }
-        }
-      }
-      return await buscarComTimeoutRSS(portal);
+      await new Promise((resolve) => setTimeout(resolve, index * 1000)); // Delay para não baterem todos juntos
+      return await buscarFeedSeguro(portal);
     });
 
     const resultados = await Promise.allSettled(promessas);
@@ -424,7 +439,11 @@ async function atualizarCacheDeNoticiasRSS() {
     let listaLimitada = todasNoticias.slice(0, 2500);
 
     listaLimitada.forEach(async (noticia) => {
-      if (noticia.link && noticia.link.includes("news.google.com")) {
+      if (
+        noticia.link &&
+        (noticia.link.includes("news.google.com") ||
+          noticia.link.includes("bing.com"))
+      ) {
         noticia.linkResolvido = await obterLinkRealRSS(noticia.link);
       }
     });
