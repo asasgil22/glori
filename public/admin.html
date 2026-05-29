@@ -1,0 +1,3553 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel Administrativo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      /* Animação que faz o bullet piscar entre verde e branco */
+      @keyframes piscarVerdeBranco {
+        0%,
+        100% {
+          background-color: #10b981;
+          box-shadow: 0 0 6px #10b981;
+        }
+        50% {
+          background-color: #ffffff;
+          box-shadow: 0 0 6px #ffffff;
+        }
+      }
+      .bullet-pisca {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 4px;
+        animation: piscarVerdeBranco 1.5s infinite ease-in-out;
+      }
+    </style>
+  </head>
+  <body class="admin-body">
+    <nav class="navbar navbar-expand-lg admin-glass-nav sticky-top">
+      <div class="container">
+        <div class="navbar-brand d-flex align-items-center gap-3 m-0 p-0">
+          <span
+            class="fw-bold text-uppercase"
+            style="letter-spacing: 1px; font-size: 1rem"
+            >Sistema Administrativo</span
+          >
+          <span
+            class="d-inline-flex align-items-center text-secondary"
+            style="
+              font-size: 0.75rem;
+              font-weight: 600;
+              padding-left: 12px;
+              border-left: 1px solid rgba(255, 255, 255, 0.15);
+            "
+          >
+            <span
+              class="bullet-pisca"
+              style="width: 7px; height: 7px; margin-right: 6px"
+            ></span>
+            v1.1 beta
+          </span>
+          <span
+            class="text-muted fw-semibold d-none d-md-block"
+            style="font-size: 0.75rem; letter-spacing: 0"
+          >
+            asasgil | 2026 &reg;
+          </span>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="index.html" class="btn btn-outline-secondary btn-sm px-3"
+            >Ver site</a
+          >
+          <a href="/api/logout" class="btn btn-dark btn-sm px-3">Sair</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container admin-shell py-4">
+      <div class="d-flex justify-content-center mb-5 mt-2">
+        <ul
+          class="nav nav-pills admin-tabs flex-wrap justify-content-center gap-1"
+          id="admin-tabs"
+          role="tablist"
+        >
+          <li class="nav-item" id="nav-item-dashboard" role="presentation">
+            <button
+              class="nav-link active"
+              id="tab-dashboard"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-dashboard"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="9"></rect>
+                <rect x="14" y="3" width="7" height="5"></rect>
+                <rect x="14" y="12" width="7" height="9"></rect>
+                <rect x="3" y="16" width="7" height="5"></rect>
+              </svg>
+              Dashboard
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-config" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-config"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-config"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              Pagina inicial
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-noticias" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-noticias"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-noticias"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                ></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+              Publicar Noticias
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-noticias-lista" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-noticias-lista"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-noticias-lista"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              Notícias Cadastradas
+            </button>
+          </li>
+          <li class="nav-item d-none" id="nav-item-portais" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-portais"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-portais"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 19V5M10 19V9M16 19V12M22 19V3"></path>
+              </svg>
+              Portais
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-enquete" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-enquete"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-enquete"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+              </svg>
+              Enquete
+            </button>
+          </li>
+          <li class="nav-item d-none" id="nav-item-odds" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-odds"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-odds"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M12 3c1 3 3 4.5 3 7.5a3 3 0 1 1-6 0c0-2 1.5-4.5 3-7.5Z"
+                ></path>
+                <path d="M9 14c0 2 1.5 4 3 4s3-2 3-4"></path>
+              </svg>
+              Odds
+            </button>
+          </li>
+          <li class="nav-item d-none" id="nav-item-tabelas" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-tabelas"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-tabelas"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 3h18v18H3z"></path>
+                <path d="M3 9h18"></path>
+                <path d="M9 21V9"></path>
+              </svg>
+              Tabelas
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-jogos" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-jogos"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-jogos"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10"></circle>
+                <path
+                  d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
+                ></path>
+                <path d="M2 12h20"></path>
+              </svg>
+              Jogos
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-patrocinadores" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-patrocinadores"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-patrocinadores"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+              Patrocinadores
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-videos" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-videos"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-videos"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2C5.12 19.5 12 19.5 12 19.5s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.33 29 29 0 0 0-.46-5.33z"
+                ></path>
+                <polygon
+                  points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"
+                ></polygon>
+              </svg>
+              Vídeos
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-twitter" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-twitter"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-twitter"
+              type="button"
+              role="tab"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="15"
+                height="15"
+                fill="currentColor"
+              >
+                <path
+                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1 2.25h3.437l5.021 6.661L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117l12.006 15.644z"
+                />
+              </svg>
+              Comunidade X
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-autores" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-autores"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-autores"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              Autores
+            </button>
+          </li>
+          <li
+            class="nav-item d-none"
+            id="nav-item-usuarios"
+            role="presentation"
+          >
+            <button
+              class="nav-link"
+              id="tab-usuarios"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-usuarios"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              Usuários
+            </button>
+          </li>
+          <li class="nav-item" id="nav-item-rss" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-rss"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-rss"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 11a9 9 0 0 1 9 9"></path>
+                <path d="M4 4a16 16 0 0 1 16 16"></path>
+                <circle cx="5" cy="19" r="1"></circle>
+              </svg>
+              Cache do FogãoNET
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tab-content admin-tab-panels">
+        <!-- ========== DASHBOARD ========== -->
+        <section
+          class="tab-pane fade show active"
+          id="pane-dashboard"
+          role="tabpanel"
+          aria-labelledby="tab-dashboard"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Dashboard Analítico</h2>
+              <p class="admin-page-header__desc">
+                Visão geral e desempenho do seu portal.
+              </p>
+            </div>
+          </header>
+          <div class="row g-4 mb-4">
+            <div class="col-md-4">
+              <div
+                class="card border-0 shadow-sm p-4 text-center bg-white h-100"
+              >
+                <h6 class="text-muted text-uppercase fw-bold mb-2">
+                  Visualizações Totais
+                </h6>
+                <h2 class="fw-bolder m-0 text-dark" id="dash-views">0</h2>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="card border-0 shadow-sm p-4 text-center bg-white h-100"
+              >
+                <h6 class="text-muted text-uppercase fw-bold mb-2">
+                  Artigos Publicados
+                </h6>
+                <h2 class="fw-bolder m-0 text-dark" id="dash-artigos">0</h2>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="card border-0 shadow-sm p-4 text-center bg-white h-100"
+              >
+                <h6 class="text-muted text-uppercase fw-bold mb-2">
+                  Notícia mais Lida
+                </h6>
+                <p
+                  class="fw-bolder m-0 text-truncate text-dark"
+                  id="dash-top-noticia"
+                >
+                  -
+                </p>
+                <small
+                  class="text-success fw-bold mt-1 d-block"
+                  id="dash-top-views"
+                  >0 views</small
+                >
+              </div>
+            </div>
+          </div>
+          <div class="card border-0 shadow-sm p-4 rounded-3 bg-white">
+            <div
+              class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2"
+            >
+              <h6 class="text-muted text-uppercase fw-bold m-0">
+                Fontes de Notícias (RSS)
+              </h6>
+              <div class="d-flex gap-2">
+                <select
+                  id="chart-periodo"
+                  class="form-select form-select-sm shadow-none"
+                  style="cursor: pointer"
+                  onchange="atualizarGraficoPortais()"
+                >
+                  <option value="sempre">Histórico Total</option>
+                  <option value="ano">Apenas este Ano</option>
+                  <option value="0">Janeiro</option>
+                  <option value="1">Fevereiro</option>
+                  <option value="2">Março</option>
+                  <option value="3">Abril</option>
+                  <option value="4">Maio</option>
+                  <option value="5">Junho</option>
+                  <option value="6">Julho</option>
+                  <option value="7">Agosto</option>
+                  <option value="8">Setembro</option>
+                  <option value="9">Outubro</option>
+                  <option value="10">Novembro</option>
+                  <option value="11">Dezembro</option>
+                </select>
+                <select
+                  id="chart-tipo"
+                  class="form-select form-select-sm shadow-none"
+                  style="cursor: pointer"
+                  onchange="atualizarGraficoPortais()"
+                >
+                  <option value="bar">Barras</option>
+                  <option value="pie">Pizza</option>
+                  <option value="doughnut">Rosca</option>
+                </select>
+              </div>
+            </div>
+            <div style="height: 300px; width: 100%">
+              <canvas id="chart-portais"></canvas>
+            </div>
+            <!-- Legenda Personalizada com as Logomarcas -->
+            <div
+              id="chart-custom-legend"
+              class="d-flex flex-wrap justify-content-center gap-2 mt-4 pt-3 border-top border-secondary border-opacity-10"
+            ></div>
+          </div>
+        </section>
+
+        <!-- ========== PAGINA INICIAL ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-config"
+          role="tabpanel"
+          aria-labelledby="tab-config"
+        >
+          <form id="form-config" class="admin-form-config">
+            <input
+              type="hidden"
+              id="remover-logo"
+              name="removerLogo"
+              value="false"
+            />
+            <input
+              type="hidden"
+              id="remover-favicon"
+              name="removerFavicon"
+              value="false"
+            />
+            <input
+              type="hidden"
+              id="remover-banner-marca"
+              name="removerBannerMarca"
+              value="false"
+            />
+            <input
+              type="hidden"
+              id="remover-fundo-header"
+              name="removerFundoHeader"
+              value="false"
+            />
+            <input
+              type="hidden"
+              id="remover-fundo-site"
+              name="removerFundoSite"
+              value="false"
+            />
+            <input
+              type="hidden"
+              id="remover-imagem-padrao"
+              name="removerImagemPadrao"
+              value="false"
+            />
+            <input
+              type="hidden"
+              id="remover-busca-imagem"
+              name="removerBuscaImagem"
+              value="false"
+            />
+            <input
+              type="hidden"
+              id="modeloCarrossel"
+              name="modeloCarrossel"
+              value="editorial"
+            />
+
+            <header class="admin-page-header">
+              <div>
+                <h2 class="admin-page-header__title">
+                  Configuracao da pagina inicial
+                </h2>
+                <p class="admin-page-header__desc">
+                  Organize identidade visual, carrossel, blocos e widgets. Salve
+                  ao final desta aba.
+                </p>
+              </div>
+            </header>
+
+            <div class="admin-sections">
+              <!-- 1. Informacoes -->
+              <section class="admin-section">
+                <header class="admin-section__head">
+                  <span class="admin-section__badge">1</span>
+                  <div>
+                    <h3 class="admin-section__title">Informacoes do portal</h3>
+                    <p class="admin-section__desc">
+                      Nome e slogan exibidos no site.
+                    </p>
+                  </div>
+                </header>
+                <div class="admin-section__body admin-grid-2">
+                  <div>
+                    <label for="nomePortal" class="form-label"
+                      >Nome do portal</label
+                    >
+                    <input
+                      type="text"
+                      id="nomePortal"
+                      name="nomePortal"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label for="slogan" class="form-label">Slogan</label>
+                    <input
+                      type="text"
+                      id="slogan"
+                      name="slogan"
+                      class="form-control"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              <!-- 2. Cores e fundos -->
+              <section class="admin-section">
+                <header class="admin-section__head">
+                  <span class="admin-section__badge">2</span>
+                  <div>
+                    <h3 class="admin-section__title">Cores e fundos</h3>
+                    <p class="admin-section__desc">
+                      Paleta do portal, header e fundo da pagina.
+                    </p>
+                  </div>
+                </header>
+                <div class="admin-section__body">
+                  <div class="admin-subcards admin-grid-2">
+                    <div class="admin-subcard">
+                      <h4 class="admin-subcard__title">Paleta</h4>
+                      <div class="row g-3">
+                        <div class="col-6">
+                          <label for="corPrincipal" class="form-label"
+                            >Cor principal</label
+                          >
+                          <input
+                            type="color"
+                            id="corPrincipal"
+                            name="corPrincipal"
+                            class="form-control form-control-color w-100"
+                            value="#2f3a44"
+                          />
+                          <div class="form-text">Bordas e destaques</div>
+                        </div>
+                        <div class="col-6">
+                          <label for="corAcento" class="form-label"
+                            >Cor de acento</label
+                          >
+                          <input
+                            type="color"
+                            id="corAcento"
+                            name="corAcento"
+                            class="form-control form-control-color w-100"
+                            value="#0f766e"
+                          />
+                          <div class="form-text">Botoes e links</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="admin-subcard">
+                      <h4 class="admin-subcard__title">Fundo do header</h4>
+                      <div class="image-source-tabs mb-2">
+                        <button
+                          type="button"
+                          class="image-source-tab is-active"
+                          data-fundo-header="cor"
+                        >
+                          Cor
+                        </button>
+                        <button
+                          type="button"
+                          class="image-source-tab"
+                          data-fundo-header="imagem"
+                        >
+                          Imagem
+                        </button>
+                      </div>
+                      <input
+                        type="hidden"
+                        id="fundoHeaderTipo"
+                        name="fundoHeaderTipo"
+                        value="cor"
+                      />
+                      <div id="painel-fundo-header-cor">
+                        <label for="fundoHeaderCor" class="form-label"
+                          >Cor do menu</label
+                        >
+                        <input
+                          type="color"
+                          id="fundoHeaderCor"
+                          name="fundoHeaderCor"
+                          class="form-control form-control-color w-100"
+                          value="#121212"
+                        />
+                      </div>
+                      <div id="painel-fundo-header-imagem" class="d-none">
+                        <input
+                          type="file"
+                          id="fundoHeader"
+                          name="fundoHeader"
+                          class="form-control mb-2"
+                          accept="image/*"
+                        />
+                        <input
+                          type="url"
+                          id="fundoHeaderUrl"
+                          name="fundoHeaderUrl"
+                          class="form-control mb-2"
+                          placeholder="URL https://..."
+                        />
+                        <label for="fundoHeaderOverlay" class="form-label"
+                          >Escurecer:
+                          <span id="fundo-header-overlay-valor">35</span
+                          >%</label
+                        >
+                        <input
+                          type="range"
+                          id="fundoHeaderOverlay"
+                          name="fundoHeaderOverlay"
+                          class="form-range"
+                          min="0"
+                          max="85"
+                          value="35"
+                        />
+                        <div
+                          id="preview-fundo-header"
+                          class="image-preview fundo-preview mt-2 d-none"
+                        ></div>
+                        <button
+                          type="button"
+                          id="btn-remover-fundo-header"
+                          class="btn btn-outline-danger btn-sm mt-2 d-none"
+                        >
+                          Remover
+                        </button>
+                      </div>
+                    </div>
+                    <div class="admin-subcard admin-subcard--wide">
+                      <h4 class="admin-subcard__title">Fundo da pagina</h4>
+                      <div class="row g-3 align-items-start">
+                        <div class="col-md-4">
+                          <label for="fundoSiteTipo" class="form-label"
+                            >Tipo</label
+                          >
+                          <select
+                            id="fundoSiteTipo"
+                            name="fundoSiteTipo"
+                            class="form-select"
+                          >
+                            <option value="padrao">Padrao (gradiente)</option>
+                            <option value="cor">Cor solida</option>
+                            <option value="imagem">Imagem</option>
+                          </select>
+                        </div>
+                        <div class="col-md-8">
+                          <div id="painel-fundo-site-cor" class="d-none">
+                            <label for="fundoSiteCor" class="form-label"
+                              >Cor</label
+                            >
+                            <input
+                              type="color"
+                              id="fundoSiteCor"
+                              name="fundoSiteCor"
+                              class="form-control form-control-color"
+                              value="#f7f8fa"
+                            />
+                          </div>
+                          <div id="painel-fundo-site-imagem" class="d-none">
+                            <div class="row g-2">
+                              <div class="col-md-6">
+                                <input
+                                  type="file"
+                                  id="fundoSite"
+                                  name="fundoSite"
+                                  class="form-control"
+                                  accept="image/*"
+                                />
+                              </div>
+                              <div class="col-md-6">
+                                <input
+                                  type="url"
+                                  id="fundoSiteUrl"
+                                  name="fundoSiteUrl"
+                                  class="form-control"
+                                  placeholder="URL https://..."
+                                />
+                              </div>
+                            </div>
+                            <label
+                              for="fundoSiteOverlay"
+                              class="form-label mt-2"
+                              >Escurecer:
+                              <span id="fundo-site-overlay-valor">0</span
+                              >%</label
+                            >
+                            <input
+                              type="range"
+                              id="fundoSiteOverlay"
+                              name="fundoSiteOverlay"
+                              class="form-range"
+                              min="0"
+                              max="85"
+                              value="0"
+                            />
+                            <div
+                              id="preview-fundo-site"
+                              class="image-preview fundo-preview mt-2 d-none"
+                            ></div>
+                            <button
+                              type="button"
+                              id="btn-remover-fundo-site"
+                              class="btn btn-outline-danger btn-sm mt-2 d-none"
+                            >
+                              Remover imagem
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 3. Marca -->
+              <section class="admin-section">
+                <header class="admin-section__head">
+                  <span class="admin-section__badge">3</span>
+                  <div>
+                    <h3 class="admin-section__title">Marca no topo</h3>
+                    <p class="admin-section__desc">
+                      Logo, banner largo (ex: GLORIOSOPLAY) e imagem padrao das
+                      noticias.
+                    </p>
+                  </div>
+                </header>
+                <div class="admin-section__body admin-grid-2">
+                  <div class="admin-subcard">
+                    <h4 class="admin-subcard__title">Exibicao</h4>
+                    <label for="modoMarca" class="form-label">Modo</label>
+                    <select
+                      id="modoMarca"
+                      name="modoMarca"
+                      class="form-select mb-3"
+                    >
+                      <option value="texto">Somente texto</option>
+                      <option value="icone">Icone + texto</option>
+                      <option value="banner">Banner largo</option>
+                      <option value="icone_banner">Icone + banner</option>
+                    </select>
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="mostrarTextoMarca"
+                        name="mostrarTextoMarca"
+                        checked
+                      />
+                      <label class="form-check-label" for="mostrarTextoMarca"
+                        >Mostrar nome junto</label
+                      >
+                    </div>
+                  </div>
+                  <div class="admin-subcard">
+                    <h4 class="admin-subcard__title">Icone pequeno</h4>
+                    <input
+                      type="file"
+                      id="logo"
+                      name="logo"
+                      class="form-control"
+                      accept="image/*"
+                    />
+                    <label for="logoEfeito" class="form-label mt-3"
+                      >Efeito Animado</label
+                    >
+                    <select
+                      id="logoEfeito"
+                      name="logoEfeito"
+                      class="form-select"
+                    >
+                      <option value="shake">Tremor (Agito)</option>
+                      <option value="pulse">Pulso (Coração)</option>
+                      <option value="bounce">Balanço (Pulo)</option>
+                      <option value="spin">Giro (360º)</option>
+                      <option value="none">Nenhum (Desativado)</option>
+                    </select>
+                    <label for="logoTremor" class="form-label mt-3"
+                      >Intensidade do tremor:
+                      <span id="logo-tremor-valor">4</span></label
+                    >
+                    <input
+                      type="range"
+                      id="logoTremor"
+                      name="logoTremor"
+                      class="form-range"
+                      min="0"
+                      max="10"
+                      value="4"
+                    />
+                    <div
+                      id="preview-logo"
+                      class="image-preview compact mt-2 d-none"
+                    ></div>
+                    <button
+                      type="button"
+                      id="btn-remover-logo"
+                      class="btn btn-outline-danger btn-sm mt-2 d-none"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                  <div class="admin-subcard">
+                    <h4 class="admin-subcard__title">
+                      Ícone do Navegador (Favicon)
+                    </h4>
+                    <input
+                      type="file"
+                      id="favicon"
+                      name="favicon"
+                      class="form-control mb-2"
+                      accept="image/*, .ico"
+                    />
+                    <input
+                      type="url"
+                      id="faviconUrl"
+                      name="faviconUrl"
+                      class="form-control mb-2"
+                      placeholder="URL https://..."
+                    />
+                    <div
+                      id="preview-favicon"
+                      class="image-preview compact mt-2 d-none"
+                    ></div>
+                    <button
+                      type="button"
+                      id="btn-remover-favicon"
+                      class="btn btn-outline-danger btn-sm mt-2 d-none"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                  <div class="admin-subcard" id="grupo-banner-marca">
+                    <h4 class="admin-subcard__title">Banner largo</h4>
+                    <input
+                      type="file"
+                      id="bannerMarca"
+                      name="bannerMarca"
+                      class="form-control mb-2"
+                      accept="image/*"
+                    />
+                    <input
+                      type="url"
+                      id="bannerMarcaUrl"
+                      name="bannerMarcaUrl"
+                      class="form-control mb-2"
+                      placeholder="URL https://..."
+                    />
+                    <label for="alturaBannerMarca" class="form-label"
+                      >Altura: <span id="altura-banner-valor">52</span>px</label
+                    >
+                    <input
+                      type="range"
+                      id="alturaBannerMarca"
+                      name="alturaBannerMarca"
+                      class="form-range mb-2"
+                      min="28"
+                      max="120"
+                      value="52"
+                    />
+                    <div
+                      id="preview-banner-marca"
+                      class="image-preview brand-preview d-none"
+                    ></div>
+                    <button
+                      type="button"
+                      id="btn-remover-banner-marca"
+                      class="btn btn-outline-danger btn-sm mt-2 d-none"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                  <div class="admin-subcard">
+                    <h4 class="admin-subcard__title">
+                      Imagem padrao (noticias)
+                    </h4>
+                    <input
+                      type="file"
+                      id="imagemPadrao"
+                      name="imagemPadrao"
+                      class="form-control"
+                      accept="image/*"
+                    />
+                    <div
+                      id="preview-imagem-padrao"
+                      class="image-preview mt-2 d-none"
+                    ></div>
+                    <button
+                      type="button"
+                      id="btn-remover-imagem-padrao"
+                      class="btn btn-outline-danger btn-sm mt-2 d-none"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 4. Blocos da index -->
+              <section class="admin-section">
+                <header class="admin-section__head">
+                  <span class="admin-section__badge">4</span>
+                  <div>
+                    <h3 class="admin-section__title">Conteudo da index</h3>
+                    <p class="admin-section__desc">
+                      Blocos visiveis e quantidade de itens.
+                    </p>
+                  </div>
+                </header>
+                <div class="admin-section__body">
+                  <div class="admin-grid-2 admin-grid-2--uneven">
+                    <div class="admin-subcard">
+                      <h4 class="admin-subcard__title">Blocos ativos</h4>
+                      <div class="home-switches home-switches--compact">
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarBusca"
+                            name="mostrarBusca"
+                          />
+                          Busca</label
+                        >
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarVideos"
+                            name="mostrarVideos"
+                          />
+                          Vídeos</label
+                        >
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarTwitter"
+                            name="mostrarTwitter"
+                          />
+                          Twitter</label
+                        >
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarCarrossel"
+                            name="mostrarCarrossel"
+                          />
+                          Carrossel</label
+                        >
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarUltimas"
+                            name="mostrarUltimas"
+                          />
+                          Ultimas</label
+                        >
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarMaisLidas"
+                            name="mostrarMaisLidas"
+                          />
+                          Mais lidas</label
+                        >
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarJogos"
+                            name="mostrarJogos"
+                          />
+                          Jogos</label
+                        >
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarEnquete"
+                            name="mostrarEnquete"
+                          />
+                          Enquete</label
+                        >
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarTabela"
+                            name="mostrarTabela"
+                            checked
+                          />
+                          Tabela</label
+                        >
+                        <label
+                          ><input
+                            type="checkbox"
+                            id="mostrarOdds"
+                            name="mostrarOdds"
+                            checked
+                          />
+                          Odds</label
+                        >
+                      </div>
+                    </div>
+                    <div class="admin-subcard">
+                      <h4 class="admin-subcard__title">Limites</h4>
+                      <div class="row g-2">
+                        <div class="col-4">
+                          <label for="limiteCarrossel" class="form-label"
+                            >Carrossel</label
+                          >
+                          <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            id="limiteCarrossel"
+                            name="limiteCarrossel"
+                            class="form-control"
+                          />
+                        </div>
+                        <div class="col-4">
+                          <label for="limiteNoticias" class="form-label"
+                            >Noticias</label
+                          >
+                          <input
+                            type="number"
+                            min="1"
+                            max="100"
+                            id="limiteNoticias"
+                            name="limiteNoticias"
+                            class="form-control"
+                          />
+                        </div>
+                        <div class="col-4">
+                          <label for="limiteJogos" class="form-label"
+                            >Jogos</label
+                          >
+                          <input
+                            type="number"
+                            min="1"
+                            max="10"
+                            id="limiteJogos"
+                            name="limiteJogos"
+                            class="form-control"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="admin-subcard admin-subcard--wide">
+                      <h4 class="admin-subcard__title">
+                        Cabecalho da Barra de Busca
+                      </h4>
+                      <p class="text-muted small mb-3">
+                        Preencha os textos ou faca upload de uma imagem (a
+                        imagem substitui os textos).
+                      </p>
+                      <div class="row g-4">
+                        <div class="col-md-6">
+                          <div class="mb-2">
+                            <label for="buscaTitulo" class="form-label"
+                              >Titulo</label
+                            >
+                            <input
+                              type="text"
+                              id="buscaTitulo"
+                              name="buscaTitulo"
+                              class="form-control"
+                              placeholder="Ex: Explore o portal"
+                            />
+                          </div>
+                          <div>
+                            <label for="buscaSubtitulo" class="form-label"
+                              >Subtitulo</label
+                            >
+                            <input
+                              type="text"
+                              id="buscaSubtitulo"
+                              name="buscaSubtitulo"
+                              class="form-control"
+                              placeholder="Ex: busque por titulo, assunto..."
+                            />
+                          </div>
+                          <div class="mt-2">
+                            <label for="buscaPlaceholder" class="form-label"
+                              >Frases da caixa de busca (Sorteio)</label
+                            >
+                            <textarea
+                              id="buscaPlaceholder"
+                              name="buscaPlaceholder"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Ex: Pesquisar notícias...&#10;O que deseja ler hoje?&#10;Busque pelo seu time..."
+                            ></textarea>
+                            <div
+                              class="form-text text-muted"
+                              style="font-size: 0.75rem"
+                            >
+                              Digite uma frase por linha. O sistema fará um
+                              sorteio exibindo uma diferente a cada atualização
+                              da página.
+                            </div>
+                          </div>
+                          <div class="mt-3">
+                            <label for="buscaLargura" class="form-label"
+                              >Largura da caixa de busca:
+                              <span id="busca-largura-valor">640</span>px</label
+                            >
+                            <input
+                              type="range"
+                              id="buscaLargura"
+                              name="buscaLargura"
+                              class="form-range"
+                              min="200"
+                              max="1000"
+                              step="10"
+                              value="640"
+                            />
+                          </div>
+                          <div class="mt-3 row g-2">
+                            <div class="col-6">
+                              <label for="buscaCorFundo" class="form-label"
+                                >Cor de fundo</label
+                              >
+                              <input
+                                type="color"
+                                id="buscaCorFundo"
+                                name="buscaCorFundo"
+                                class="form-control form-control-color w-100"
+                              />
+                            </div>
+                            <div class="col-6">
+                              <label
+                                for="buscaPaddingVertical"
+                                class="form-label"
+                                >Altura do box:
+                                <span id="busca-padding-valor">31</span
+                                >px</label
+                              >
+                              <input
+                                type="range"
+                                id="buscaPaddingVertical"
+                                name="buscaPaddingVertical"
+                                class="form-range"
+                                min="10"
+                                max="150"
+                                value="31"
+                              />
+                            </div>
+                          </div>
+                          <div class="mt-3 row g-2">
+                            <div class="col-6">
+                              <label for="buscaTextoBotao" class="form-label"
+                                >Texto do botão</label
+                              >
+                              <input
+                                type="text"
+                                id="buscaTextoBotao"
+                                name="buscaTextoBotao"
+                                class="form-control"
+                                placeholder="Ex: Buscar"
+                              />
+                            </div>
+                            <div class="col-6">
+                              <label for="buscaCorTextoBotao" class="form-label"
+                                >Cor do texto do botão</label
+                              >
+                              <input
+                                type="color"
+                                id="buscaCorTextoBotao"
+                                name="buscaCorTextoBotao"
+                                class="form-control form-control-color w-100"
+                              />
+                            </div>
+                          </div>
+                          <div class="mt-4 border-top pt-3">
+                            <label class="form-label fw-bold"
+                              >Faixa de Patrocinadores (Marquee)</label
+                            >
+                            <div class="form-check form-switch mb-2">
+                              <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="mostrarPatrocinadores"
+                                name="mostrarPatrocinadores"
+                                checked
+                              />
+                              <label
+                                class="form-check-label"
+                                for="mostrarPatrocinadores"
+                                >Exibir Faixa de Patrocinadores</label
+                              >
+                            </div>
+                            <div class="mb-2">
+                              <label
+                                for="patrocinadoresTitulo"
+                                class="form-label mt-2"
+                                >Título da Faixa (Opcional)</label
+                              >
+                              <input
+                                type="text"
+                                id="patrocinadoresTitulo"
+                                name="patrocinadoresTitulo"
+                                class="form-control form-control-sm"
+                                placeholder="Ex: Parceiros:"
+                              />
+                            </div>
+                            <div class="row g-2 mt-2">
+                              <div class="col-6">
+                                <label
+                                  for="patrocinadoresCorFundo"
+                                  class="form-label"
+                                  >Cor de Fundo</label
+                                >
+                                <input
+                                  type="color"
+                                  id="patrocinadoresCorFundo"
+                                  name="patrocinadoresCorFundo"
+                                  class="form-control form-control-color w-100"
+                                />
+                              </div>
+                              <div class="col-6">
+                                <label
+                                  for="patrocinadoresCorTexto"
+                                  class="form-label"
+                                  >Cor do Título</label
+                                >
+                                <input
+                                  type="color"
+                                  id="patrocinadoresCorTexto"
+                                  name="patrocinadoresCorTexto"
+                                  class="form-control form-control-color w-100"
+                                />
+                              </div>
+                            </div>
+                            <label
+                              for="patrocinadoresAltura"
+                              class="form-label mt-2"
+                              >Altura máxima das imagens:
+                              <span id="patrocinadores-altura-valor">40</span
+                              >px</label
+                            >
+                            <input
+                              type="range"
+                              id="patrocinadoresAltura"
+                              name="patrocinadoresAltura"
+                              class="form-range"
+                              min="20"
+                              max="100"
+                              value="40"
+                            />
+                            <label
+                              for="patrocinadoresVelocidade"
+                              class="form-label mt-2"
+                              >Duração do Loop:
+                              <span id="patrocinadores-velocidade-valor"
+                                >25</span
+                              >s</label
+                            >
+                            <input
+                              type="range"
+                              id="patrocinadoresVelocidade"
+                              name="patrocinadoresVelocidade"
+                              class="form-range"
+                              min="5"
+                              max="100"
+                              value="25"
+                            />
+                            <div
+                              class="form-text text-muted mb-2"
+                              style="font-size: 0.75rem; margin-top: -6px"
+                            >
+                              Menos tempo = Mais Rápido
+                            </div>
+                            <button
+                              type="button"
+                              class="btn btn-dark btn-sm w-100 mt-3"
+                              onclick="
+                                document
+                                  .getElementById('tab-patrocinadores')
+                                  .click();
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              "
+                            >
+                              👉 Clique aqui para Cadastrar Marcas e Logos
+                            </button>
+                          </div>
+                          <div class="mt-4 border-top pt-3">
+                            <label class="form-label fw-bold"
+                              >Menu de Autores</label
+                            >
+                            <label
+                              for="tamanhoFotoAutor"
+                              class="form-label mt-2"
+                              >Tamanho da foto:
+                              <span id="tamanho-foto-autor-valor">70</span
+                              >px</label
+                            >
+                            <input
+                              type="range"
+                              id="tamanhoFotoAutor"
+                              name="tamanhoFotoAutor"
+                              class="form-range"
+                              min="40"
+                              max="120"
+                              value="70"
+                            />
+                            <button
+                              type="button"
+                              class="btn btn-dark btn-sm w-100 mt-3"
+                              onclick="
+                                document.getElementById('tab-autores').click();
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              "
+                            >
+                              👉 Clique aqui para Cadastrar Autores
+                            </button>
+                          </div>
+                        </div>
+                        <div class="col-md-6 border-start">
+                          <label class="form-label">Imagem (Opcional)</label>
+                          <div class="image-source-tabs mb-2">
+                            <button
+                              type="button"
+                              class="image-source-tab is-active"
+                              data-busca-imagem="upload"
+                            >
+                              Upload
+                            </button>
+                            <button
+                              type="button"
+                              class="image-source-tab"
+                              data-busca-imagem="url"
+                            >
+                              URL
+                            </button>
+                          </div>
+                          <div id="painel-busca-imagem-upload">
+                            <input
+                              type="file"
+                              id="buscaImagem"
+                              name="buscaImagem"
+                              class="form-control"
+                              accept="image/*"
+                            />
+                          </div>
+                          <div id="painel-busca-imagem-url" class="d-none">
+                            <input
+                              type="url"
+                              id="buscaImagemUrl"
+                              name="buscaImagemUrl"
+                              class="form-control"
+                              placeholder="URL https://..."
+                            />
+                          </div>
+                          <label for="buscaImagemAltura" class="form-label mt-2"
+                            >Altura da imagem:
+                            <span id="busca-imagem-altura-valor">50</span
+                            >px</label
+                          >
+                          <input
+                            type="range"
+                            id="buscaImagemAltura"
+                            name="buscaImagemAltura"
+                            class="form-range"
+                            min="20"
+                            max="200"
+                            value="50"
+                          />
+                          <div
+                            id="preview-busca-imagem"
+                            class="image-preview mt-2 d-none"
+                          ></div>
+                          <button
+                            type="button"
+                            id="btn-remover-busca-imagem"
+                            class="btn btn-outline-danger btn-sm mt-2 d-none"
+                          >
+                            Remover
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="admin-subcard admin-subcard--wide">
+                      <h4 class="admin-subcard__title">Previa</h4>
+                      <div
+                        id="preview-layout-home"
+                        class="home-layout-preview"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 5. Carrossel -->
+              <section class="admin-section">
+                <header class="admin-section__head">
+                  <span class="admin-section__badge">5</span>
+                  <div>
+                    <h3 class="admin-section__title">Carrossel de destaques</h3>
+                    <p class="admin-section__desc">
+                      Modelo, controles e noticias exibidas.
+                    </p>
+                  </div>
+                </header>
+                <div class="admin-section__body">
+                  <div class="admin-subcard admin-subcard--wide mb-3">
+                    <h4 class="admin-subcard__title">Modelo</h4>
+                    <div
+                      id="carousel-model-grid"
+                      class="carousel-model-grid"
+                    ></div>
+                  </div>
+                  <div class="admin-subcard mb-3">
+                    <h4 class="admin-subcard__title">Automação do Carrossel</h4>
+                    <div class="form-check form-switch">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="carrosselAutoRss"
+                        name="carrosselAutoRss"
+                      />
+                      <label
+                        class="form-check-label fw-bold text-secondary"
+                        for="carrosselAutoRss"
+                        >Piloto Automático (Últimas do RSS com Foto)</label
+                      >
+                    </div>
+                    <p class="text-muted small mt-1 mb-0">
+                      Se ativado, o carrossel ignora a seleção manual e exibe
+                      automaticamente as notícias externas mais recentes que
+                      possuam imagem de capa.
+                    </p>
+                  </div>
+                  <div class="admin-subcards admin-grid-3 mb-3">
+                    <div>
+                      <label for="alturaCarrossel" class="form-label"
+                        >Altura</label
+                      >
+                      <select
+                        id="alturaCarrossel"
+                        name="alturaCarrossel"
+                        class="form-select"
+                      >
+                        <option value="baixo">Baixa</option>
+                        <option value="medio">Media</option>
+                        <option value="alto">Alta</option>
+                        <option value="extra">Extra</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="temaCarrossel" class="form-label">Tema</label>
+                      <select
+                        id="temaCarrossel"
+                        name="temaCarrossel"
+                        class="form-select"
+                      >
+                        <option value="claro">Claro</option>
+                        <option value="escuro">Escuro</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label for="autoplayCarrossel" class="form-label"
+                        >Autoplay (s)</label
+                      >
+                      <input
+                        type="number"
+                        min="3"
+                        max="20"
+                        id="autoplayCarrossel"
+                        name="autoplayCarrossel"
+                        class="form-control"
+                        value="6"
+                      />
+                    </div>
+                  </div>
+                  <div class="admin-grid-2 mb-3">
+                    <div class="admin-subcard">
+                      <h4 class="admin-subcard__title">Conteudo do slide</h4>
+                      <label class="admin-check"
+                        ><input
+                          type="checkbox"
+                          id="mostrarResumoCarrossel"
+                          name="mostrarResumoCarrossel"
+                          checked
+                        />
+                        Resumo</label
+                      >
+                      <label class="admin-check"
+                        ><input
+                          type="checkbox"
+                          id="mostrarMiniaturasCarrossel"
+                          name="mostrarMiniaturasCarrossel"
+                          checked
+                        />
+                        Miniaturas</label
+                      >
+                    </div>
+                    <div class="admin-subcard">
+                      <h4 class="admin-subcard__title">Barra inferior</h4>
+                      <label class="admin-check"
+                        ><input
+                          type="checkbox"
+                          id="mostrarDotsCarrossel"
+                          name="mostrarDotsCarrossel"
+                          checked
+                        />
+                        Barras</label
+                      >
+                      <label class="admin-check"
+                        ><input
+                          type="checkbox"
+                          id="mostrarContadorCarrossel"
+                          name="mostrarContadorCarrossel"
+                          checked
+                        />
+                        Numeros (01/03)</label
+                      >
+                      <label class="admin-check"
+                        ><input
+                          type="checkbox"
+                          id="mostrarSetasCarrossel"
+                          name="mostrarSetasCarrossel"
+                          checked
+                        />
+                        Setas</label
+                      >
+                    </div>
+                  </div>
+                  <div class="admin-subcard admin-subcard--wide">
+                    <h4 class="admin-subcard__title">Noticias no carrossel</h4>
+                    <input
+                      type="hidden"
+                      id="carrosselIds"
+                      name="carrosselIds"
+                      value="[]"
+                    />
+                    <div class="row g-3">
+                      <div class="col-lg-6">
+                        <div class="carousel-picker-head">
+                          <strong>Selecionadas</strong>
+                          <span
+                            id="carrossel-contador"
+                            class="carousel-picker-count"
+                            >0 / 20</span
+                          >
+                        </div>
+                        <div
+                          id="carrossel-selecionados"
+                          class="carousel-picker-list"
+                        ></div>
+                      </div>
+                      <div class="col-lg-6">
+                        <div class="carousel-picker-head">
+                          <strong>Adicionar</strong>
+                          <span class="carousel-picker-hint">publicadas</span>
+                        </div>
+                        <input
+                          type="search"
+                          id="carrossel-busca"
+                          class="form-control mb-2"
+                          placeholder="Buscar..."
+                        />
+                        <div
+                          id="carrossel-disponiveis"
+                          class="carousel-picker-list carousel-picker-list--scroll"
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- 6. Widgets -->
+              <section class="admin-section">
+                <header class="admin-section__head">
+                  <span class="admin-section__badge">6</span>
+                  <div>
+                    <h3 class="admin-section__title">Widgets da sidebar</h3>
+                    <p class="admin-section__desc">
+                      Use as setas (↑ ↓) para reordenar e a chave para exibir ou
+                      ocultar do site.
+                    </p>
+                  </div>
+                </header>
+                <div class="admin-section__body">
+                  <div id="widgets-admin-grid" class="widgets-admin-grid"></div>
+                </div>
+              </section>
+            </div>
+
+            <footer class="admin-sticky-bar">
+              <a
+                href="index.html"
+                target="_blank"
+                rel="noopener"
+                class="btn btn-outline-secondary"
+                >Abrir index</a
+              >
+              <button type="submit" class="btn btn-accent">
+                Salvar pagina inicial
+              </button>
+            </footer>
+          </form>
+        </section>
+
+        <!-- ========== NOTICIAS ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-noticias"
+          role="tabpanel"
+          aria-labelledby="tab-noticias"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Publicar Noticias</h2>
+              <p class="admin-page-header__desc">
+                Publique, edite e gerencie o conteudo do portal.
+              </p>
+            </div>
+          </header>
+
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="admin-panel">
+                <div class="admin-panel__toolbar">
+                  <h1 id="titulo-form">Nova noticia</h1>
+                  <button
+                    type="button"
+                    id="btn-cancelar"
+                    class="btn btn-outline-secondary btn-sm d-none"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                <form id="form-noticia">
+                  <input type="hidden" id="noticia-id" />
+                  <input
+                    type="hidden"
+                    id="remover-imagem"
+                    name="removerImagem"
+                    value="false"
+                  />
+                  <div class="mb-3">
+                    <label for="titulo" class="form-label">Titulo</label>
+                    <input
+                      type="text"
+                      id="titulo"
+                      name="titulo"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="resumo" class="form-label">Resumo</label>
+                    <textarea
+                      id="resumo"
+                      name="resumo"
+                      class="form-control"
+                      rows="3"
+                      required
+                    ></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Texto da materia</label>
+                    <div class="rich-editor-wrap">
+                      <div
+                        class="editor-toolbar"
+                        id="editor-toolbar"
+                        role="toolbar"
+                        aria-label="Formatacao do texto"
+                      >
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="bold"
+                          title="Negrito"
+                        >
+                          <b>B</b>
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="italic"
+                          title="Italico"
+                        >
+                          <i>I</i>
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="underline"
+                          title="Sublinhado"
+                        >
+                          <u>U</u>
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="strikeThrough"
+                          title="Tachado"
+                        >
+                          <s>S</s>
+                        </button>
+                        <span
+                          class="editor-toolbar__sep"
+                          aria-hidden="true"
+                        ></span>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="formatBlock"
+                          data-value="h2"
+                          title="Titulo"
+                        >
+                          H2
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="formatBlock"
+                          data-value="h3"
+                          title="Subtitulo"
+                        >
+                          H3
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="formatBlock"
+                          data-value="h4"
+                          title="Tópico Menor"
+                        >
+                          H4
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="formatBlock"
+                          data-value="blockquote"
+                          title="Citação"
+                        >
+                          ""
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="formatBlock"
+                          data-value="p"
+                          title="Paragrafo"
+                        >
+                          P
+                        </button>
+                        <span
+                          class="editor-toolbar__sep"
+                          aria-hidden="true"
+                        ></span>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="justifyLeft"
+                          title="Alinhar à Esquerda"
+                        >
+                          Esquerda
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="justifyCenter"
+                          title="Centralizar"
+                        >
+                          Centro
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="justifyRight"
+                          title="Alinhar à Direita"
+                        >
+                          Direita
+                        </button>
+                        <span
+                          class="editor-toolbar__sep"
+                          aria-hidden="true"
+                        ></span>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="insertUnorderedList"
+                          title="Lista"
+                        >
+                          • Lista
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="insertOrderedList"
+                          title="Lista numerada"
+                        >
+                          1. Lista
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="createLink"
+                          title="Link"
+                        >
+                          Link
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="unlink"
+                          title="Remover Link"
+                        >
+                          <s>Link</s>
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="insertImage"
+                          title="Inserir Imagem externa (URL)"
+                        >
+                          Img
+                        </button>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="insertVideo"
+                          title="Inserir Vídeo do YouTube"
+                        >
+                          Vídeo
+                        </button>
+                        <span
+                          class="editor-toolbar__sep"
+                          aria-hidden="true"
+                        ></span>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn"
+                          data-cmd="removeFormat"
+                          title="Limpar"
+                        >
+                          Limpar
+                        </button>
+                      </div>
+                      <div
+                        id="conteudo-editor"
+                        class="rich-editor"
+                        contenteditable="true"
+                        data-placeholder="Escreva o texto completo da materia..."
+                        style="
+                          min-height: 400px;
+                          font-size: 1.05rem;
+                          line-height: 1.6;
+                        "
+                      ></div>
+                    </div>
+                    <textarea
+                      id="conteudo"
+                      name="conteudo"
+                      class="d-none"
+                      required
+                    ></textarea>
+                  </div>
+                  <div class="row g-2">
+                    <div class="col-6">
+                      <label for="categoria" class="form-label"
+                        >Categoria</label
+                      >
+                      <input
+                        type="text"
+                        id="categoria"
+                        name="categoria"
+                        class="form-control"
+                        value="Arena Alvinegra"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="autor" class="form-label">Autor</label>
+                      <select id="autor" name="autor" class="form-select">
+                        <option value="Redacao">Redação</option>
+                      </select>
+                    </div>
+                    <div class="col-6">
+                      <label for="tags" class="form-label">Tags</label>
+                      <input
+                        type="text"
+                        id="tags"
+                        name="tags"
+                        class="form-control"
+                        value="Arena Alvinegra"
+                        placeholder="politica, esporte"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="status" class="form-label">Status</label>
+                      <select id="status" name="status" class="form-select">
+                        <option value="publicado">Publicado</option>
+                        <option value="rascunho">Rascunho</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="admin-subcard mt-3 mb-3">
+                    <h4 class="admin-subcard__title">Imagem</h4>
+                    <div class="image-source-tabs mb-2">
+                      <button
+                        type="button"
+                        class="image-source-tab is-active"
+                        data-image-source="upload"
+                      >
+                        Upload
+                      </button>
+                      <button
+                        type="button"
+                        class="image-source-tab"
+                        data-image-source="url"
+                      >
+                        URL
+                      </button>
+                      <button
+                        type="button"
+                        class="image-source-tab"
+                        data-image-source="galeria"
+                      >
+                        Galeria
+                      </button>
+                    </div>
+                    <div id="painel-imagem-upload">
+                      <input
+                        type="file"
+                        id="imagem"
+                        name="imagem"
+                        class="form-control"
+                        accept="image/*"
+                      />
+                    </div>
+                    <div id="painel-imagem-url" class="d-none">
+                      <input
+                        type="url"
+                        id="imagemUrl"
+                        name="imagemUrl"
+                        class="form-control"
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div id="painel-imagem-galeria" class="d-none">
+                      <button
+                        type="button"
+                        class="btn btn-outline-secondary btn-sm w-100 mb-2"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalGaleria"
+                      >
+                        Selecionar Imagem
+                      </button>
+                      <input
+                        type="hidden"
+                        id="imagemGaleriaUrl"
+                        name="imagemGaleriaUrl"
+                      />
+                    </div>
+                    <div
+                      id="preview-imagem"
+                      class="image-preview mt-2 d-none"
+                    ></div>
+                    <button
+                      type="button"
+                      id="btn-remover-imagem"
+                      class="btn btn-outline-danger btn-sm mt-2 d-none"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                  <div class="form-check form-switch mb-3">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="destaque"
+                      name="destaque"
+                    />
+                    <label class="form-check-label" for="destaque"
+                      >Destacar no carrossel</label
+                    >
+                  </div>
+                  <button
+                    type="submit"
+                    id="btn-submit"
+                    class="btn btn-accent w-100"
+                  >
+                    Publicar noticia
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== NOTICIAS CADASTRADAS ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-noticias-lista"
+          role="tabpanel"
+          aria-labelledby="tab-noticias-lista"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Notícias Cadastradas</h2>
+              <p class="admin-page-header__desc">
+                Lista de todas as publicações, rascunhos e matérias importadas.
+              </p>
+            </div>
+          </header>
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="admin-panel">
+                <div class="section-heading">
+                  <div>
+                    <span>Noticias cadastradas</span>
+                    <small id="admin-count"></small>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button
+                      type="button"
+                      class="btn btn-outline-warning btn-sm rounded-pill fw-bold m-0 text-dark"
+                      onclick="limparTodosRascunhos(this)"
+                    >
+                      🧹 Limpar Rascunhos
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm rounded-pill fw-bold m-0"
+                      onclick="rodarRoboManualmente(this)"
+                    >
+                      🤖 Forçar Robô TF
+                    </button>
+                  </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                  <input
+                    type="text"
+                    id="busca-noticias-admin"
+                    class="form-control form-control-sm"
+                    style="max-width: 250px"
+                    placeholder="Buscar na lista..."
+                  />
+                  <select
+                    id="filtro-portal-admin"
+                    class="form-select form-select-sm"
+                    style="max-width: 200px"
+                  >
+                    <option value="todos">Todos os Tipos</option>
+                    <option value="locais">Publicações Manuais</option>
+                    <option value="robo">Robô Thiago Franklin</option>
+                    <option value="rss">Feed RSS</option>
+                  </select>
+                  <div
+                    id="filtros-rss-portais"
+                    class="d-none d-flex flex-wrap gap-3 align-items-center bg-light px-3 py-1 rounded-pill border shadow-sm"
+                    style="font-size: 0.8rem"
+                  ></div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table align-middle table-sm">
+                    <thead>
+                      <tr>
+                        <th>Titulo</th>
+                        <th>Categoria</th>
+                        <th>Views</th>
+                        <th class="text-end">Acoes</th>
+                      </tr>
+                    </thead>
+                    <tbody id="lista-admin-noticias"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== PORTAIS ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-portais"
+          role="tabpanel"
+          aria-labelledby="tab-portais"
+        >
+          <div class="admin-panel">
+            <div class="admin-page-header">
+              <h2 class="admin-page-header__title">Últimas dos Portais</h2>
+              <p class="admin-page-header__desc">
+                Gerencie os portais de notícias permitidos e a quantidade de
+                publicações exibidas no widget da página inicial.
+              </p>
+            </div>
+            <form id="form-portais">
+              <div class="admin-section">
+                <div class="admin-section__head">
+                  <div class="admin-section__badge">📰</div>
+                  <div>
+                    <h3 class="admin-section__title">
+                      Configurações de Exibição
+                    </h3>
+                    <p class="admin-section__desc">
+                      Defina quantas notícias externas devem aparecer na index.
+                    </p>
+                  </div>
+                </div>
+                <div class="admin-section__body">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <label for="limiteRss" class="form-label"
+                        >Quantidade de notícias</label
+                      >
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        id="limiteRss"
+                        name="limiteRss"
+                        class="form-control"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="admin-section mt-4">
+                <div class="admin-section__head">
+                  <div class="admin-section__badge">✅</div>
+                  <div>
+                    <h3 class="admin-section__title">Portais Permitidos</h3>
+                    <p class="admin-section__desc">
+                      Marque quais fontes de notícias podem aparecer no seu
+                      portal.
+                    </p>
+                  </div>
+                </div>
+                <div class="admin-section__body">
+                  <div class="row g-3" id="grid-portais-permitidos">
+                    <!-- Preenchido dinamicamente pelo JS -->
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-accent px-4 rounded-pill">
+                  Salvar Configurações
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ========== ENQUETE ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-enquete"
+          role="tabpanel"
+          aria-labelledby="tab-enquete"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Enquete</h2>
+              <p class="admin-page-header__desc">
+                Pergunta e opcoes do widget na index. Salvar reinicia os votos.
+              </p>
+            </div>
+          </header>
+          <div class="admin-panel admin-panel--single">
+            <form id="form-enquete" class="mb-4">
+              <input
+                type="hidden"
+                id="remover-imagem-enquete"
+                name="removerImagemEnquete"
+                value="false"
+              />
+              <div class="mb-3">
+                <label for="imagem-enquete" class="form-label"
+                  >Imagem de Destaque (Substitui o título do widget na
+                  Home)</label
+                >
+                <input
+                  type="file"
+                  id="imagem-enquete"
+                  name="imagem"
+                  class="form-control"
+                  accept="image/*"
+                />
+                <div
+                  id="preview-imagem-enquete"
+                  class="mt-2 d-none image-preview compact"
+                ></div>
+                <button
+                  type="button"
+                  id="btn-remover-imagem-enquete"
+                  class="btn btn-outline-danger btn-sm mt-2 d-none"
+                >
+                  Remover Imagem
+                </button>
+              </div>
+              <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                  <label for="pergunta-enquete" class="form-label"
+                    >Pergunta</label
+                  >
+                  <input
+                    type="text"
+                    id="pergunta-enquete"
+                    name="pergunta"
+                    class="form-control"
+                    required
+                  />
+                </div>
+                <div class="col-md-5">
+                  <label for="opcoes-enquete" class="form-label"
+                    >Opcoes (virgula)</label
+                  >
+                  <input
+                    type="text"
+                    id="opcoes-enquete"
+                    class="form-control"
+                    required
+                    placeholder="Esportes, Politica, Cultura"
+                  />
+                </div>
+                <div class="col-md-2">
+                  <button type="submit" class="btn btn-accent w-100">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </form>
+            <h4 class="admin-subcard__title">Previa</h4>
+            <div id="preview-enquete"></div>
+          </div>
+        </section>
+
+        <!-- ========== ODDS ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-odds"
+          role="tabpanel"
+          aria-labelledby="tab-odds"
+        >
+          <div class="admin-panel">
+            <div class="admin-page-header">
+              <h2 class="admin-page-header__title">Mercado de Odds</h2>
+              <p class="admin-page-header__desc">
+                Configure as casas de apostas que serão exibidas e selecione a
+                de destaque principal no widget da Home.
+              </p>
+            </div>
+            <form id="form-odds">
+              <div class="admin-section">
+                <div class="admin-section__head">
+                  <div class="admin-section__badge">🔥</div>
+                  <div>
+                    <h3 class="admin-section__title">
+                      Casa de Aposta em Destaque
+                    </h3>
+                    <p class="admin-section__desc">
+                      Selecione qual casa ficará fixa e em destaque com borda
+                      colorida.
+                    </p>
+                  </div>
+                </div>
+                <div class="admin-section__body">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label class="form-label">Selecione a Casa</label>
+                      <select
+                        class="form-select"
+                        id="casaDeApostaDestaque"
+                        name="casaDeApostaDestaque"
+                      >
+                        <!-- Preenchido dinamicamente pelo JS -->
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="admin-section mt-4">
+                <div class="admin-section__head">
+                  <div class="admin-section__badge">📋</div>
+                  <div>
+                    <h3 class="admin-section__title">
+                      Casas Permitidas no Widget
+                    </h3>
+                    <p class="admin-section__desc">
+                      Marque as opções que deverão aparecer na vitrine para o
+                      leitor.
+                    </p>
+                  </div>
+                </div>
+                <div class="admin-section__body">
+                  <div class="row g-3" id="grid-casas-apostas">
+                    <!-- Preenchido dinamicamente pelo JS -->
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-accent px-4 rounded-pill">
+                  Salvar Configurações
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ========== TABELAS ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-tabelas"
+          role="tabpanel"
+          aria-labelledby="tab-tabelas"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">
+                Tabelas de Competições
+                <small
+                  class="text-danger fs-6 fw-bold ms-2 d-inline-flex align-items-center gap-1"
+                  ><svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                    ></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                  (Em construção, manter o Piloto Automático)</small
+                >
+              </h2>
+              <p class="admin-page-header__desc">
+                Gerencie a tabela do Brasileirão e adicione outros campeonatos.
+              </p>
+            </div>
+          </header>
+          <div class="admin-split">
+            <aside class="admin-split__form">
+              <div class="admin-panel">
+                <div class="admin-panel__toolbar">
+                  <h1 id="titulo-form-tabela">Novo Campeonato</h1>
+                  <button
+                    type="button"
+                    id="btn-cancelar-tabela"
+                    class="btn btn-outline-secondary btn-sm d-none"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                <form id="form-tabela">
+                  <input type="hidden" id="tabela-id" />
+                  <div class="mb-3">
+                    <label for="tabela-campeonato" class="form-label"
+                      >Nome do Campeonato</label
+                    >
+                    <input
+                      type="text"
+                      id="tabela-campeonato"
+                      class="form-control"
+                      required
+                      placeholder="Ex: Brasileirão Série B"
+                    />
+                  </div>
+                  <div class="form-check form-switch mb-3">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="tabela-auto"
+                      checked
+                    />
+                    <label
+                      class="form-check-label fw-bold text-secondary"
+                      for="tabela-auto"
+                      >Piloto Automático (Scraper)</label
+                    >
+                    <div class="form-text small text-muted">
+                      Se ativado, atualiza automaticamente. Atualmente otimizado
+                      para a Série A.
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    id="btn-submit-tabela"
+                    class="btn btn-accent w-100 mt-3"
+                  >
+                    Salvar Campeonato
+                  </button>
+                </form>
+              </div>
+            </aside>
+            <div class="admin-split__list">
+              <div class="admin-panel">
+                <div class="section-heading">
+                  <span>Campeonatos Cadastrados</span>
+                  <small id="tabelas-count"></small>
+                </div>
+                <div
+                  id="lista-tabelas-admin"
+                  class="d-flex flex-column gap-3"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== JOGOS ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-jogos"
+          role="tabpanel"
+          aria-labelledby="tab-jogos"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Agenda de jogos</h2>
+              <p class="admin-page-header__desc">
+                Cadastre partidas e placares para o widget da index.
+              </p>
+            </div>
+          </header>
+          <div class="admin-split">
+            <aside class="admin-split__form">
+              <div class="admin-panel">
+                <div class="admin-panel__toolbar">
+                  <h1 id="titulo-form-jogo">Novo jogo</h1>
+                  <button
+                    type="button"
+                    id="btn-cancelar-jogo"
+                    class="btn btn-outline-secondary btn-sm d-none"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                <form id="form-jogo">
+                  <input type="hidden" id="jogo-id" />
+                  <div class="mb-3">
+                    <label for="campeonato" class="form-label"
+                      >Campeonato</label
+                    >
+                    <input
+                      type="text"
+                      id="campeonato"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="dataHora" class="form-label">Data e hora</label>
+                    <input
+                      type="datetime-local"
+                      id="dataHora"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="row g-2">
+                    <div class="col-6">
+                      <label for="mandante" class="form-label">Mandante</label>
+                      <input
+                        type="text"
+                        id="mandante"
+                        class="form-control"
+                        list="lista-clubes"
+                        required
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="visitante" class="form-label"
+                        >Visitante</label
+                      >
+                      <input
+                        type="text"
+                        id="visitante"
+                        class="form-control"
+                        list="lista-clubes"
+                        required
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="escudoMandante" class="form-label"
+                        >Escudo Mand. (URL)</label
+                      >
+                      <input
+                        type="url"
+                        id="escudoMandante"
+                        class="form-control"
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="escudoVisitante" class="form-label"
+                        >Escudo Visit. (URL)</label
+                      >
+                      <input
+                        type="url"
+                        id="escudoVisitante"
+                        class="form-control"
+                        placeholder="https://..."
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="placarMandante" class="form-label"
+                        >Placar mand.</label
+                      >
+                      <input
+                        type="number"
+                        id="placarMandante"
+                        class="form-control"
+                        min="0"
+                      />
+                    </div>
+                    <div class="col-6">
+                      <label for="placarVisitante" class="form-label"
+                        >Placar visit.</label
+                      >
+                      <input
+                        type="number"
+                        id="placarVisitante"
+                        class="form-control"
+                        min="0"
+                      />
+                    </div>
+                  </div>
+                  <datalist id="lista-clubes"></datalist>
+                  <button
+                    type="submit"
+                    id="btn-submit-jogo"
+                    class="btn btn-accent w-100 mt-3"
+                  >
+                    Salvar jogo
+                  </button>
+                </form>
+              </div>
+            </aside>
+            <div class="admin-split__list">
+              <div class="admin-panel">
+                <div class="section-heading">
+                  <span>Jogos cadastrados</span>
+                  <small id="jogos-count"></small>
+                </div>
+                <div id="lista-jogos-admin"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== PATROCINADORES ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-patrocinadores"
+          role="tabpanel"
+          aria-labelledby="tab-patrocinadores"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Patrocinadores</h2>
+              <p class="admin-page-header__desc">
+                Gerencie as marcas que aparecem na faixa rotativa (marquee).
+              </p>
+            </div>
+          </header>
+          <div class="admin-split">
+            <aside class="admin-split__form">
+              <div class="admin-panel">
+                <div class="admin-panel__toolbar">
+                  <h1 id="titulo-form-patrocinador">Novo patrocinador</h1>
+                  <button
+                    type="button"
+                    id="btn-cancelar-patrocinador"
+                    class="btn btn-outline-secondary btn-sm d-none"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                <form id="form-patrocinador">
+                  <input type="hidden" id="patrocinador-id" />
+                  <input
+                    type="hidden"
+                    id="remover-imagem-patrocinador"
+                    name="removerImagemPatrocinador"
+                    value="false"
+                  />
+                  <div class="mb-3">
+                    <label for="patrocinador-nome" class="form-label"
+                      >Nome da Marca / Texto do Botão</label
+                    >
+                    <input
+                      type="text"
+                      id="patrocinador-nome"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="patrocinador-tipo" class="form-label"
+                      >Tipo de Exibição</label
+                    >
+                    <select id="patrocinador-tipo" class="form-select">
+                      <option value="texto">Botão de Texto</option>
+                      <option value="imagem">Imagem (Logomarca)</option>
+                    </select>
+                  </div>
+                  <div class="mb-3 d-none" id="box-imagem-patrocinador">
+                    <label for="patrocinador-imagem" class="form-label"
+                      >Upload da Imagem</label
+                    >
+                    <input
+                      type="file"
+                      id="patrocinador-imagem"
+                      class="form-control"
+                      accept="image/*"
+                    />
+                    <div
+                      id="preview-patrocinador-imagem"
+                      class="mt-2 d-none"
+                    ></div>
+                    <button
+                      type="button"
+                      id="btn-remover-imagem-patrocinador"
+                      class="btn btn-outline-danger btn-sm mt-2 d-none"
+                    >
+                      Remover Imagem
+                    </button>
+                  </div>
+                  <div class="mb-3">
+                    <label for="patrocinador-link" class="form-label"
+                      >Link de Destino (Opcional)</label
+                    >
+                    <input
+                      type="url"
+                      id="patrocinador-link"
+                      class="form-control"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div class="form-check form-switch mb-3">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="patrocinador-ativo"
+                      checked
+                    />
+                    <label class="form-check-label" for="patrocinador-ativo"
+                      >Ativo na rolagem</label
+                    >
+                  </div>
+                  <button
+                    type="submit"
+                    id="btn-submit-patrocinador"
+                    class="btn btn-accent w-100"
+                  >
+                    Salvar patrocinador
+                  </button>
+                </form>
+              </div>
+            </aside>
+            <div class="admin-split__list">
+              <div class="admin-panel">
+                <div class="section-heading">
+                  <span>Marcas cadastradas</span>
+                  <small id="patrocinadores-count"></small>
+                </div>
+                <div id="lista-patrocinadores-admin"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== VIDEOS ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-videos"
+          role="tabpanel"
+          aria-labelledby="tab-videos"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Vídeos do Carrossel</h2>
+              <p class="admin-page-header__desc">
+                Adicione vídeos manualmente se optar pelo modo "Manual" nas
+                configurações.
+              </p>
+            </div>
+          </header>
+          <div class="admin-panel mb-4">
+            <h4 class="admin-subcard__title mb-3">
+              Configurações do Widget de Vídeos
+            </h4>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label for="modoVideos" class="form-label"
+                  >Fonte dos Vídeos</label
+                >
+                <select id="modoVideos" name="modoVideos" class="form-select">
+                  <option value="auto">Automático (Canal do YouTube)</option>
+                  <option value="manual">Manual (Cadastrados Abaixo)</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label for="limiteVideos" class="form-label"
+                  >Qtd. Exibida</label
+                >
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  id="limiteVideos"
+                  name="limiteVideos"
+                  class="form-control"
+                />
+              </div>
+              <div class="col-md-3">
+                <label for="videosCorBotao" class="form-label"
+                  >Cor do Botão Play</label
+                >
+                <input
+                  type="color"
+                  id="videosCorBotao"
+                  name="videosCorBotao"
+                  class="form-control form-control-color w-100"
+                  value="#dc3545"
+                />
+              </div>
+              <div class="col-md-4">
+                <label for="videosProporcao" class="form-label"
+                  >Proporção da Capa</label
+                >
+                <select
+                  id="videosProporcao"
+                  name="videosProporcao"
+                  class="form-select"
+                >
+                  <option value="16/9">Padrão (16:9)</option>
+                  <option value="4/3">Clássica (4:3)</option>
+                  <option value="1/1">Quadrada (1:1)</option>
+                  <option value="9/16">Vertical (Shorts)</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="videosIntervalo" class="form-label"
+                  >Transição Automática (s)</label
+                >
+                <input
+                  type="number"
+                  id="videosIntervalo"
+                  name="videosIntervalo"
+                  class="form-control"
+                  min="0"
+                  max="60"
+                  value="5"
+                />
+                <div class="form-text text-muted" style="font-size: 0.75rem">
+                  0 para desativar.
+                </div>
+              </div>
+              <div class="col-md-4" id="grupo-youtube-auto">
+                <label for="youtubeChannelId" class="form-label"
+                  >ID do Canal (Modo Automático)</label
+                >
+                <input
+                  type="text"
+                  id="youtubeChannelId"
+                  name="youtubeChannelId"
+                  class="form-control"
+                  placeholder="Ex: UCqzaT..."
+                />
+                <div class="form-text text-muted" style="font-size: 0.75rem">
+                  Vazio = padrão do sistema.
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label for="textoBotaoVideo" class="form-label"
+                  >Texto da legenda (Opcional)</label
+                >
+                <input
+                  type="text"
+                  id="textoBotaoVideo"
+                  name="textoBotaoVideo"
+                  class="form-control"
+                  placeholder="Clique na imagem para assistir"
+                />
+              </div>
+            </div>
+            <div class="mt-3 text-end">
+              <button
+                type="button"
+                class="btn btn-accent px-4"
+                onclick="
+                  document
+                    .getElementById('form-config')
+                    .dispatchEvent(
+                      new Event('submit', { cancelable: true, bubbles: true }),
+                    )
+                "
+              >
+                Salvar Configurações
+              </button>
+            </div>
+          </div>
+          <div class="admin-split">
+            <aside class="admin-split__form">
+              <div class="admin-panel">
+                <div class="admin-panel__toolbar">
+                  <h1 id="titulo-form-video">Novo vídeo</h1>
+                  <button
+                    type="button"
+                    id="btn-cancelar-video"
+                    class="btn btn-outline-secondary btn-sm d-none"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                <form id="form-video">
+                  <input type="hidden" id="video-id" />
+                  <div class="mb-3">
+                    <label for="video-link" class="form-label"
+                      >Link do YouTube</label
+                    >
+                    <input
+                      type="url"
+                      id="video-link"
+                      class="form-control"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="video-titulo" class="form-label"
+                      >Título do Vídeo</label
+                    >
+                    <input
+                      type="text"
+                      id="video-titulo"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="video-thumbnail" class="form-label"
+                      >Thumbnail (URL opcional)</label
+                    >
+                    <input
+                      type="url"
+                      id="video-thumbnail"
+                      class="form-control"
+                      placeholder="Gerada automaticamente..."
+                    />
+                    <div
+                      id="preview-video-thumb"
+                      class="mt-2 text-center d-none"
+                    ></div>
+                  </div>
+                  <div class="form-check form-switch mb-3">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="video-ativo"
+                      checked
+                    />
+                    <label class="form-check-label" for="video-ativo"
+                      >Ativo</label
+                    >
+                  </div>
+                  <button
+                    type="submit"
+                    id="btn-submit-video"
+                    class="btn btn-accent w-100"
+                  >
+                    Salvar vídeo
+                  </button>
+                </form>
+              </div>
+            </aside>
+            <div class="admin-split__list">
+              <div class="admin-panel">
+                <div class="section-heading">
+                  <span>Vídeos cadastrados</span>
+                  <small id="videos-count"></small>
+                </div>
+                <div id="lista-videos-admin"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== TWITTER ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-twitter"
+          role="tabpanel"
+          aria-labelledby="tab-twitter"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">
+                Comunidade no Twitter (X)
+              </h2>
+              <p class="admin-page-header__desc">
+                Cadastre criadores e páginas para o widget puxar os posts
+                automaticamente.
+              </p>
+            </div>
+          </header>
+          <div class="admin-split">
+            <aside class="admin-split__form">
+              <div class="admin-panel">
+                <div class="admin-panel__toolbar">
+                  <h1 id="titulo-form-twitter">Novo Perfil</h1>
+                  <button
+                    type="button"
+                    id="btn-cancelar-twitter"
+                    class="btn btn-outline-secondary btn-sm d-none"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                <form id="form-twitter">
+                  <input type="hidden" id="twitter-id" />
+                  <div class="mb-3">
+                    <label for="twitter-nome" class="form-label"
+                      >Nome da Página</label
+                    >
+                    <input
+                      type="text"
+                      id="twitter-nome"
+                      class="form-control"
+                      required
+                      placeholder="Ex: Thiago Franklin"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="twitter-handle" class="form-label"
+                      >Arroba (@)</label
+                    >
+                    <input
+                      type="text"
+                      id="twitter-handle"
+                      class="form-control"
+                      required
+                      placeholder="Ex: @thiagomfranklin"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="twitter-avatar" class="form-label"
+                      >Avatar (URL Opcional)</label
+                    >
+                    <input
+                      type="url"
+                      id="twitter-avatar"
+                      class="form-control"
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div class="form-check form-switch mb-3">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="twitter-ativo"
+                      checked
+                    />
+                    <label class="form-check-label" for="twitter-ativo"
+                      >Ativo na varredura</label
+                    >
+                  </div>
+                  <button
+                    type="submit"
+                    id="btn-submit-twitter"
+                    class="btn btn-accent w-100"
+                  >
+                    Salvar perfil
+                  </button>
+                </form>
+              </div>
+            </aside>
+            <div class="admin-split__list">
+              <div class="admin-panel">
+                <div class="section-heading">
+                  <span>Perfis cadastrados</span>
+                  <small id="twitter-count"></small>
+                </div>
+                <div id="lista-twitter-admin"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== AUTORES ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-autores"
+          role="tabpanel"
+          aria-labelledby="tab-autores"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Autores (Menu)</h2>
+              <p class="admin-page-header__desc">
+                Gerencie até 12 autores e suas fotos para o menu da página
+                inicial.
+              </p>
+            </div>
+          </header>
+          <div class="admin-split">
+            <aside class="admin-split__form">
+              <div class="admin-panel">
+                <div class="admin-panel__toolbar">
+                  <h1 id="titulo-form-autor">Novo autor</h1>
+                  <button
+                    type="button"
+                    id="btn-cancelar-autor"
+                    class="btn btn-outline-secondary btn-sm d-none"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                <form id="form-autor">
+                  <input type="hidden" id="autor-id" />
+                  <input
+                    type="hidden"
+                    id="remover-imagem-autor"
+                    name="removerImagemAutor"
+                    value="false"
+                  />
+                  <div class="mb-3">
+                    <label for="autor-nome" class="form-label"
+                      >Nome Exato do Autor</label
+                    >
+                    <input
+                      type="text"
+                      id="autor-nome"
+                      class="form-control"
+                      required
+                      placeholder="Ex: Sergio Gil"
+                    />
+                    <div
+                      class="form-text text-muted"
+                      style="font-size: 0.75rem"
+                    >
+                      Deve ser exatamente igual ao nome registrado na notícia.
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="autor-arroba" class="form-label"
+                      >Arroba (@) (Opcional)</label
+                    >
+                    <input
+                      type="text"
+                      id="autor-arroba"
+                      class="form-control"
+                      placeholder="Ex: @sergiogil"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="autor-redes" class="form-label"
+                      >Link da Rede Social (Opcional)</label
+                    >
+                    <input
+                      type="url"
+                      id="autor-redes"
+                      class="form-control"
+                      placeholder="https://twitter.com/..."
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="autor-imagem" class="form-label"
+                      >Foto de Perfil</label
+                    >
+                    <input
+                      type="file"
+                      id="autor-imagem"
+                      class="form-control"
+                      accept="image/*"
+                    />
+                    <div
+                      id="preview-autor-imagem"
+                      class="mt-2 text-center d-none"
+                    ></div>
+                    <button
+                      type="button"
+                      id="btn-remover-imagem-autor"
+                      class="btn btn-outline-danger btn-sm mt-2 d-none w-100"
+                    >
+                      Remover Imagem
+                    </button>
+                  </div>
+                  <div class="form-check form-switch mb-3">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="autor-verificado"
+                    />
+                    <label class="form-check-label" for="autor-verificado"
+                      >Selo de Verificado</label
+                    >
+                  </div>
+                  <button
+                    type="submit"
+                    id="btn-submit-autor"
+                    class="btn btn-accent w-100 mt-3"
+                  >
+                    Salvar autor
+                  </button>
+                </form>
+              </div>
+            </aside>
+            <div class="admin-split__list">
+              <div class="admin-panel">
+                <div class="section-heading">
+                  <span>Autores cadastrados (Máx 12)</span>
+                  <small id="autores-count"></small>
+                </div>
+                <div id="lista-autores-admin"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== USUÁRIOS ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-usuarios"
+          role="tabpanel"
+          aria-labelledby="tab-usuarios"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Usuários</h2>
+              <p class="admin-page-header__desc">
+                Gerencie contas e níveis de acesso ao painel do portal.
+              </p>
+            </div>
+          </header>
+          <div class="admin-split">
+            <aside class="admin-split__form">
+              <div class="admin-panel">
+                <div class="admin-panel__toolbar">
+                  <h1 id="titulo-form-usuario">Novo usuário</h1>
+                  <button
+                    type="button"
+                    id="btn-cancelar-usuario"
+                    class="btn btn-outline-secondary btn-sm d-none"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+                <form id="form-usuario">
+                  <input type="hidden" id="usuario-id" />
+                  <div class="mb-3">
+                    <label for="usuario-nome" class="form-label"
+                      >Usuário (Login)</label
+                    >
+                    <input
+                      type="text"
+                      id="usuario-nome"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="usuario-senha" class="form-label">Senha</label>
+                    <input
+                      type="text"
+                      id="usuario-senha"
+                      class="form-control"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="usuario-role" class="form-label"
+                      >Nível de Permissão</label
+                    >
+                    <select id="usuario-role" class="form-select" required>
+                      <option value="usuario">
+                        Usuário (Notícias e Enquete)
+                      </option>
+                      <option value="admin">
+                        Administrador (Sem Dashboard)
+                      </option>
+                      <option value="super_admin">
+                        Super Admin (Acesso Total)
+                      </option>
+                    </select>
+                  </div>
+                  <button
+                    type="submit"
+                    id="btn-submit-usuario"
+                    class="btn btn-accent w-100 mt-3"
+                  >
+                    Criar usuário
+                  </button>
+                </form>
+              </div>
+            </aside>
+            <div class="admin-split__list">
+              <div class="admin-panel">
+                <div class="section-heading">
+                  <span>Usuários cadastrados</span>
+                  <small id="usuarios-count"></small>
+                </div>
+                <div id="lista-usuarios-admin"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========== CACHE DO FOGÃONET ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-rss"
+          role="tabpanel"
+          aria-labelledby="tab-rss"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Cache do FogãoNET (RSS)</h2>
+              <p class="admin-page-header__desc">
+                Visualize e edite as matérias que foram importadas
+                automaticamente pelo Feed RSS do portal.
+              </p>
+            </div>
+          </header>
+
+          <div class="row g-4">
+            <div class="col-12">
+              <div class="admin-panel">
+                <div class="section-heading">
+                  <div>
+                    <span>Matérias na Memória</span>
+                    <small id="rss-count"></small>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm rounded-pill fw-bold m-0"
+                    onclick="carregarCacheRss()"
+                  >
+                    🔄 Atualizar Lista
+                  </button>
+                </div>
+                <div class="table-responsive">
+                  <table class="table align-middle table-sm">
+                    <thead>
+                      <tr>
+                        <th>Capa</th>
+                        <th>Título</th>
+                        <th>Data</th>
+                        <th class="text-end">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody id="lista-admin-rss"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Modal Editar Tabela -->
+    <div class="modal fade" id="modalEditarTabela" tabindex="-1">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold" id="modalEditarTabelaTitle">
+              Editar Times
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit-tabela-id" />
+            <div class="table-responsive custom-scrollbar">
+              <table
+                class="table table-sm align-middle table-bordered"
+                style="font-size: 0.85rem"
+              >
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 60px">Pos</th>
+                    <th>Clube</th>
+                    <th style="width: 70px">Pts</th>
+                    <th style="width: 70px">J</th>
+                    <th style="width: 70px">V</th>
+                    <th style="width: 70px">E</th>
+                    <th style="width: 70px">D</th>
+                    <th style="width: 70px">SG</th>
+                    <th style="width: 50px">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-editar-tabela"></tbody>
+              </table>
+            </div>
+            <button
+              type="button"
+              class="btn btn-outline-dark btn-sm mt-2"
+              onclick="adicionarLinhaTabela()"
+            >
+              + Adicionar Time
+            </button>
+          </div>
+          <div class="modal-footer border-0">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-accent"
+              onclick="salvarTimesTabela()"
+            >
+              Salvar Tabela
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      Esse projeto foi criado e desenvolvido por Sergio Gil utilizando a
+      tecnologia Node.js | 2026
+    </footer>
+
+    <!-- Modal Galeria -->
+    <div class="modal fade" id="modalGaleria" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">Galeria de Mídias</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p class="small text-muted mb-4">
+              Selecione uma imagem já utilizada anteriormente no portal para
+              economizar espaço.
+            </p>
+            <div class="row g-2" id="grid-galeria"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/portal-theme.js"></script>
+    <script src="js/carrossel.js"></script>
+    <script src="js/widgets-config.js"></script>
+    <script src="js/admin.js"></script>
+  </body>
+</html>
+m

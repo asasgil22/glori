@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1779844473175",
+    "nome": "Bernardo Gentile",
+    "redes": "",
+    "arroba": "@bernardogentile",
+    "imagemUrl": "/uploads/1779844473004-206172280.png",
+    "verificado": true
+  },
+  {
+    "id": "1779844518590",
+    "nome": "Thiago Veras",
+    "redes": "",
+    "arroba": "@bernardogentile",
+    "imagemUrl": "/uploads/1779844518311-117859316.jpg",
+    "verificado": false
+  },
+  {
+    "id": "1779844533296",
+    "nome": "Thiago Franklin",
+    "redes": "",
+    "arroba": "",
+    "imagemUrl": "/uploads/1779844532994-296596334.jpg",
+    "verificado": false
+  },
+  {
+    "id": "1779844547106",
+    "nome": "Lívia Rangel",
+    "redes": "",
+    "arroba": "",
+    "imagemUrl": "/uploads/1779844546930-993789872.jpg",
+    "verificado": true
+  },
+  {
+    "id": "1779844562937",
+    "nome": "Dep",
+    "imagemUrl": "/uploads/1779844562766-151254126.jpg",
+    "verificado": true,
+    "redes": "",
+    "arroba": "Dep"
+  }
+]

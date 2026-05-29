@@ -1,0 +1,229 @@
+[
+  {
+    "id": "brasileirao",
+    "times": [
+      {
+        "posicao": "1",
+        "nome": "Palmeiras",
+        "pts": "38",
+        "j": "17",
+        "v": "11",
+        "e": "5",
+        "d": "1",
+        "sg": "16",
+        "escudo": "/escudos/palmeiras.png"
+      },
+      {
+        "posicao": "2",
+        "nome": "Flamengo",
+        "pts": "31",
+        "j": "16",
+        "v": "9",
+        "e": "4",
+        "d": "3",
+        "sg": "12",
+        "escudo": "/escudos/flamengo.svg"
+      },
+      {
+        "posicao": "3",
+        "nome": "Fluminense",
+        "pts": "30",
+        "j": "17",
+        "v": "9",
+        "e": "3",
+        "d": "5",
+        "sg": "5",
+        "escudo": "/escudos/fluminense.png"
+      },
+      {
+        "posicao": "4",
+        "nome": "Athletico-PR",
+        "pts": "27",
+        "j": "17",
+        "v": "8",
+        "e": "3",
+        "d": "6",
+        "sg": "5",
+        "escudo": "/escudos/athletico-pr.svg"
+      },
+      {
+        "posicao": "5",
+        "nome": "Bragantino",
+        "pts": "26",
+        "j": "17",
+        "v": "8",
+        "e": "2",
+        "d": "7",
+        "sg": "4",
+        "escudo": "/escudos/bragantino.svg"
+      },
+      {
+        "posicao": "6",
+        "nome": "Coritiba",
+        "pts": "26",
+        "j": "17",
+        "v": "7",
+        "e": "5",
+        "d": "5",
+        "sg": "3",
+        "escudo": "/escudos/coritiba.png"
+      },
+      {
+        "posicao": "7",
+        "nome": "São Paulo",
+        "pts": "25",
+        "j": "17",
+        "v": "7",
+        "e": "4",
+        "d": "6",
+        "sg": "4",
+        "escudo": "/escudos/sao-paulo.png"
+      },
+      {
+        "posicao": "8",
+        "nome": "Bahia",
+        "pts": "23",
+        "j": "16",
+        "v": "6",
+        "e": "5",
+        "d": "5",
+        "sg": "1",
+        "escudo": "/escudos/bahia.png"
+      },
+      {
+        "posicao": "9",
+        "nome": "Cruzeiro",
+        "pts": "23",
+        "j": "17",
+        "v": "6",
+        "e": "5",
+        "d": "6",
+        "sg": "-4",
+        "escudo": "/escudos/cruzeiro.svg"
+      },
+      {
+        "posicao": "10",
+        "nome": "Botafogo",
+        "pts": "22",
+        "j": "16",
+        "v": "6",
+        "e": "4",
+        "d": "6",
+        "sg": "1",
+        "escudo": "/escudos/botafogo.svg"
+      },
+      {
+        "posicao": "11",
+        "nome": "Vitória",
+        "pts": "22",
+        "j": "16",
+        "v": "6",
+        "e": "4",
+        "d": "6",
+        "sg": "-2",
+        "escudo": "/escudos/Vitoria.svg"
+      },
+      {
+        "posicao": "12",
+        "nome": "Atlético-MG",
+        "pts": "21",
+        "j": "17",
+        "v": "6",
+        "e": "3",
+        "d": "8",
+        "sg": "-2",
+        "escudo": "/escudos/atletico-mg.svg"
+      },
+      {
+        "posicao": "13",
+        "nome": "Internacional",
+        "pts": "21",
+        "j": "17",
+        "v": "5",
+        "e": "6",
+        "d": "6",
+        "sg": "1",
+        "escudo": "/escudos/internacional.png"
+      },
+      {
+        "posicao": "14",
+        "nome": "Grêmio",
+        "pts": "21",
+        "j": "17",
+        "v": "5",
+        "e": "6",
+        "d": "6",
+        "sg": "-1",
+        "escudo": "/escudos/gremio.png"
+      },
+      {
+        "posicao": "15",
+        "nome": "Corinthians",
+        "pts": "21",
+        "j": "17",
+        "v": "5",
+        "e": "6",
+        "d": "6",
+        "sg": "-3",
+        "escudo": "/escudos/Corinthians.svg"
+      },
+      {
+        "posicao": "16",
+        "nome": "Vasco da Gama",
+        "pts": "20",
+        "j": "17",
+        "v": "5",
+        "e": "5",
+        "d": "7",
+        "sg": "-6",
+        "escudo": "/escudos/vasco.svg"
+      },
+      {
+        "posicao": "17",
+        "nome": "Santos",
+        "pts": "18",
+        "j": "17",
+        "v": "4",
+        "e": "6",
+        "d": "7",
+        "sg": "-5",
+        "escudo": "/escudos/santos.png"
+      },
+      {
+        "posicao": "18",
+        "nome": "Mirassol",
+        "pts": "16",
+        "j": "16",
+        "v": "4",
+        "e": "4",
+        "d": "8",
+        "sg": "-5",
+        "escudo": "/escudos/mirassol.svg"
+      },
+      {
+        "posicao": "19",
+        "nome": "Remo",
+        "pts": "15",
+        "j": "17",
+        "v": "3",
+        "e": "6",
+        "d": "8",
+        "sg": "-9",
+        "escudo": "/escudos/Remo.svg"
+      },
+      {
+        "posicao": "20",
+        "nome": "Chapecoense",
+        "pts": "9",
+        "j": "16",
+        "v": "1",
+        "e": "6",
+        "d": "9",
+        "sg": "-15",
+        "escudo": "/escudos/chapecoense.svg"
+      }
+    ],
+    "campeonato": "Brasileirão Série A",
+    "autoAtualizar": true
+  }
+]

@@ -1,0 +1,178 @@
+{
+  "nomePortal": "Arena Alvinegra | Aqui o torcedor Alvinegro sempre estará em primero lugar ",
+  "slogan": "Aqui o torcedor Alvinegro sempre estará em primero lugar ",
+  "corPrincipal": "#262626",
+  "corAcento": "#f7f7f7",
+  "logoUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779851936377-266671659.png",
+  "logoTremor": 1,
+  "logoEfeito": "shake",
+  "faviconUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779851938577-501330539.png",
+  "bannerMarcaUrl": "/uploads/1779844630909-275641477.png",
+  "modoMarca": "banner",
+  "alturaBannerMarca": 60,
+  "mostrarTextoMarca": true,
+  "fundoHeaderTipo": "cor",
+  "fundoHeaderCor": "#121212",
+  "fundoHeaderImagemUrl": "",
+  "fundoHeaderOverlay": 35,
+  "fundoSiteTipo": "padrao",
+  "fundoSiteCor": "#f7f8fa",
+  "fundoSiteImagemUrl": "",
+  "fundoSiteOverlay": 0,
+  "imagemPadraoUrl": "/uploads/1779844630910-719499986.png",
+  "buscaTitulo": "Explore o portal",
+  "buscaSubtitulo": "busque por titulo, assunto ou categoria",
+  "buscaImagemUrl": "/uploads/1779844630911-480453791.png",
+  "buscaImagemAltura": 30,
+  "buscaLargura": 640,
+  "buscaPlaceholder": "É o Glorioso Mané, Busca ai ...\r\nEu sei que você não gosta do Textor, Busca ai ...\r\nFofoquinha? Chama o Gentileza! Busca ai ...\r\nTF no Gol passa mais segurança que o Neto, Busca ai ...\r\nMadrugadão é com o DEP ... Busca ai ...\r\nEspeta Ronaldo Ésper. Gabiru? Busca ai ...",
+  "buscaCorFundo": "#ffffff",
+  "buscaPaddingVertical": 30,
+  "buscaTextoBotao": "É o Glorioso Mané ... Busca ai.",
+  "buscaCorTextoBotao": "#000000",
+  "siteUrl": "",
+  "seoDescricao": "",
+  "youtubeChannelId": "",
+  "home": {
+    "mostrarTicker": true,
+    "mostrarBusca": true,
+    "mostrarCarrossel": true,
+    "mostrarUltimas": true,
+    "mostrarMaisLidas": false,
+    "mostrarJogos": true,
+    "mostrarEnquete": true,
+    "mostrarTabela": true,
+    "mostrarOdds": true,
+    "mostrarVideos": true,
+    "mostrarTwitter": false,
+    "mostrarPortais": true,
+    "carrosselAutoRss": true,
+    "limiteNoticias": 80,
+    "limiteRss": 14,
+    "limiteJogos": 3,
+    "limiteCarrossel": 10,
+    "limiteVideos": 3,
+    "modoVideos": "auto",
+    "textoBotaoVideo": "Clique na imagem para assistir",
+    "videosCorBotao": "#dc3545",
+    "videosIntervalo": 3,
+    "videosProporcao": "16/9",
+    "temaCarrossel": "claro",
+    "modeloCarrossel": "compacto",
+    "alturaCarrossel": "extra",
+    "autoplayCarrossel": 12,
+    "mostrarResumoCarrossel": false,
+    "mostrarMiniaturasCarrossel": false,
+    "mostrarContadorCarrossel": false,
+    "mostrarSetasCarrossel": true,
+    "mostrarDotsCarrossel": true,
+    "efeitoCamaleao": false,
+    "widgets": {
+      "maisLidas": {
+        "titulo": "Mais lidas",
+        "subtitulo": "As materias com maior audiencia",
+        "icone": "sem",
+        "layout": "lista"
+      },
+      "jogos": {
+        "titulo": "Agenda de jogos",
+        "subtitulo": "Proximos confrontos e placares",
+        "icone": "sem",
+        "layout": "cards"
+      },
+      "enquete": {
+        "titulo": "Enquete",
+        "subtitulo": "Participe da pesquisa do portal",
+        "icone": "sem",
+        "layout": "barras"
+      },
+      "tabela": {
+        "titulo": "Brasileirão",
+        "subtitulo": "Classificação atualizada",
+        "icone": "sem",
+        "layout": "completo"
+      },
+      "odds": {
+        "titulo": "Odds da Partida",
+        "subtitulo": "Mercado de Apostas",
+        "icone": "sem",
+        "layout": "cards"
+      },
+      "portais": {
+        "titulo": "Últimas dos Portais",
+        "subtitulo": "Notícias de outras fontes",
+        "icone": "sem",
+        "layout": "lista"
+      },
+      "videos": {
+        "titulo": "Últimos Vídeos",
+        "subtitulo": "Acompanhe nosso canal",
+        "icone": "sem",
+        "layout": "carrossel"
+      },
+      "twitter": {
+        "titulo": "Comunidade Alvinegra",
+        "subtitulo": "O que estão falando no X",
+        "icone": "sem",
+        "layout": "cards",
+        "tempoExibicao": 5,
+        "tipoTransicao": "slide",
+        "velocidadeTransicao": 500,
+        "quantidadePorConta": 3,
+        "mostrarMidia": true
+      }
+    },
+    "ordemWidgets": [
+      "videos",
+      "jogos",
+      "enquete",
+      "odds",
+      "tabela",
+      "portais",
+      "maisLidas",
+      "twitter"
+    ],
+    "carrosselIds": [
+      "1001",
+      "1002"
+    ],
+    "portaisPermitidos": [
+      "FOGÃONET",
+      "GLOBO ESPORTE",
+      "UOL ESPORTE",
+      "LANCE!",
+      "OGOL",
+      "O DIA",
+      "ESPN BRASIL",
+      "TNT SPORTS",
+      "365SCORES"
+    ],
+    "casasDeApostasPermitidas": [
+      "VBET",
+      "Esportes da Sorte",
+      "F12.bet"
+    ],
+    "casaDeApostaDestaque": "VBET",
+    "rssCustom": {
+      "rss-2FzLTEteC0zLWJvdGFmb2dvLw": {
+        "resumo": "RAUL: 5,5\r\nSem trabalho durante todo o jogoVitinho: 4,0\r\nMal e nervoso. Fez falta boba que gerou o gol e levou cartãoYTHALLO: 5,5\r\nPartida OK, sem grande destaqueJUSTINO: 5,0\r\nMarcação em cima e vontade, mas perdeu alguns duelosMARÇAL: 5,0\r\nEnvolvido no primeiro tempo, melhorou na etapa finalWallace Davi: 3,0\r\nLento com a bola e faltoso na marcação. Saiu no intervaloSANTIAGO RODRÍGUEZ: 6,0\r\nDeu dinâmica e mobilidade no meio, porém errou muitos passesEDENÍLSON: 5,0\r\nCorreu e participou do jogo, sem muita efetividadeJordan Barrera: 4,5\r\nPerdeu uma boa chance e outras jogadas. Não se encontrou🎖️ Joaquín Correa: 7,5\r\nDeu algumas boas arrancadas e duas assistências. Fez um gol e perdeu outro. Pode colocar mais vontadeChris Ramos: 5,5\r\nUm gol contra e um a favor. Enrolado com a bolaKADU: 6,0\r\nMelhorou o lado direito, com marcação e apoioCRISTIAN MEDINA: 6,5\r\nDeu mais controle e lucidez ao meio-campoMATHEUS MARTINS: 6,5\r\nEntrou criando jogadas, indo para cima e levando perigoCAIO VALLE: 6,0\r\nParticipou bem do terceiro golKauan Toledo: 7,5\r\nEntrou, fez um gol e foi perigoso. Deu uma assistênciaFranclim Carvalho: 7,0\r\nOptou por poupar titulares na Venezuela e fez bem. Deu minutagem a ritmo a vários atletas. Melhorou o time com as alterações Ver essa foto no Instagram Um post compartilhado por FogãoNET ★彡 Botafogo 👨🏽‍💻🔥 (@fogaonet)",
+        "titulo": "ATUAÇÕES FN: Kauan Toledo e Joaquín Correa são os melhores em Caracas 1 x 3 Botafogo",
+        "conteudo": "<img src=\"https://i.fogaonet.com/Rxvq5ATFxlJjVha1QVuNcLYDhj4B8aMpErYNkSa4NjQ/rs:fill:1200:630:0/g:ce/f:webp/plain/static/uploads/2026/05/elenco-1.jpg\" alt=\"Imagem da matéria\"><br><br><div><b>RAUL: 5,5<br></b>Sem trabalho durante todo o jogo</div><div><br></div><div><b>Vitinho: 4,0<br></b>Mal e nervoso. Fez falta boba que gerou o gol e levou cartão</div><div><br></div><div><b>YTHALLO: 5,5<br></b>Partida OK, sem grande destaque</div><div><br></div><div><b>JUSTINO: 5,0<br></b>Marcação em cima e vontade, mas perdeu alguns duelos</div><div><br></div><div><b>MARÇAL: 5,0<br></b>Envolvido no primeiro tempo, melhorou na etapa final</div><div><br></div><div><b>Wallace&nbsp;<span style=\"font-size: 1.05rem;\">Davi: 3,0</span></b></div><div>Lento com a bola e faltoso na marcação. Saiu no intervalo</div><div><br></div><div><b>SANTIAGO RODRÍGUEZ: 6,0<br></b>Deu dinâmica e mobilidade no meio, porém errou muitos passes</div><div><br></div><div><b>EDENÍLSON: 5,0<br></b>Correu e participou do jogo, sem muita efetividadeJordan&nbsp;</div><div><br></div><div><b>Barrera: 4,5<br></b>Perdeu uma boa chance e outras jogadas. Não se encontrou&nbsp;</div><div><br></div><div><b>Joaquín Correa: 7,5<br></b>Deu algumas boas arrancadas e duas assistências. Fez um gol e perdeu outro. Pode colocar mais vontade</div><div><br></div><div><b>Chris Ramos: 5,5<br></b>Um gol contra e um a favor. Enrolado com a bola</div><div><br></div><div><b>KADU: 6,0<br></b>Melhorou o lado direito, com marcação e apoio</div><div><br></div><div><b>CRISTIAN MEDINA: 6,5<br></b>Deu mais controle e lucidez ao meio-campo</div><div><br></div><div><b>MATHEUS MARTINS: 6,5<br></b>Entrou criando jogadas, indo para cima e levando perigo</div><div><br></div><div><b>CAIO VALLE: 6,0<br></b>Participou bem do terceiro gol</div><div><br></div><div><b>Kauan Toledo: 7,5<br></b>Entrou, fez um gol e foi perigoso.<span style=\"font-size: 1.05rem;\">Deu uma assistência</span></div><div><span style=\"font-size: 1.05rem;\"><br></span></div><div><span style=\"font-size: 1.05rem;\"><b>Franclim Carvalho: 7,0</b></span></div><div><span style=\"font-size: 1.05rem;\"><br></span></div><div>Optou por poupar titulares na Venezuela e fez bem. Deu minutagem a ritmo a vários atletas.&nbsp;</div><div>Melhorou o time com as alterações.</div>",
+        "imagemUrl": "https://i.fogaonet.com/Rxvq5ATFxlJjVha1QVuNcLYDhj4B8aMpErYNkSa4NjQ/rs:fill:1200:630:0/g:ce/f:webp/plain/static/uploads/2026/05/elenco-1.jpg"
+      }
+    },
+    "mostrarPatrocinadores": true,
+    "patrocinadoresTitulo": "Oferecimento:",
+    "patrocinadoresAltura": 20,
+    "patrocinadoresCorFundo": "#ffffff",
+    "patrocinadoresCorTexto": "#000000",
+    "patrocinadoresVelocidade": 80,
+    "tamanhoFotoAutor": 100
+  },
+  "portais": {
+    "titulo": "Últimas dos Portais",
+    "subtitulo": "Notícias de outras fontes",
+    "icone": "lista",
+    "layout": "lista"
+  }
+}

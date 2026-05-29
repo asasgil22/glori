@@ -1,0 +1,26 @@
+[
+  {
+    "id": "super_admin_id",
+    "role": "super_admin",
+    "senha": "Sog+123+#",
+    "usuario": "Admin"
+  },
+  {
+    "id": "admin_id",
+    "role": "admin",
+    "senha": "asas18",
+    "usuario": "Sergio"
+  },
+  {
+    "id": "usuario_id",
+    "role": "usuario",
+    "senha": "dep",
+    "usuario": "dep"
+  },
+  {
+    "id": "1779843432272",
+    "usuario": "teste",
+    "senha": "teste",
+    "role": "super_admin"
+  }
+]
