@@ -654,7 +654,7 @@ window.traduzirArtigoEN = function (btn) {
   let gtCombo = document.querySelector(".goog-te-combo");
   if (gtCombo) {
     gtCombo.value = "en";
-    gtCombo.dispatchEvent(new Event("change"));
+    gtCombo.dispatchEvent(new Event("change", { bubbles: true }));
     window.isTranslatedEN = true;
     btn.innerHTML =
       '<img src="https://flagcdn.com/w20/br.png" style="width: 18px; border-radius: 2px; opacity: 0.85;" alt="BR Flag">';
@@ -667,7 +667,7 @@ window.traduzirArtigoEN = function (btn) {
   // Google ignora elementos com display: none, então usamos position absolute fora da tela
   gtDiv.style.position = "absolute";
   gtDiv.style.top = "-9999px";
-  gtDiv.style.visibility = "hidden";
+  gtDiv.style.opacity = "0";
   document.body.appendChild(gtDiv);
 
   window.googleTranslateElementInit = function () {
@@ -682,7 +682,7 @@ window.traduzirArtigoEN = function (btn) {
       if (select) {
         clearInterval(checkInterval);
         select.value = "en";
-        select.dispatchEvent(new Event("change"));
+        select.dispatchEvent(new Event("change", { bubbles: true }));
         window.isTranslatedEN = true;
         btn.innerHTML =
           '<img src="https://flagcdn.com/w20/br.png" style="width: 18px; border-radius: 2px; opacity: 0.85;" alt="BR Flag">';

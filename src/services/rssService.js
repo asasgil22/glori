@@ -56,7 +56,7 @@ const portaisRSS = [
 let cacheDeNoticiasRSS = [];
 let servidorRssPronto = false;
 
-async function tentarBuscador(url) {
+async function tentarBuscador(url, isAllOriginsJson = false) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
   try {
@@ -71,14 +71,24 @@ async function tentarBuscador(url) {
     const res = await fetch(url, {
       headers: {
         "User-Agent": randomUA,
-        Accept: "application/rss+xml, application/xml, text/xml, */*",
+        Accept: isAllOriginsJson
+          ? "application/json"
+          : "application/rss+xml, application/xml, text/xml, */*",
         "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
       },
       signal: controller.signal,
     });
     clearTimeout(timeout);
     if (!res.ok) throw new Error(`Status HTTP ${res.status}`);
-    let xml = await res.text();
+
+    let xml = "";
+    if (isAllOriginsJson) {
+      const json = await res.json();
+      if (!json.contents) throw new Error("JSON Proxy Vazio");
+      xml = json.contents;
+    } else {
+      xml = await res.text();
+    }
 
     xml = xml.replace(
       /\b(allowfullscreen|async|defer|controls|autoplay|muted|loop|ismap|checked|readonly|disabled|multiple|required)\b(?=[\s>])/gi,
@@ -99,40 +109,72 @@ async function tentarBuscador(url) {
   }
 }
 
-async function buscarFeedSeguro(portal) {
-  const urlsParaTentar = [];
+async function tentarRss2Json(urlAlvo) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const res = await fetch(
+      `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(urlAlvo)}`,
+      { signal: controller.signal },
+    );
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`RSS2JSON HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.status !== "ok")
+      throw new Error("RSS2JSON falhou no processamento");
 
-  if (portal.nome === "FOGÃONET") {
-    urlsParaTentar.push(portal.urlOriginal);
-    urlsParaTentar.push(
-      `https://corsproxy.io/?url=${encodeURIComponent(portal.urlOriginal)}`,
-    );
-    urlsParaTentar.push(
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(portal.urlOriginal)}`,
-    );
-    urlsParaTentar.push(
-      `https://news.google.com/rss/search?q=${encodeURIComponent(portal.query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`,
-    );
-  } else {
-    const q = encodeURIComponent(portal.query);
-    urlsParaTentar.push(
-      `https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`,
-    );
-    urlsParaTentar.push(`https://www.bing.com/news/search?q=${q}&format=rss`);
-    urlsParaTentar.push(
-      `https://corsproxy.io/?url=${encodeURIComponent(`https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`)}`,
-    );
-    urlsParaTentar.push(
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://www.bing.com/news/search?q=${q}&format=rss`)}`,
-    );
-    urlsParaTentar.push(
-      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`)}`,
-    );
+    return {
+      items: (data.items || []).map((item) => ({
+        title: item.title,
+        link: item.link,
+        pubDate: item.pubDate,
+        description: item.description,
+        content: item.content,
+        enclosure:
+          item.enclosure && item.enclosure.link
+            ? { url: item.enclosure.link }
+            : null,
+        thumbnail: item.thumbnail ? { $: { url: item.thumbnail } } : null,
+      })),
+    };
+  } catch (e) {
+    clearTimeout(timeout);
+    throw e;
   }
+}
 
-  for (const url of urlsParaTentar) {
+async function buscarFeedSeguro(portal) {
+  const q = encodeURIComponent(portal.query);
+  const urlGoogle =
+    portal.nome === "FOGÃONET"
+      ? portal.urlOriginal
+      : `https://news.google.com/rss/search?q=${q}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+  const urlBing =
+    portal.nome === "FOGÃONET"
+      ? portal.urlOriginal
+      : `https://www.bing.com/news/search?q=${q}&format=rss`;
+
+  const tentativas = [
+    { tipo: "direto", url: urlGoogle },
+    { tipo: "direto", url: urlBing },
+    { tipo: "rss2json", url: urlGoogle },
+    { tipo: "rss2json", url: urlBing },
+    { tipo: "allorigins", url: urlGoogle },
+    { tipo: "allorigins", url: urlBing },
+  ];
+
+  for (const tentativa of tentativas) {
     try {
-      const feed = await tentarBuscador(url);
+      let feed = null;
+      if (tentativa.tipo === "direto") {
+        feed = await tentarBuscador(tentativa.url, false);
+      } else if (tentativa.tipo === "rss2json") {
+        feed = await tentarRss2Json(tentativa.url);
+      } else if (tentativa.tipo === "allorigins") {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(tentativa.url)}`;
+        feed = await tentarBuscador(proxyUrl, true);
+      }
+
       if (feed && feed.items && feed.items.length > 0) {
         return { feed, config: portal };
       }
@@ -142,7 +184,7 @@ async function buscarFeedSeguro(portal) {
   }
 
   console.log(
-    `[Robô RSS] ⚠️ Falha total ao ler portal: ${portal.nome} (Tentou todas as rotas e proxies)`,
+    `[Robô RSS] ⚠️ Falha total ao ler portal: ${portal.nome} (Tentou Google, Bing, RSS2JSON e AllOrigins)`,
   );
   return { feed: { items: [] }, config: portal };
 }
