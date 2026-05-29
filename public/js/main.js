@@ -936,25 +936,29 @@ function renderizarOdds(oddsLista, layout = "cards") {
           ? `<img src="${logoUrl}" style="width: 18px; height: 18px; object-fit: contain; border-radius: 2px;" alt="">`
           : "";
 
+        const destaqueStyle = odd.destaque
+          ? "border-color: #f70068 !important; border-width: 2px !important; background-color: rgba(247, 0, 104, 0.12) !important;"
+          : "border-color: var(--line) !important; background-color: var(--surface-muted) !important;";
+
         return `
-    <div class="p-2 rounded-3 border ${odd.destaque ? "shadow-sm" : "border-secondary border-opacity-10"}" ${odd.destaque ? 'style="border-color: #f70068 !important; background-color: color-mix(in srgb, #f70068 8%, var(--surface));"' : 'style="background-color: var(--surface-muted); color: var(--ink);" '}>
+        <div class="p-2 rounded-3 border ${odd.destaque ? "shadow-sm" : ""}" style="${destaqueStyle} color: var(--ink) !important; transition: all 0.3s ease;">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <div class="d-flex align-items-center gap-2">
           ${logoHtml}
           <strong class="small text-uppercase fw-bold" style="color: var(--ink);">${escapeHtml(odd.casa || "Aguardando")}</strong>
         </div>
-        ${odd.destaque ? '<span class="badge" style="background-color: #f70068; color: #fff; font-size: 0.6rem; letter-spacing: 0.5px; text-transform: uppercase;">Destaque</span>' : ""}
+            ${odd.destaque ? '<span class="badge" style="background-color: #f70068; color: #fff; font-size: 0.6rem; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 4px rgba(247,0,104,0.3);">Destaque</span>' : ""}
       </div>
       <div class="d-flex justify-content-between gap-2 text-center" style="color: var(--ink);">
-        <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface);">
+            <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface); border-color: var(--line) !important;">
           <span class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Botafogo</span>
           <strong class="d-block">${escapeHtml(odd.vitoria || "-")}</strong>
         </div>
-        <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface);">
+            <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface); border-color: var(--line) !important;">
           <span class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Empate</span>
           <strong class="d-block">${escapeHtml(odd.empate || "-")}</strong>
         </div>
-        <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface);">
+            <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface); border-color: var(--line) !important;">
         <span class="d-block text-muted text-uppercase fw-bold text-truncate mx-auto" style="font-size: 0.6rem; max-width: 70px;" title="${escapeHtml(odd.adversario || "Adversário")}">${escapeHtml(odd.adversario || "Adversário")}</span>
           <strong class="d-block">${escapeHtml(odd.derrota || "-")}</strong>
         </div>

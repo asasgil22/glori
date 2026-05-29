@@ -13,6 +13,7 @@ const {
 
 const PATH_TABELAS = path.join(__dirname, "../../data/tabelas.json");
 const PATH_JOGOS = path.join(__dirname, "../../data/jogos.json");
+const PATH_CONFIG = path.join(__dirname, "../../data/config.json");
 
 function normalizarBoolean(valor) {
   return valor === true || valor === "true" || valor === "on" || valor === "1";
@@ -111,7 +112,33 @@ router.delete("/tabelas/:id", exigirPermissaoAdmin, async (req, res) => {
 // ==========================================
 // ODDS
 // ==========================================
-router.get("/odds/botafogo", (req, res) => res.json(getCacheOdds()));
+router.get("/odds/botafogo", async (req, res) => {
+  const odds = getCacheOdds();
+  if (!odds || odds.length === 0) return res.json([]);
+
+  const config = await lerJSON(PATH_CONFIG, {});
+  const casaDestaqueUpper = (
+    config.home?.casaDeApostaDestaque || "VBET"
+  ).toUpperCase();
+
+  const oddsDestaque = odds.filter(
+    (o) => o.casa && o.casa.toUpperCase() === casaDestaqueUpper,
+  );
+  const oddsRestante = odds.filter(
+    (o) => o.casa && o.casa.toUpperCase() !== casaDestaqueUpper,
+  );
+
+  oddsRestante.sort(
+    (a, b) => parseFloat(b.vitoria || 0) - parseFloat(a.vitoria || 0),
+  );
+
+  const oddsFinal = [...oddsDestaque, ...oddsRestante].map((odd, index) => ({
+    ...odd,
+    destaque: index === 0 && oddsDestaque.length > 0,
+  }));
+
+  res.json(oddsFinal);
+});
 
 // ==========================================
 // JOGOS

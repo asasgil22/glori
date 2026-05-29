@@ -114,15 +114,19 @@ async function buscarOddsBotafogo(
 
     const casaDestaqueUpper = (casaDestaque || "VBET").toUpperCase();
 
-    // Deixa a casa de destaque fixa no topo se existir
-    oddsGeradas.sort((a, b) => {
-      if (a.casa.toUpperCase() === casaDestaqueUpper) return -1;
-      if (b.casa.toUpperCase() === casaDestaqueUpper) return 1;
-      return parseFloat(b.vitoria) - parseFloat(a.vitoria);
-    });
+    // Puxa a casa de destaque para o topo da lista de forma forçada e infalível
+    const oddsDestaque = oddsGeradas.filter(
+      (o) => o.casa.toUpperCase() === casaDestaqueUpper,
+    );
+    const oddsRestante = oddsGeradas.filter(
+      (o) => o.casa.toUpperCase() !== casaDestaqueUpper,
+    );
+
+    oddsRestante.sort((a, b) => parseFloat(b.vitoria) - parseFloat(a.vitoria));
+    oddsGeradas = [...oddsDestaque, ...oddsRestante];
 
     oddsGeradas.forEach((odd, index) => {
-      odd.destaque = index === 0;
+      odd.destaque = index === 0 && oddsDestaque.length > 0;
     });
 
     return oddsGeradas;
@@ -130,7 +134,19 @@ async function buscarOddsBotafogo(
     console.error("⚠️ Aviso no scraper Público sem Chave:", erro.message);
 
     let fallbackOdds = [];
-    casasNacionaisPermitidas.forEach((nomeCasa, index) => {
+    const casaDestaqueUpper = (casaDestaque || "VBET").toUpperCase();
+
+    const destaqueObj = casasNacionaisPermitidas.find(
+      (c) => c.toUpperCase() === casaDestaqueUpper,
+    );
+    const restantes = casasNacionaisPermitidas.filter(
+      (c) => c.toUpperCase() !== casaDestaqueUpper,
+    );
+    const casasOrdenadas = destaqueObj
+      ? [destaqueObj, ...restantes]
+      : restantes;
+
+    casasOrdenadas.forEach((nomeCasa, index) => {
       fallbackOdds.push({
         casa: nomeCasa,
         confronto: "Botafogo x Próximo Jogo",
@@ -139,7 +155,7 @@ async function buscarOddsBotafogo(
         vitoria: formatarOdd(1.8 + Math.random() * 0.3),
         empate: formatarOdd(3.1 + Math.random() * 0.3),
         derrota: formatarOdd(3.9 + Math.random() * 0.5),
-        destaque: index === 0,
+        destaque: index === 0 && destaqueObj !== undefined,
       });
     });
     return fallbackOdds;

@@ -48,7 +48,7 @@
     "mostrarPortais": true,
     "carrosselAutoRss": true,
     "limiteNoticias": 80,
-    "limiteRss": 14,
+    "limiteRss": 12,
     "limiteJogos": 3,
     "limiteCarrossel": 10,
     "limiteVideos": 3,
@@ -148,7 +148,12 @@
       "365SCORES"
     ],
     "casasDeApostasPermitidas": [
+      "Betano",
+      "Bet365",
+      "Betfair",
+      "Superbet",
       "VBET",
+      "Pixbet",
       "Esportes da Sorte",
       "F12.bet"
     ],
