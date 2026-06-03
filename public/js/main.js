@@ -97,18 +97,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputBusca.setAttribute("placeholder", sorteada);
   }
 
-  carregarPatrocinadores();
-  carregarCategorias();
+  // 1. Prioridade Máxima (Carregam instantaneamente na tela)
   carregarNoticias(1);
+  carregarWidgetOutrosPortais();
   carregarTrending();
+  carregarMenuAutores();
+  carregarStickerProgramacao();
+
+  // 2. Prioridade Média
+  carregarCategorias();
   carregarWidgetJogos();
   carregarWidgetEnquete();
   carregarWidgetTabela();
-  carregarWidgetOdds();
-  carregarWidgetVideos();
-  carregarWidgetTwitter();
-  carregarWidgetOutrosPortais();
-  carregarMenuAutores();
+  carregarPatrocinadores();
+
+  // 3. Prioridade Baixa (Atraso sutil para não entupir a rede do navegador com raspagens pesadas)
+  setTimeout(() => {
+    carregarWidgetOdds();
+    carregarWidgetVideos();
+    // carregarWidgetTwitter(); // Desabilitado: API do Twitter instável e propensa a bloqueios
+  }, 800);
+
   iniciarContadorAtualizacao();
   initSmartHeader();
 });
@@ -128,6 +137,22 @@ async function carregarConfig() {
       home: {},
     };
   }
+
+  try {
+    const resPatr = await fetch("/api/patrocinadores");
+    if (resPatr.ok) {
+      const patrs = await resPatr.json();
+      const agora = new Date();
+      estadoHome.patrocinadoresAds = patrs.filter(
+        (p) =>
+          p.tipo === "imagem" &&
+          p.imagemUrl &&
+          (p.localExibicao === "ambos" || p.localExibicao === "grid") &&
+          (!p.dataInicio || new Date(p.dataInicio) <= agora) &&
+          (!p.dataFim || new Date(p.dataFim) >= agora),
+      );
+    }
+  } catch (e) {}
 
   const config = estadoHome.config;
   document.title = config.nomePortal || "Portal Noticias";
@@ -416,7 +441,7 @@ function mediaNoticia(noticia, classe, fallbackClasse, options = {}) {
     if (options.isCarousel) {
       overlayHtml = `
         <div class="live-mobile-overlay d-md-none position-absolute top-0 start-0 w-100 h-100 pe-none" style="z-index: 2;"></div>
-        <div class="position-absolute top-0 end-0 m-3 px-3 py-1 rounded-pill fw-bold text-white d-md-none shadow-sm" style="z-index: 3; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.2); font-size: 0.75rem; letter-spacing: 0.5px;">@${escapeHtml(autorTexto)}</div>
+        <div class="position-absolute top-0 end-0 m-3 px-3 py-1 rounded-pill fw-bold text-white shadow-sm" style="z-index: 3; background: rgba(0,0,0,0.65); border: 1px solid rgba(255,255,255,0.2); font-size: 0.75rem; letter-spacing: 0.5px;">@${escapeHtml(autorTexto)}</div>
         <div class="live-play-wrapper position-absolute start-50 translate-middle pe-none" style="z-index: 3;">
           <div class="live-play-btn rounded-circle d-flex align-items-center justify-content-center shadow-lg">
             <svg viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
@@ -435,15 +460,9 @@ function mediaNoticia(noticia, classe, fallbackClasse, options = {}) {
   }
 
   if (imagem) {
-    let onerrorAttr = "";
-    if (noticia.isYouTube) {
-      onerrorAttr = `onerror="if(this.src.includes('maxresdefault.jpg')){this.src='https://i.ytimg.com/vi/${escapeAttr(noticia.id)}/maxresdefault_live.jpg';}else if(this.src.includes('maxresdefault_live')){this.src='https://i.ytimg.com/vi/${escapeAttr(noticia.id)}/hq720.jpg';}else if(this.src.includes('hq720')){this.src='https://i.ytimg.com/vi/${escapeAttr(noticia.id)}/sddefault.jpg';}else if(this.src.includes('sddefault')){this.src='https://i.ytimg.com/vi/${escapeAttr(noticia.id)}/hqdefault.jpg';}else{this.onerror=null;}"`;
-    } else if (noticia.isRss && noticia.portal) {
-      const logo = obterLogoPortalRSS(noticia.portal);
-      onerrorAttr = `onerror="this.onerror=null; this.outerHTML='<div class=\\'${fallbackClasse}\\' style=\\'display: flex; align-items: center; justify-content: center;\\'><img src=\\'${logo}\\' style=\\'width: 48px; opacity: 0.6;\\'></div>';"`;
-    } else {
-      onerrorAttr = `onerror="this.onerror=null; this.outerHTML='<div class=\\'${fallbackClasse}\\'>${iniciais(noticia.titulo)}</div>';"`;
-    }
+    const onerrorAttr = noticia.isYouTube
+      ? `onerror="if(this.src.includes('maxresdefault.jpg')){this.src='https://i.ytimg.com/vi/${escapeAttr(noticia.id)}/maxresdefault_live.jpg';}else if(this.src.includes('maxresdefault_live')){this.src='https://i.ytimg.com/vi/${escapeAttr(noticia.id)}/hq720.jpg';}else if(this.src.includes('hq720')){this.src='https://i.ytimg.com/vi/${escapeAttr(noticia.id)}/sddefault.jpg';}else if(this.src.includes('sddefault')){this.src='https://i.ytimg.com/vi/${escapeAttr(noticia.id)}/hqdefault.jpg';}else{this.onerror=null;}"`
+      : "";
 
     if (overlayHtml) {
       return `<div class="position-relative w-100 h-100">${overlayHtml}<img class="${classe || "hero-media"}" src="${imagem}" alt="${escapeHtml(noticia.titulo)}" ${onerrorAttr}></div>`;
@@ -467,39 +486,39 @@ function renderizarLista(noticias, limpar = true) {
     return;
   }
 
-  const html = noticias
-    .map((noticia) => {
-      const urlClicavel = urlNoticia(noticia);
-      let iconeCategoria = estadoHome.config?.faviconUrl
-        ? `<img src="${estadoHome.config.faviconUrl.replace(/"/g, "&quot;")}" style="height: 14px; border-radius: 2px; margin-top: -2px; margin-right: 4px;" alt="">`
-        : "";
-      if (noticia.isRss && noticia.portal) {
-        iconeCategoria = `<img src="${obterLogoPortalRSS(noticia.portal)}" style="height: 14px; border-radius: 2px; margin-top: -2px; margin-right: 4px;" alt="">`;
-      }
+  let html = "";
+  noticias.forEach((noticia, index) => {
+    const urlClicavel = urlNoticia(noticia);
+    let iconeCategoria = estadoHome.config?.faviconUrl
+      ? `<img src="${estadoHome.config.faviconUrl.replace(/"/g, "&quot;")}" style="height: 14px; border-radius: 2px; margin-top: -2px; margin-right: 4px;" alt="">`
+      : "";
+    if (noticia.isRss && noticia.portal) {
+      iconeCategoria = `<img src="${obterLogoPortalRSS(noticia.portal)}" style="height: 14px; border-radius: 2px; margin-top: -2px; margin-right: 4px;" alt="">`;
+    }
 
-      const tagCategoria = `<span>${iconeCategoria}${escapeHtml(noticia.categoria || "Geral")}</span>`;
+    const tagCategoria = `<span>${iconeCategoria}${escapeHtml(noticia.categoria || "Geral")}</span>`;
 
-      const urlShare = urlClicavel.startsWith("http")
-        ? urlClicavel
-        : window.location.origin + urlClicavel;
-      const textoShare = encodeURIComponent(noticia.titulo);
-      const linkShare = encodeURIComponent(urlShare);
-      const rawLink = urlShare.replace(/'/g, "\\'");
-      const rawTitle = noticia.titulo.replace(/'/g, "\\'");
-      const isFavorito = localStorage
-        .getItem("portal_favoritos")
-        ?.includes(String(noticia.id));
-      const iconeFavorito = isFavorito
-        ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>'
-        : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>';
-      const tempoLeitura = Math.max(
-        1,
-        Math.ceil(
-          (noticia.conteudo || noticia.resumo || "").split(/\s+/).length / 200,
-        ),
-      );
+    const urlShare = urlClicavel.startsWith("http")
+      ? urlClicavel
+      : window.location.origin + urlClicavel;
+    const textoShare = encodeURIComponent(noticia.titulo);
+    const linkShare = encodeURIComponent(urlShare);
+    const rawLink = urlShare.replace(/'/g, "\\'");
+    const rawTitle = noticia.titulo.replace(/'/g, "\\'");
+    const isFavorito = localStorage
+      .getItem("portal_favoritos")
+      ?.includes(String(noticia.id));
+    const iconeFavorito = isFavorito
+      ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>'
+      : '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>';
+    const tempoLeitura = Math.max(
+      1,
+      Math.ceil(
+        (noticia.conteudo || noticia.resumo || "").split(/\s+/).length / 200,
+      ),
+    );
 
-      return `
+    html += `
     <article class="news-item position-relative reveal-on-scroll">
       <div class="thumb-wrapper">
         ${mediaNoticia(noticia, "thumb w-100 h-100", "thumb-fallback")}
@@ -538,8 +557,26 @@ function renderizarLista(noticias, limpar = true) {
       </div>
     </article>
   `;
-    })
-    .join("");
+
+    // INJETA PROPAGANDA A CADA 4 NOTÍCIAS
+    if (
+      (index + 1) % 4 === 0 &&
+      estadoHome.config?.home?.mostrarAnunciosNoGrid !== false &&
+      estadoHome.patrocinadoresAds &&
+      estadoHome.patrocinadoresAds.length > 0
+    ) {
+      const patrocinador =
+        estadoHome.patrocinadoresAds[
+          Math.floor(Math.random() * estadoHome.patrocinadoresAds.length)
+        ];
+      html += `
+        <article class="position-relative reveal-on-scroll my-3 rounded-4 shadow-sm border border-secondary border-opacity-10 overflow-hidden" style="background: var(--surface-muted); cursor: pointer; display: block; transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='var(--shadow-card)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-soft)';" onclick="window.open('${escapeAttr(patrocinador.link || "#")}', '_blank')">
+            <span class="position-absolute top-0 end-0 px-3 py-1 fw-bold text-white shadow-sm" style="font-size: 0.6rem; letter-spacing: 0.5px; background: rgba(0,0,0,0.6); border-bottom-left-radius: 12px; z-index: 2; backdrop-filter: blur(4px);">PATROCINADOR</span>
+            <img src="${escapeAttr(patrocinador.imagemUrl)}" class="w-100 d-block" style="height: 110px; object-fit: cover; object-position: center;" alt="${escapeAttr(patrocinador.nome)}">
+        </article>
+        `;
+    }
+  });
 
   if (limpar) {
     grid.innerHTML = html;
@@ -677,14 +714,20 @@ async function carregarWidgetEnquete() {
     );
     const jaVotou = localStorage.getItem(`votou_enquete_${hash}`);
 
+    let imagemHtml = "";
+    if (enquete.imagemUrl) {
+      imagemHtml = `<img src="${escapeAttr(enquete.imagemUrl)}" class="w-100 rounded-3 mb-3 shadow-sm" style="object-fit: cover; max-height: 200px;" alt="Enquete">`;
+    }
+
     // Substituir título do widget por imagem se houver
     const widgetCard = alvo.closest(".widget-card");
     if (widgetCard) {
       const head = widgetCard.querySelector(".widget-card__head");
       if (head) {
         if (enquete.imagemUrl) {
-          head.innerHTML = `<img src="${escapeAttr(enquete.imagemUrl)}" class="w-100" style="object-fit: cover; max-height: 200px;" alt="Enquete">`;
+          head.innerHTML = `<img src="${escapeAttr(enquete.imagemUrl)}" class="w-100" style="object-fit: cover; max-height: 200px; border-top-left-radius: inherit; border-top-right-radius: inherit;" alt="Enquete">`;
           head.style.padding = "0";
+          imagemHtml = ""; // Remove a imagem do corpo para não duplicar
         } else {
           if (typeof aplicarConfigWidgets === "function")
             aplicarConfigWidgets(estadoHome.config);
@@ -693,12 +736,9 @@ async function carregarWidgetEnquete() {
       }
     }
 
-    alvo.innerHTML = renderizarEnquete(
-      enquete,
-      total,
-      layoutWidget("enquete"),
-      jaVotou,
-    );
+    alvo.innerHTML =
+      imagemHtml +
+      renderizarEnquete(enquete, total, layoutWidget("enquete"), jaVotou);
 
     // Dispara a animação fluida das barras de progresso
     if (jaVotou) {
@@ -936,29 +976,25 @@ function renderizarOdds(oddsLista, layout = "cards") {
           ? `<img src="${logoUrl}" style="width: 18px; height: 18px; object-fit: contain; border-radius: 2px;" alt="">`
           : "";
 
-        const destaqueStyle = odd.destaque
-          ? "border-color: #f70068 !important; border-width: 2px !important; background-color: rgba(247, 0, 104, 0.12) !important;"
-          : "border-color: var(--line) !important; background-color: var(--surface-muted) !important;";
-
         return `
-        <div class="p-2 rounded-3 border ${odd.destaque ? "shadow-sm" : ""}" style="${destaqueStyle} color: var(--ink) !important; transition: all 0.3s ease;">
+    <div class="p-2 rounded-3 border ${odd.destaque ? "shadow-sm" : "border-secondary border-opacity-10"}" ${odd.destaque ? 'style="border-color: #f70068 !important; background-color: color-mix(in srgb, #f70068 8%, var(--surface));"' : 'style="background-color: var(--surface-muted); color: var(--ink);" '}>
       <div class="d-flex justify-content-between align-items-center mb-2">
         <div class="d-flex align-items-center gap-2">
           ${logoHtml}
           <strong class="small text-uppercase fw-bold" style="color: var(--ink);">${escapeHtml(odd.casa || "Aguardando")}</strong>
         </div>
-            ${odd.destaque ? '<span class="badge" style="background-color: #f70068; color: #fff; font-size: 0.6rem; letter-spacing: 0.5px; text-transform: uppercase; box-shadow: 0 2px 4px rgba(247,0,104,0.3);">Destaque</span>' : ""}
+        ${odd.destaque ? '<span class="badge" style="background-color: #f70068; color: #fff; font-size: 0.6rem; letter-spacing: 0.5px; text-transform: uppercase;">Destaque</span>' : ""}
       </div>
       <div class="d-flex justify-content-between gap-2 text-center" style="color: var(--ink);">
-            <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface); border-color: var(--line) !important;">
+        <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface);">
           <span class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Botafogo</span>
           <strong class="d-block">${escapeHtml(odd.vitoria || "-")}</strong>
         </div>
-            <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface); border-color: var(--line) !important;">
+        <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface);">
           <span class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.6rem;">Empate</span>
           <strong class="d-block">${escapeHtml(odd.empate || "-")}</strong>
         </div>
-            <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface); border-color: var(--line) !important;">
+        <div class="flex-fill rounded p-1 border shadow-sm" style="background: var(--surface);">
         <span class="d-block text-muted text-uppercase fw-bold text-truncate mx-auto" style="font-size: 0.6rem; max-width: 70px;" title="${escapeHtml(odd.adversario || "Adversário")}">${escapeHtml(odd.adversario || "Adversário")}</span>
           <strong class="d-block">${escapeHtml(odd.derrota || "-")}</strong>
         </div>
@@ -1488,7 +1524,11 @@ window.abrirModalRSSPorId = function (id) {
   document.getElementById("modal-rss-titulo").innerText = noticia.titulo;
   document.getElementById("modal-rss-resumo").innerText =
     noticia.resumo || "Clique no botão abaixo para ler na íntegra.";
-  document.getElementById("modal-rss-link-oficial").href = noticia.linkExterno;
+
+  const btnLink = document.getElementById("modal-rss-link-oficial");
+  const urlDestino = noticia.linkExterno || noticia.link || "#";
+  btnLink.href = urlDestino;
+  btnLink.onclick = null; // Removido o bloqueio via JavaScript (onclick) para evitar que o bloqueador de pop-ups do navegador barre o link
 
   const modalElement = document.getElementById("modalNoticiaRSS");
   const modalBootstrap = new bootstrap.Modal(modalElement);
@@ -1781,7 +1821,16 @@ async function carregarPatrocinadores() {
   try {
     const resposta = await fetch("/api/patrocinadores");
     if (!resposta.ok) return;
-    const patrocinadores = await resposta.json();
+    let patrocinadores = await resposta.json();
+    const agora = new Date();
+    patrocinadores = patrocinadores.filter(
+      (p) =>
+        (!p.localExibicao ||
+          p.localExibicao === "ambos" ||
+          p.localExibicao === "marquee") &&
+        (!p.dataInicio || new Date(p.dataInicio) <= agora) &&
+        (!p.dataFim || new Date(p.dataFim) >= agora),
+    );
 
     if (patrocinadores.length > 0) {
       let wrapper = document.getElementById("patrocinadores-wrapper");
@@ -1975,6 +2024,11 @@ async function carregarMenuAutores() {
         }
         .ring-new {
           background: linear-gradient(135deg, #32d74b, #0da61c); /* Verde 'Melhores Amigos' do Instagram */
+        }
+        
+        [data-bs-theme="dark"] .ring-active,
+        [data-bs-theme="dark"] .ring-new {
+          background: linear-gradient(135deg, #f70068, #d40059) !important; /* Rosa VBET */
         }
 
         /* Efeito de "Squish" ao tocar (App Nativo) */
@@ -2256,4 +2310,120 @@ window.fecharEnqueteMobile = function () {
 
 function fecharEnqueteMobile() {
   window.fecharEnqueteMobile();
+}
+
+// ==========================================
+// STICKER INTELIGENTE DE PROGRAMAÇÃO
+// ==========================================
+async function carregarStickerProgramacao() {
+  // Se o administrador desativou o sticker globalmente no Painel, encerra a função
+  if (estadoHome.config?.home?.mostrarStickerProgramacao === false) {
+    return;
+  }
+
+  try {
+    const resposta = await fetch("/api/programacao?t=" + Date.now(), {
+      cache: "no-store",
+    });
+    const programacao = await resposta.json();
+
+    const dias = [
+      "domingo",
+      "segunda",
+      "terca",
+      "quarta",
+      "quinta",
+      "sexta",
+      "sabado",
+    ];
+    const diaAtual = dias[new Date().getDay()];
+    const hoje = programacao.find((d) => d.id === diaAtual);
+
+    let eventoAoVivo = null;
+    if (hoje && hoje.eventos) {
+      const agora = new Date();
+      const horaAtual = agora.getHours() * 60 + agora.getMinutes();
+      eventoAoVivo = hoje.eventos.find((ev) => {
+        const [h, m] = ev.horario.split(":").map(Number);
+        const horaEvento = h * 60 + m;
+        return horaAtual >= horaEvento && horaAtual < horaEvento + 120; // 2 horas de duração da live
+      });
+    }
+
+    // Ancoragem ultra robusta: Encontra o Carrossel diretamente pela ID e se injeta ABAIXO dele
+    const ancoraCarrossel =
+      document.getElementById("carouselDestaques") ||
+      document.getElementById("carousel-section");
+    if (!ancoraCarrossel) return;
+
+    if (!document.getElementById("style-pulse-sticker")) {
+      const style = document.createElement("style");
+      style.id = "style-pulse-sticker";
+      style.innerHTML = `
+        @keyframes pulse-live-sticker-red { 0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.6); } 70% { box-shadow: 0 0 0 8px rgba(220, 53, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); } }
+        @keyframes pulse-live-sticker-pink { 0% { box-shadow: 0 0 0 0 rgba(247, 0, 104, 0.6); } 70% { box-shadow: 0 0 0 8px rgba(247, 0, 104, 0); } 100% { box-shadow: 0 0 0 0 rgba(247, 0, 104, 0); } }
+        @keyframes pulse-live-sticker-yellow { 0% { box-shadow: 0 0 0 0 rgba(248, 219, 82, 0.6); } 70% { box-shadow: 0 0 0 8px rgba(248, 219, 82, 0); } 100% { box-shadow: 0 0 0 0 rgba(248, 219, 82, 0); } }
+      `;
+      document.head.appendChild(style);
+    }
+
+    let html = "";
+    if (eventoAoVivo) {
+      let bgStyle = "linear-gradient(135deg, #dc3545, #a70c18)"; // Vermelho padrão
+      let borderStyle = "#ff6b77";
+      let pulseAnim = "pulse-live-sticker-red";
+      let btnTextColor = "#dc3545";
+      let textColor = "#fff";
+
+      const tituloLimpo = (eventoAoVivo.titulo || "").toLowerCase();
+
+      if (tituloLimpo.includes("6 é fogo")) {
+        bgStyle = "linear-gradient(135deg, #f8db52, #d4b51c)"; // Amarelo Menzoil
+        borderStyle = "#ffe26b";
+        pulseAnim = "pulse-live-sticker-yellow";
+        btnTextColor = "#d4b51c";
+        textColor = "#111"; // Texto escuro para dar contraste no amarelo
+      } else if (tituloLimpo.includes("arena alvinegra")) {
+        bgStyle = "linear-gradient(135deg, #f70068, #d40059)"; // Rosa VBET
+        borderStyle = "#ff4d94";
+        pulseAnim = "pulse-live-sticker-pink";
+        btnTextColor = "#f70068";
+      }
+
+      html = `
+        <a href="/programacao.html" class="d-flex align-items-center justify-content-between p-2 px-3 mt-4 mb-4 rounded-3 text-decoration-none shadow-sm" style="background: ${bgStyle}; color: ${textColor}; border: 1px solid ${borderStyle}; animation: ${pulseAnim} 2s infinite;">
+          <div class="d-flex align-items-center gap-2 overflow-hidden">
+            <span class="spinner-grow spinner-grow-sm flex-shrink-0" role="status" style="width: 12px; height: 12px; color: ${textColor};"></span>
+            <span class="fw-bold text-uppercase flex-shrink-0" style="font-size: 0.75rem; letter-spacing: 0.5px;">AO VIVO: ${escapeHtml(eventoAoVivo.canal).toUpperCase()}</span>
+            <span class="d-none d-md-inline small opacity-75 mx-2 flex-shrink-0">|</span>
+            <span class="d-none d-md-inline small fw-medium text-truncate">${escapeHtml(eventoAoVivo.titulo)}</span>
+          </div>
+          <span class="badge bg-white fw-bold rounded-pill flex-shrink-0 ms-2" style="color: ${btnTextColor}; font-size: 0.7rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">Assistir ➔</span>
+        </a>
+      `;
+    } else if (hoje && hoje.eventos && hoje.eventos.length > 0) {
+      html = `
+        <a href="/programacao.html" class="glass-panel d-flex align-items-center justify-content-between p-2 px-3 mt-4 mb-4 rounded-3 text-decoration-none shadow-sm" style="color: var(--ink); transition: transform 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div class="d-flex align-items-center gap-2 overflow-hidden">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--ink); flex-shrink: 0;"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+            <span class="fw-bold text-uppercase flex-shrink-0" style="font-size: 0.75rem; letter-spacing: 0.5px;">Grade de Programação</span>
+            <span class="d-none d-md-inline small text-muted mx-2 flex-shrink-0">|</span>
+            <span class="d-none d-md-inline small text-muted fw-medium text-truncate">Confira os horários de lives e vídeos.</span>
+          </div>
+          <span class="fw-bold text-uppercase small flex-shrink-0 ms-2" style="color: var(--ink); font-size: 0.7rem;">Ver Programação ➔</span>
+        </a>
+      `;
+    }
+
+    if (html) {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = html;
+      ancoraCarrossel.parentNode.insertBefore(
+        wrapper.firstElementChild,
+        ancoraCarrossel.nextSibling,
+      );
+    }
+  } catch (error) {
+    console.warn("Erro ao carregar sticker de programação", error);
+  }
 }

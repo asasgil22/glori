@@ -64,6 +64,16 @@
           </span>
         </div>
         <div class="d-flex gap-2">
+          <a
+            href="estatisticas.html"
+            class="btn btn-primary btn-sm px-3 fw-bold rounded-pill"
+            style="
+              background: linear-gradient(135deg, #3b82f6, #2563eb);
+              border: none;
+              box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+            "
+            >📊 Estatísticas</a
+          >
           <a href="index.html" class="btn btn-outline-secondary btn-sm px-3"
             >Ver site</a
           >
@@ -79,36 +89,9 @@
           id="admin-tabs"
           role="tablist"
         >
-          <li class="nav-item" id="nav-item-dashboard" role="presentation">
-            <button
-              class="nav-link active"
-              id="tab-dashboard"
-              data-bs-toggle="pill"
-              data-bs-target="#pane-dashboard"
-              type="button"
-              role="tab"
-            >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="3" y="3" width="7" height="9"></rect>
-                <rect x="14" y="3" width="7" height="5"></rect>
-                <rect x="14" y="12" width="7" height="9"></rect>
-                <rect x="3" y="16" width="7" height="5"></rect>
-              </svg>
-              Dashboard
-            </button>
-          </li>
           <li class="nav-item" id="nav-item-config" role="presentation">
             <button
-              class="nav-link"
+              class="nav-link active"
               id="tab-config"
               data-bs-toggle="pill"
               data-bs-target="#pane-config"
@@ -478,122 +461,42 @@
               Cache do FogãoNET
             </button>
           </li>
+          <li class="nav-item" id="nav-item-lab" role="presentation">
+            <button
+              class="nav-link"
+              id="tab-lab"
+              data-bs-toggle="pill"
+              data-bs-target="#pane-lab"
+              type="button"
+              role="tab"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M10 2v7.31"></path>
+                <path d="M14 9.3V1.99"></path>
+                <path d="M8.5 2h7"></path>
+                <path
+                  d="M14 9.3a2.2 2.2 0 0 1-.34 1.16L8.4 17.22a2.12 2.12 0 0 0-.32 1.15V20a2 2 0 0 0 2 2h4.5c.98 0 1.83-.72 1.98-1.68l.26-2.58a1.53 1.53 0 0 0-.41-1.24z"
+                ></path>
+              </svg>
+              Lab (Scraping)
+            </button>
+          </li>
         </ul>
       </div>
 
       <div class="tab-content admin-tab-panels">
-        <!-- ========== DASHBOARD ========== -->
-        <section
-          class="tab-pane fade show active"
-          id="pane-dashboard"
-          role="tabpanel"
-          aria-labelledby="tab-dashboard"
-        >
-          <header class="admin-page-header">
-            <div>
-              <h2 class="admin-page-header__title">Dashboard Analítico</h2>
-              <p class="admin-page-header__desc">
-                Visão geral e desempenho do seu portal.
-              </p>
-            </div>
-          </header>
-          <div class="row g-4 mb-4">
-            <div class="col-md-4">
-              <div
-                class="card border-0 shadow-sm p-4 text-center bg-white h-100"
-              >
-                <h6 class="text-muted text-uppercase fw-bold mb-2">
-                  Visualizações Totais
-                </h6>
-                <h2 class="fw-bolder m-0 text-dark" id="dash-views">0</h2>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div
-                class="card border-0 shadow-sm p-4 text-center bg-white h-100"
-              >
-                <h6 class="text-muted text-uppercase fw-bold mb-2">
-                  Artigos Publicados
-                </h6>
-                <h2 class="fw-bolder m-0 text-dark" id="dash-artigos">0</h2>
-              </div>
-            </div>
-            <div class="col-md-4">
-              <div
-                class="card border-0 shadow-sm p-4 text-center bg-white h-100"
-              >
-                <h6 class="text-muted text-uppercase fw-bold mb-2">
-                  Notícia mais Lida
-                </h6>
-                <p
-                  class="fw-bolder m-0 text-truncate text-dark"
-                  id="dash-top-noticia"
-                >
-                  -
-                </p>
-                <small
-                  class="text-success fw-bold mt-1 d-block"
-                  id="dash-top-views"
-                  >0 views</small
-                >
-              </div>
-            </div>
-          </div>
-          <div class="card border-0 shadow-sm p-4 rounded-3 bg-white">
-            <div
-              class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2"
-            >
-              <h6 class="text-muted text-uppercase fw-bold m-0">
-                Fontes de Notícias (RSS)
-              </h6>
-              <div class="d-flex gap-2">
-                <select
-                  id="chart-periodo"
-                  class="form-select form-select-sm shadow-none"
-                  style="cursor: pointer"
-                  onchange="atualizarGraficoPortais()"
-                >
-                  <option value="sempre">Histórico Total</option>
-                  <option value="ano">Apenas este Ano</option>
-                  <option value="0">Janeiro</option>
-                  <option value="1">Fevereiro</option>
-                  <option value="2">Março</option>
-                  <option value="3">Abril</option>
-                  <option value="4">Maio</option>
-                  <option value="5">Junho</option>
-                  <option value="6">Julho</option>
-                  <option value="7">Agosto</option>
-                  <option value="8">Setembro</option>
-                  <option value="9">Outubro</option>
-                  <option value="10">Novembro</option>
-                  <option value="11">Dezembro</option>
-                </select>
-                <select
-                  id="chart-tipo"
-                  class="form-select form-select-sm shadow-none"
-                  style="cursor: pointer"
-                  onchange="atualizarGraficoPortais()"
-                >
-                  <option value="bar">Barras</option>
-                  <option value="pie">Pizza</option>
-                  <option value="doughnut">Rosca</option>
-                </select>
-              </div>
-            </div>
-            <div style="height: 300px; width: 100%">
-              <canvas id="chart-portais"></canvas>
-            </div>
-            <!-- Legenda Personalizada com as Logomarcas -->
-            <div
-              id="chart-custom-legend"
-              class="d-flex flex-wrap justify-content-center gap-2 mt-4 pt-3 border-top border-secondary border-opacity-10"
-            ></div>
-          </div>
-        </section>
-
         <!-- ========== PAGINA INICIAL ========== -->
         <section
-          class="tab-pane fade"
+          class="tab-pane fade show active"
           id="pane-config"
           role="tabpanel"
           aria-labelledby="tab-config"
@@ -2028,6 +1931,18 @@
                         >
                           Limpar
                         </button>
+                        <span
+                          class="editor-toolbar__sep"
+                          aria-hidden="true"
+                        ></span>
+                        <button
+                          type="button"
+                          class="editor-toolbar__btn fw-bold text-primary"
+                          data-cmd="toggleHtml"
+                          title="Editar Código HTML"
+                        >
+                          &lt;/&gt; HTML
+                        </button>
                       </div>
                       <div
                         id="conteudo-editor"
@@ -3446,6 +3361,106 @@
             </div>
           </div>
         </section>
+
+        <!-- ========== LAB (SCRAPING) ========== -->
+        <section
+          class="tab-pane fade"
+          id="pane-lab"
+          role="tabpanel"
+          aria-labelledby="tab-lab"
+        >
+          <header class="admin-page-header">
+            <div>
+              <h2 class="admin-page-header__title">Laboratório de Raspagem</h2>
+              <p class="admin-page-header__desc">
+                Ambiente isolado para testar e analisar a extração de dados de
+                portais externos usando robôs.
+              </p>
+            </div>
+          </header>
+          <div class="admin-panel">
+            <form id="form-lab-scrape" class="mb-4">
+              <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                  <label class="form-label fw-bold small text-secondary"
+                    >URL da Matéria/Site</label
+                  >
+                  <input
+                    type="url"
+                    id="lab-url"
+                    class="form-control"
+                    placeholder="Ex: https://ge.globo.com/..."
+                    required
+                  />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-bold small text-secondary"
+                    >Portal (Predefinição)</label
+                  >
+                  <select id="lab-preset" class="form-select">
+                    <option value="auto">
+                      Automático / Detecção Inteligente
+                    </option>
+                    <option value="ge">Globo Esporte (GE)</option>
+                    <option value="uol">UOL Esporte</option>
+                    <option value="lance">Lance!</option>
+                    <option value="fogaonet">FogãoNET</option>
+                    <option value="espn">ESPN Brasil</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-bold small text-secondary"
+                    >Seletor Manual</label
+                  >
+                  <input
+                    type="text"
+                    id="lab-seletor"
+                    class="form-control"
+                    placeholder="Opcional. Ex: .materia"
+                  />
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                  <button
+                    type="submit"
+                    id="btn-lab-scrape"
+                    class="btn btn-dark flex-fill fw-bold"
+                  >
+                    Analisar
+                  </button>
+                  <button
+                    type="button"
+                    id="btn-lab-extract"
+                    class="btn btn-accent flex-fill fw-bold"
+                    title="Extrair e levar para o editor"
+                  >
+                    🪄 Extrair
+                  </button>
+                </div>
+              </div>
+            </form>
+            <div
+              class="card bg-light border border-secondary border-opacity-10 shadow-sm p-3"
+            >
+              <h6 class="fw-bold text-uppercase text-secondary small mb-2">
+                Resultado da Extração (<span id="lab-tempo">0.0s</span>)
+              </h6>
+              <div
+                id="lab-resultado"
+                class="p-3 bg-white border rounded custom-scrollbar"
+                style="
+                  height: 400px;
+                  overflow-y: auto;
+                  font-family: monospace;
+                  font-size: 0.85rem;
+                  white-space: pre-wrap;
+                  color: var(--ink);
+                "
+              >
+                Aguardando teste... Insira um link acima e clique em Analisar.
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
 
@@ -3543,7 +3558,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/portal-theme.js"></script>
     <script src="js/carrossel.js"></script>
     <script src="js/widgets-config.js"></script>

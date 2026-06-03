@@ -76,6 +76,34 @@ const PATH_TWITTER = path.join(DATA_DIR, "twitter.json");
 const PATH_USUARIOS = path.join(DATA_DIR, "usuarios.json");
 const PATH_ESCUDOS = path.join(PUBLIC_DIR, "escudos");
 
+// ==========================================
+// 🚀 MEMÓRIA CACHE DE ALTA PERFORMANCE (I/O)
+// ==========================================
+const cacheIO = {
+  config: { data: null, ts: 0 },
+  noticias: { data: null, ts: 0 },
+  enquete: { data: null, ts: 0 },
+};
+const TTL_CACHE_IO = 60000; // 60 segundos
+
+async function getJSONCached(caminho, padrao, chave) {
+  const agora = Date.now();
+  if (cacheIO[chave].data && agora - cacheIO[chave].ts < TTL_CACHE_IO) {
+    return cacheIO[chave].data;
+  }
+  const dados = await lerJSON(caminho, padrao);
+  cacheIO[chave].data = dados;
+  cacheIO[chave].ts = agora;
+  return dados;
+}
+
+function invalidarCacheIO(chave) {
+  if (cacheIO[chave]) {
+    cacheIO[chave].data = null;
+    cacheIO[chave].ts = 0;
+  }
+}
+
 app.set("trust proxy", 1);
 app.use(compression()); // 🚀 Comprime todas as respostas HTTP deixando o site até 70% mais rápido!
 app.use(cors());
@@ -329,6 +357,13 @@ async function resolverImagemNoticia(req, imagemAtual = "") {
 function lerBooleanConfig(valor, padrao = true) {
   if (valor === undefined || valor === null || valor === "") return padrao;
   return normalizarBoolean(valor);
+}
+
+function removerAcentos(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 }
 
 function slugify(texto) {
@@ -677,6 +712,9 @@ function normalizarConfig(config = {}) {
       mostrarVideos: config.home?.mostrarVideos !== false,
       mostrarTwitter: config.home?.mostrarTwitter !== false,
       mostrarPortais: config.home?.mostrarPortais !== false,
+      mostrarAnunciosNoGrid: config.home?.mostrarAnunciosNoGrid !== false,
+      mostrarStickerProgramacao:
+        config.home?.mostrarStickerProgramacao !== false,
       carrosselAutoRss: config.home?.carrosselAutoRss === true,
       limiteNoticias: Math.min(
         Math.max(Number(config.home?.limiteNoticias) || 6, 1),
@@ -860,7 +898,9 @@ async function servirHtmlComSeo(res, arquivo, metaHtml) {
 app.use(exigirLoginPagina);
 
 app.get("/robots.txt", async (req, res) => {
-  const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+  const config = normalizarConfig(
+    await getJSONCached(PATH_CONFIG, {}, "config"),
+  );
   const base = seo.getBaseUrl(req, config);
   res
     .type("text/plain")
@@ -870,9 +910,11 @@ app.get("/robots.txt", async (req, res) => {
 });
 
 app.get("/sitemap.xml", async (req, res) => {
-  const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+  const config = normalizarConfig(
+    await getJSONCached(PATH_CONFIG, {}, "config"),
+  );
   const base = seo.getBaseUrl(req, config);
-  const noticias = (await lerJSON(PATH_NOTICIAS, []))
+  const noticias = (await getJSONCached(PATH_NOTICIAS, [], "noticias"))
     .map((item) => normalizarNoticia(item))
     .filter(noticiaPublicavel)
     .sort(
@@ -926,10 +968,12 @@ app.get("/noticia.html", (req, res) => {
 });
 
 app.get("/noticia/:slug", async (req, res) => {
-  const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+  const config = normalizarConfig(
+    await getJSONCached(PATH_CONFIG, {}, "config"),
+  );
   const base = seo.getBaseUrl(req, config);
-  const noticias = (await lerJSON(PATH_NOTICIAS, [])).map((item) =>
-    normalizarNoticia(item),
+  const noticias = (await getJSONCached(PATH_NOTICIAS, [], "noticias")).map(
+    (item) => normalizarNoticia(item),
   );
   let noticia = noticias.find(
     (item) =>
@@ -996,9 +1040,11 @@ app.get("/noticia/:slug", async (req, res) => {
 });
 
 app.get("/categoria/:slug", async (req, res) => {
-  const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+  const config = normalizarConfig(
+    await getJSONCached(PATH_CONFIG, {}, "config"),
+  );
   const base = seo.getBaseUrl(req, config);
-  const noticias = (await lerJSON(PATH_NOTICIAS, []))
+  const noticias = (await getJSONCached(PATH_NOTICIAS, [], "noticias"))
     .map((item) => normalizarNoticia(item))
     .filter(noticiaPublicavel);
   const nomeCategoria = seo.encontrarNomeCategoria(noticias, req.params.slug);
@@ -1029,10 +1075,13 @@ app.get("/categoria/:slug", async (req, res) => {
   );
 });
 
-app.use(express.static(PUBLIC_DIR, { index: false }));
+// 🚀 Cache de 1 dia para arquivos estáticos (CSS, JS, Imagens) economiza muita banda!
+app.use(express.static(PUBLIC_DIR, { index: false, maxAge: "1d" }));
 
 app.get("/", async (req, res) => {
-  const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+  const config = normalizarConfig(
+    await getJSONCached(PATH_CONFIG, {}, "config"),
+  );
   const base = seo.getBaseUrl(req, config);
   return servirHtmlComSeo(res, "index.html", seo.metaHome(config, base));
 });
@@ -1042,6 +1091,7 @@ app.use("/api/usuarios", require("./src/routes/usuarios"));
 app.use("/api", require("./src/routes/painel"));
 app.use("/api", require("./src/routes/esportes"));
 app.use("/api", require("./src/routes/twitter"));
+app.use("/api/lab", require("./src/routes/lab"));
 
 // Rota leve para o UptimeRobot monitorar e manter o servidor acordado
 app.get("/ping", (req, res) => {
@@ -1049,7 +1099,7 @@ app.get("/ping", (req, res) => {
 });
 
 app.get("/api/config", async (req, res) => {
-  res.json(normalizarConfig(await lerJSON(PATH_CONFIG, {})));
+  res.json(normalizarConfig(await getJSONCached(PATH_CONFIG, {}, "config")));
 });
 
 async function resolverBannerMarca(req, atual = "") {
@@ -1256,6 +1306,14 @@ app.put(
           mostrarPortais: lerBooleanConfig(
             req.body.mostrarPortais,
             atual.home.mostrarPortais,
+          ),
+          mostrarAnunciosNoGrid: lerBooleanConfig(
+            req.body.mostrarAnunciosNoGrid,
+            atual.home.mostrarAnunciosNoGrid,
+          ),
+          mostrarStickerProgramacao: lerBooleanConfig(
+            req.body.mostrarStickerProgramacao,
+            atual.home.mostrarStickerProgramacao,
           ),
           carrosselAutoRss: lerBooleanConfig(
             req.body.carrosselAutoRss,
@@ -1587,6 +1645,7 @@ app.put(
         config.buscaImagemUrl = "";
 
       await salvarJSON(PATH_CONFIG, config);
+      invalidarCacheIO("config");
       res.json(normalizarConfig(config));
 
       // Invalida o cache do YouTube se o canal ou a quantidade mudar
@@ -1635,6 +1694,7 @@ app.put("/api/config/carrossel", exigirPermissaoAdmin, async (req, res) => {
       req.body.ids ?? req.body.carrosselIds,
     ).slice(0, limite);
     await salvarJSON(PATH_CONFIG, atual);
+    invalidarCacheIO("config");
     res.json({
       carrosselIds: atual.home.carrosselIds,
       home: atual.home,
@@ -1649,7 +1709,9 @@ app.put("/api/config/carrossel", exigirPermissaoAdmin, async (req, res) => {
 
 app.get("/api/videos", async (req, res) => {
   const currentTime = Date.now();
-  const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+  const config = normalizarConfig(
+    await getJSONCached(PATH_CONFIG, {}, "config"),
+  );
   const modo = config.home.modoVideos || "auto";
   const textoBotao = config.home.textoBotaoVideo || "";
 
@@ -1760,19 +1822,21 @@ app.get("/api/rss", async (req, res) => {
       erro: "O servidor esta carregando as fotos pela primeira vez. Recarregue em instantes.",
     });
   }
-  const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+  const config = normalizarConfig(
+    await getJSONCached(PATH_CONFIG, {}, "config"),
+  );
   res.json(cacheDeNoticiasRSS.slice(0, config.home.limiteRss));
 });
 
 app.get("/api/noticias", async (req, res) => {
-  const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+  const config = normalizarConfig(
+    await getJSONCached(PATH_CONFIG, {}, "config"),
+  );
   try {
-    const noticias = (await lerJSON(PATH_NOTICIAS, [])).map((noticia) =>
-      normalizarNoticia(noticia),
+    const noticias = (await getJSONCached(PATH_NOTICIAS, [], "noticias")).map(
+      (noticia) => normalizarNoticia(noticia),
     );
-    const termo = String(req.query.q || "")
-      .trim()
-      .toLowerCase();
+    const termo = removerAcentos(req.query.q || "").trim();
     const termosBusca = termo ? termo.split(/\s+/) : [];
     const categoria = String(req.query.categoria || "")
       .trim()
@@ -1817,8 +1881,9 @@ app.get("/api/noticias", async (req, res) => {
         ? [...noticias, ...rss]
         : [...noticias.filter(noticiaPublicavel), ...rss];
     const filtradas = base.filter((noticia) => {
-      const texto =
-        `${noticia.titulo} ${noticia.resumo} ${noticia.conteudo} ${noticia.categoria} ${(noticia.tags || []).join(" ")}`.toLowerCase();
+      const texto = removerAcentos(
+        `${noticia.titulo} ${noticia.resumo} ${noticia.conteudo} ${noticia.categoria} ${(noticia.tags || []).join(" ")}`,
+      );
       // Verifica se TODAS as palavras digitadas estão presentes no texto da notícia
       const bateBusca =
         termosBusca.length === 0 || termosBusca.every((t) => texto.includes(t));
@@ -1877,7 +1942,17 @@ app.get("/api/noticias", async (req, res) => {
         setLastFetchTime(currentTime);
       }
       if (vCache && Array.isArray(vCache)) {
-        const liveVideos = vCache.filter((v) => v.isLive);
+        // Filtra os vídeos ao vivo e BLOQUEIA canais intrusos que o YouTube possa sugerir
+        const canaisBloqueados = ["TICARACATICAST"];
+        const liveVideos = vCache.filter(
+          (v) =>
+            v.isLive &&
+            !canaisBloqueados.some((bloqueado) =>
+              String(v.autor || "")
+                .toUpperCase()
+                .includes(bloqueado),
+            ),
+        );
         if (liveVideos.length > 0) {
           // Reverte para manter a prioridade (Setor Visitante, TF, Arena) empurrando no começo
           liveVideos.reverse().forEach((liveVideo) => {
@@ -1919,8 +1994,8 @@ app.get("/api/noticias", async (req, res) => {
 });
 
 app.get("/api/categorias", async (req, res) => {
-  const noticias = (await lerJSON(PATH_NOTICIAS, [])).map((noticia) =>
-    normalizarNoticia(noticia),
+  const noticias = (await getJSONCached(PATH_NOTICIAS, [], "noticias")).map(
+    (noticia) => normalizarNoticia(noticia),
   );
   const publicadas = noticias.filter(noticiaPublicavel);
   const categorias = [
@@ -1930,8 +2005,8 @@ app.get("/api/categorias", async (req, res) => {
 });
 
 app.get("/api/noticias/:identificador", async (req, res) => {
-  const noticias = (await lerJSON(PATH_NOTICIAS, [])).map((noticia) =>
-    normalizarNoticia(noticia),
+  const noticias = (await getJSONCached(PATH_NOTICIAS, [], "noticias")).map(
+    (noticia) => normalizarNoticia(noticia),
   );
   let noticia = noticias.find(
     (item) =>
@@ -1940,7 +2015,9 @@ app.get("/api/noticias/:identificador", async (req, res) => {
   );
 
   if (!noticia && isRssPronto()) {
-    const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+    const config = normalizarConfig(
+      await getJSONCached(PATH_CONFIG, {}, "config"),
+    );
     const nRss = getCacheRSS().find((n) => {
       const hashId = Buffer.from(n.link || "")
         .toString("base64")
@@ -2014,6 +2091,7 @@ app.post(
 
       noticias.unshift(novaNoticia);
       await salvarJSON(PATH_NOTICIAS, noticias);
+      invalidarCacheIO("noticias");
       res.status(201).json(novaNoticia);
     } catch (error) {
       res.status(500).json({ erro: "Erro ao criar noticia." });
@@ -2028,7 +2106,9 @@ app.put(
   async (req, res) => {
     try {
       if (String(req.params.id).startsWith("rss-")) {
-        const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+        const config = normalizarConfig(
+          await getJSONCached(PATH_CONFIG, {}, "config"),
+        );
         if (!config.home.rssCustom) config.home.rssCustom = {};
 
         let customData = config.home.rssCustom[req.params.id] || {};
@@ -2047,6 +2127,7 @@ app.put(
 
         config.home.rssCustom[req.params.id] = customData;
         await salvarJSON(PATH_CONFIG, config);
+        invalidarCacheIO("config");
         return res.json({ id: req.params.id, ...customData });
       }
 
@@ -2083,6 +2164,7 @@ app.put(
       };
 
       await salvarJSON(PATH_NOTICIAS, noticias);
+      invalidarCacheIO("noticias");
       res.json(noticias[idx]);
     } catch (error) {
       res.status(500).json({ erro: "Erro ao atualizar noticia." });
@@ -2102,6 +2184,7 @@ app.delete(
       const apagados = totalAntes - noticias.length;
 
       await salvarJSON(PATH_NOTICIAS, noticias);
+      invalidarCacheIO("noticias");
 
       res.json({
         mensagem: `${apagados} rascunho(s) apagado(s) com sucesso!`,
@@ -2120,12 +2203,16 @@ app.delete("/api/noticias/:id", exigirLoginAPI, async (req, res) => {
       (item) => String(item.id) !== String(req.params.id),
     );
     await salvarJSON(PATH_NOTICIAS, filtradas);
+    invalidarCacheIO("noticias");
 
-    const config = normalizarConfig(await lerJSON(PATH_CONFIG, {}));
+    const config = normalizarConfig(
+      await getJSONCached(PATH_CONFIG, {}, "config"),
+    );
     config.home.carrosselIds = config.home.carrosselIds.filter(
       (itemId) => String(itemId) !== String(req.params.id),
     );
     await salvarJSON(PATH_CONFIG, config);
+    invalidarCacheIO("config");
 
     res.json({ mensagem: "Noticia excluida." });
   } catch (error) {
@@ -2144,6 +2231,7 @@ app.post("/api/noticias/:identificador/view", async (req, res) => {
     if (idx !== -1) {
       noticias[idx].visualizacoes = (noticias[idx].visualizacoes || 0) + 1;
       await salvarJSON(PATH_NOTICIAS, noticias);
+      invalidarCacheIO("noticias");
     }
     res.sendStatus(200);
   } catch {
@@ -2153,8 +2241,8 @@ app.post("/api/noticias/:identificador/view", async (req, res) => {
 
 app.get("/api/noticias/:id/relacionadas", async (req, res) => {
   try {
-    const noticias = (await lerJSON(PATH_NOTICIAS, [])).map((noticia) =>
-      normalizarNoticia(noticia),
+    const noticias = (await getJSONCached(PATH_NOTICIAS, [], "noticias")).map(
+      (noticia) => normalizarNoticia(noticia),
     );
     const noticiaAtual = noticias.find(
       (item) => String(item.id) === String(req.params.id),
@@ -2178,7 +2266,11 @@ app.get("/api/noticias/:id/relacionadas", async (req, res) => {
 
 app.get("/api/enquete", async (req, res) => {
   res.json(
-    await lerJSON(PATH_ENQUETE, { pergunta: "Sua opiniao?", opcoes: {} }),
+    await getJSONCached(
+      PATH_ENQUETE,
+      { pergunta: "Sua opiniao?", opcoes: {} },
+      "enquete",
+    ),
   );
 });
 
@@ -2191,6 +2283,7 @@ app.post("/api/enquete/votar", async (req, res) => {
     }
     enquete.opcoes[opcao] += 1;
     await salvarJSON(PATH_ENQUETE, enquete);
+    invalidarCacheIO("enquete");
     res.json(enquete);
   } catch {
     res.sendStatus(500);
@@ -2235,6 +2328,7 @@ app.post(
       }
 
       await salvarJSON(PATH_ENQUETE, novaEnquete);
+      invalidarCacheIO("enquete");
       res.json(novaEnquete);
     } catch (error) {
       res.status(500).json({ erro: "Erro ao configurar enquete." });
@@ -2268,7 +2362,7 @@ garantirEstrutura()
       console.log(`Painel admin: http://localhost:${PORT}/admin.html`);
       console.log(`✅ SISTEMA INICIADO COM SUCESSO - TABELA ATIVADA!`);
       atualizarCacheDeNoticiasRSS();
-      setInterval(atualizarCacheDeNoticiasRSS, 120000);
+      setInterval(atualizarCacheDeNoticiasRSS, 600000); // Reduzido de 2 min (120000) para 10 min (600000) para evitar bloqueios do Google/Bing
       atualizarTabelaBrasileirao();
       setInterval(atualizarTabelaBrasileirao, 86400000);
 
@@ -2287,8 +2381,9 @@ garantirEstrutura()
         },
         2 * 60 * 60 * 1000,
       ); // Atualiza a cada 2h e blinda o limite da cota gratuita de forma segura.
-      atualizarCacheTwitter();
-      setInterval(atualizarCacheTwitter, 30 * 60 * 1000); // Roda a cada 30 min para evitar bloqueio de IP no X
+      // A funcionalidade de Twitter/X foi desabilitada devido à instabilidade da API e restrições de raspagem.
+      // atualizarCacheTwitter();
+      // setInterval(atualizarCacheTwitter, 30 * 60 * 1000);
       atualizarAgendaAutomatica(); // O próprio robô define o setInterval baseado no status da partida!
 
       // O robô IA (Thiago Franklin) agora roda estritamente pelo agendamento interno (cron)

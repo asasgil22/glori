@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grade de Programação | Portal Notícias</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+      @keyframes pulse-live-anim {
+        0% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+        }
+        70% {
+          transform: scale(1);
+          box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+        }
+        100% {
+          transform: scale(0.95);
+          box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+        }
+      }
+      .pulse-live {
+        animation: pulse-live-anim 2s infinite;
+      }
+      .live-dot {
+        animation: opacity-pulse 1s infinite alternate;
+      }
+      @keyframes opacity-pulse {
+        from {
+          opacity: 0.4;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-body text-body"
+    style="background-color: var(--site-bg-color, #f7f8fa); min-height: 100vh"
+  >
+    <nav class="navbar navbar-expand-lg glass-nav sticky-top">
+      <div class="container">
+        <a
+          class="navbar-brand fw-bold text-uppercase d-flex align-items-center gap-2"
+          href="/"
+          id="brand-link"
+          style="letter-spacing: 1.5px; color: var(--nav-ink, #ffffff)"
+        >
+          Portal Notícias
+        </a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+          <a
+            href="/"
+            class="btn btn-outline-secondary btn-sm px-3 rounded-pill fw-bold text-uppercase"
+            style="font-size: 0.75rem; letter-spacing: 0.5px"
+            >Voltar à Home</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5 pb-5">
+      <div class="text-center mb-5">
+        <span
+          class="badge bg-dark px-3 py-2 rounded-pill shadow-sm mb-3"
+          style="font-size: 0.75rem; letter-spacing: 1px; color: #fff"
+          >GRADE OFICIAL</span
+        >
+        <h1
+          class="fw-bolder text-uppercase"
+          style="letter-spacing: -1px; color: var(--ink)"
+        >
+          Programação Alvinegra
+        </h1>
+        <p class="text-muted mx-auto mt-2" style="max-width: 600px">
+          Acompanhe os horários das lives e vídeos dos maiores canais do
+          Botafogo no YouTube:
+          <strong>Canal do TF, Setor Visitante e Arena Alvinegra</strong>.
+        </p>
+      </div>
+
+      <ul
+        class="nav nav-pills justify-content-center mb-4 gap-2 border-bottom border-secondary border-opacity-10 pb-3"
+        id="diasTab"
+        role="tablist"
+      ></ul>
+
+      <div
+        class="tab-content mx-auto"
+        id="diasTabContent"
+        style="max-width: 800px"
+      ></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/seo.js"></script>
+    <script src="/js/portal-theme.js"></script>
+    <script src="/js/portal-brand.js"></script>
+    <script src="/js/programacao.js"></script>
+  </body>
+</html>

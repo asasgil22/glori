@@ -1,5 +1,41 @@
 [
   {
+    "id": "1780526279834",
+    "data": "2026-06-03T22:38:00.230Z",
+    "link": "",
+    "nome": "turim",
+    "tipo": "imagem",
+    "ativo": true,
+    "dataFim": "2026-12-31T19:37",
+    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1780526279835-797274518.png",
+    "dataInicio": "2026-06-03T19:37",
+    "localExibicao": "grid"
+  },
+  {
+    "id": "1780524928546",
+    "data": "2026-06-03T22:15:29.146Z",
+    "link": "",
+    "nome": "vbet",
+    "tipo": "imagem",
+    "ativo": true,
+    "dataFim": "2026-12-31T19:15",
+    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1780525662833-953887803.png",
+    "dataInicio": "2026-06-03T19:15",
+    "localExibicao": "grid"
+  },
+  {
+    "id": "1780524877241",
+    "data": "2026-06-03T22:14:38.121Z",
+    "link": "https://menzoil.com.br/wp-content/uploads/2024/09/logo-menzoil-header.webp",
+    "nome": "menzoil",
+    "tipo": "imagem",
+    "ativo": true,
+    "dataFim": "2026-12-31T19:14",
+    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1780525083446-946578428.png",
+    "dataInicio": "2026-06-03T19:14",
+    "localExibicao": "grid"
+  },
+  {
     "id": "1779852807994",
     "data": "2026-05-27T03:33:28.331Z",
     "link": "",

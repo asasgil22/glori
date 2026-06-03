@@ -3,7 +3,10 @@ function estaLogado(req) {
 }
 
 function exigirLoginPagina(req, res, next) {
-  if (req.path === "/admin.html" && !estaLogado(req)) {
+  if (
+    (req.path === "/admin.html" || req.path === "/estatisticas.html") &&
+    !estaLogado(req)
+  ) {
     return res.redirect("/login.html");
   }
   next();

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="pt-BR" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Botafogo 2026 - Estatísticas Perfeitas</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      body {
+        background-color: #0a0a0a;
+        color: #fff;
+        min-height: 100vh;
+        background-image: radial-gradient(circle at top, #1a1a1a, #000);
+      }
+      .premium-card {
+        background: rgba(20, 20, 20, 0.6);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      }
+
+      /* CAMPO TÁTICO PREMIUM */
+      .campo-tatico-premium {
+        background: linear-gradient(180deg, #183e18 50%, #122d12 50%);
+        background-size: 100% 12%;
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.8);
+        overflow: hidden;
+      }
+      .campo-linha {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.25);
+      }
+      .campo-meio {
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        transform: translateY(-50%);
+      }
+      .campo-circulo {
+        top: 50%;
+        left: 50%;
+        width: 90px;
+        height: 90px;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .campo-area-top {
+        top: 0;
+        left: 50%;
+        width: 50%;
+        height: 16%;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        border-top: 0;
+        transform: translateX(-50%);
+      }
+      .campo-area-bottom {
+        bottom: 0;
+        left: 50%;
+        width: 50%;
+        height: 16%;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        border-bottom: 0;
+        transform: translateX(-50%);
+      }
+
+      /* JOGADORES NO CAMPO */
+      .jogador-pin {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 2;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+      .jogador-pin:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+        cursor: pointer;
+        z-index: 10;
+      }
+      .jogador-pin:hover .jogador-foto {
+        transform: scale(1.3);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.8);
+        border-color: #10b981;
+        z-index: 10;
+      }
+      .jogador-pin:hover .jogador-nome {
+        background: #10b981;
+        color: #000;
+        transform: scale(1.1) translateY(2px);
+      }
+      .jogador-foto {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.8);
+        background-size: cover;
+        background-position: top center;
+        background-color: #222;
+        position: relative;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        z-index: 2;
+      }
+      .jogador-numero {
+        position: absolute;
+        bottom: -4px;
+        right: -8px;
+        background: #000;
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 900;
+        padding: 1px 5px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+      .jogador-nome {
+        background: rgba(0, 0, 0, 0.85);
+        color: #fff;
+        padding: 3px 10px;
+        border-radius: 8px;
+        font-size: 0.7rem;
+        margin-top: 6px;
+        white-space: nowrap;
+        font-weight: bold;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        z-index: 3;
+      }
+
+      /* LISTAS PREMIUM */
+      .stat-row {
+        transition: all 0.2s;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .stat-row:hover {
+        background: rgba(255, 255, 255, 0.03);
+        padding-left: 8px;
+      }
+      .stat-badge {
+        background: #fff;
+        color: #000;
+        font-weight: 900;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        box-shadow: 0 4px 10px rgba(255, 255, 255, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <nav
+      class="navbar navbar-dark bg-black sticky-top border-bottom border-secondary border-opacity-25 shadow-lg"
+    >
+      <div class="container">
+        <span
+          class="navbar-brand fw-bolder text-uppercase"
+          style="letter-spacing: 1px"
+          >Estatísticas: Temporada 2026</span
+        >
+        <button
+          class="btn btn-light btn-sm fw-bold rounded-pill px-4"
+          onclick="window.location.reload()"
+        >
+          🔄 Recarregar Painel
+        </button>
+      </div>
+    </nav>
+
+    <main class="container py-5">
+      <div class="row g-4">
+        <!-- GRAFICO: JOGADORES MAIS ESCALADOS -->
+        <div class="col-12">
+          <div class="premium-card p-4">
+            <div
+              class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3"
+            >
+              <h5
+                class="fw-bolder m-0 text-uppercase text-white d-flex align-items-center gap-2"
+              >
+                <span
+                  style="
+                    width: 12px;
+                    height: 12px;
+                    background: #fff;
+                    border-radius: 50%;
+                    display: inline-block;
+                  "
+                ></span>
+                Jogadores Mais Escalados (2026)
+              </h5>
+              <select
+                id="filtro-posicao-jogadores"
+                class="form-select form-select-sm bg-dark text-white border-secondary shadow-none rounded-pill"
+                style="width: auto; cursor: pointer"
+                onchange="renderizarGrafico()"
+              >
+                <option value="todas">Todas as posições</option>
+                <option value="G">Goleiros</option>
+                <option value="D">Defensores</option>
+                <option value="M">Meio-Campistas</option>
+                <option value="A">Atacantes</option>
+              </select>
+            </div>
+            <div id="container-grafico" style="height: 400px; width: 100%">
+              <canvas id="chart-mais-escalados"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAMPO: TIME BASE -->
+        <div class="col-lg-7">
+          <div class="premium-card p-4 h-100">
+            <h5
+              class="fw-bolder mb-4 text-uppercase text-white d-flex align-items-center gap-2"
+            >
+              <span
+                style="
+                  width: 12px;
+                  height: 12px;
+                  background: #10b981;
+                  border-radius: 50%;
+                  display: inline-block;
+                "
+              ></span>
+              Time Base (Mais Escalados por Posição)
+            </h5>
+            <div
+              class="campo-tatico-premium position-relative mx-auto"
+              style="width: 100%; max-width: 420px; aspect-ratio: 2/3"
+            >
+              <div class="campo-linha campo-meio"></div>
+              <div class="campo-linha campo-circulo position-absolute"></div>
+              <div class="campo-linha campo-area-top position-absolute"></div>
+              <div
+                class="campo-linha campo-area-bottom position-absolute"
+              ></div>
+              <div id="board-jogadores" class="position-absolute w-100 h-100">
+                <!-- Jogadores Injetados pelo JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LISTAS: ARTILHEIROS E ASSISTÊNCIAS -->
+        <div class="col-lg-5">
+          <div class="premium-card p-4 h-100 d-flex flex-column gap-4">
+            <div>
+              <h5
+                class="fw-bolder mb-3 text-uppercase text-white d-flex align-items-center gap-2 border-bottom border-secondary border-opacity-25 pb-2"
+              >
+                ⚽ Top Artilheiros
+              </h5>
+              <div id="lista-gols" class="d-flex flex-column"></div>
+            </div>
+
+            <div>
+              <h5
+                class="fw-bolder mb-3 text-uppercase text-white d-flex align-items-center gap-2 border-bottom border-secondary border-opacity-25 pb-2"
+              >
+                👟 Top Assistências
+              </h5>
+              <div id="lista-assistencias" class="d-flex flex-column"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/estatisticas4.js"></script>
+  </body>
+</html>

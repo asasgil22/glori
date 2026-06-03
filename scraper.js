@@ -1,5 +1,21 @@
 const puppeteer = require("puppeteer");
 
+let globalBrowser = null;
+async function getBrowser() {
+  if (!globalBrowser) {
+    globalBrowser = await puppeteer.launch({
+      headless: "new",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+      ],
+    });
+  }
+  return globalBrowser;
+}
+
 const CASAS_PADRAO = [
   "Betano",
   "Bet365",
@@ -34,14 +50,10 @@ async function buscarOddsBotafogo(
     ? casasPermitidas
     : CASAS_PADRAO;
 
-  let browser;
+  let page;
   try {
-    // Usamos Puppeteer (já instalado no servidor) em modo invisível para driblar a barreira anti-robô (Cloudflare)
-    browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox"],
-    });
-    const page = await browser.newPage();
+    const browser = await getBrowser();
+    page = await browser.newPage();
 
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
@@ -160,18 +172,15 @@ async function buscarOddsBotafogo(
     });
     return fallbackOdds;
   } finally {
-    if (browser) await browser.close();
+    if (page) await page.close().catch(() => {});
   }
 }
 
 async function buscarAgendaBotafogo() {
-  let browser;
+  let page;
   try {
-    browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox"],
-    });
-    const page = await browser.newPage();
+    const browser = await getBrowser();
+    page = await browser.newPage();
 
     await page.setUserAgent(
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
@@ -236,11 +245,108 @@ async function buscarAgendaBotafogo() {
     console.error("⚠️ Aviso no scraper de Agenda:", erro.message);
     return [];
   } finally {
-    if (browser) await browser.close();
+    if (page) await page.close().catch(() => {});
+  }
+}
+
+async function buscarEscalacoesHistorico() {
+  let page;
+  try {
+    const browser = await getBrowser();
+    page = await browser.newPage();
+
+    await page.setUserAgent(
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+    );
+    await page.setRequestInterception(true);
+    page.on("request", (req) => {
+      if (["image", "stylesheet", "font", "media"].includes(req.resourceType()))
+        req.abort();
+      else req.continue();
+    });
+
+    await page.goto("https://www.sofascore.com/team/football/botafogo/1958", {
+      waitUntil: "domcontentloaded",
+      timeout: 20000,
+    });
+
+    const elenco = await page.evaluate(async () => {
+      const contagem = {};
+      const jogadores = {};
+
+      // Pega as últimas duas páginas de jogos finalizados (aprox. 40 jogos)
+      for (let p = 0; p < 2; p++) {
+        const resLast = await fetch(
+          `https://api.sofascore.com/api/v1/team/1958/events/last/${p}`,
+        );
+        if (!resLast.ok) continue;
+        const lastData = await resLast.json();
+        const events = lastData.events || [];
+
+        for (const event of events) {
+          if (event.status.type !== "finished") continue;
+
+          await new Promise((r) => setTimeout(r, 1000)); // Delay seguro (dentro do bypass do cloudflare)
+
+          const resLineup = await fetch(
+            `https://api.sofascore.com/api/v1/event/${event.id}/lineups`,
+          );
+          if (!resLineup.ok) continue;
+          const lineupData = await resLineup.json();
+
+          const homeOrAway = event.homeTeam.id === 1958 ? "home" : "away";
+          const teamLineup = lineupData[homeOrAway];
+
+          if (teamLineup && teamLineup.players) {
+            teamLineup.players.forEach((playerObj) => {
+              const stats = playerObj.statistics || {};
+              const played = stats.minutesPlayed > 0 || !playerObj.substitute;
+
+              if (played) {
+                const pId = playerObj.player.id;
+                contagem[pId] = (contagem[pId] || 0) + 1;
+
+                if (!jogadores[pId]) {
+                  jogadores[pId] = {
+                    nome: playerObj.player.shortName || playerObj.player.name,
+                    numero: playerObj.shirtNumber,
+                    posicao: playerObj.player.position,
+                    gols: 0,
+                    assistencias: 0,
+                  };
+                }
+                jogadores[pId].gols += stats.goals || 0;
+                jogadores[pId].assistencias += stats.goalAssists || 0;
+              }
+            });
+          }
+        }
+      }
+
+      return Object.keys(contagem)
+        .map((id) => ({
+          id,
+          nome: jogadores[id].nome,
+          numero: jogadores[id].numero,
+          posicao: jogadores[id].posicao,
+          gols: jogadores[id].gols,
+          assistencias: jogadores[id].assistencias,
+          jogos: contagem[id],
+        }))
+        .sort((a, b) => b.jogos - a.jogos);
+    });
+
+    return elenco;
+  } catch (erro) {
+    console.error("⚠️ Aviso no scraper de Escalação:", erro.message);
+    return null;
+  } finally {
+    if (page) await page.close().catch(() => {});
   }
 }
 
 module.exports = {
   buscarOddsBotafogo,
   buscarAgendaBotafogo,
+  buscarEscalacoesHistorico,
 };

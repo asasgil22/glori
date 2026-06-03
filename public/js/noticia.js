@@ -93,6 +93,14 @@ async function carregarNoticia() {
       ),
     );
 
+    const isTranslated = document.cookie.includes("googtrans=");
+    const flagSrc = isTranslated
+      ? "https://flagcdn.com/w20/br.png"
+      : "https://flagcdn.com/w20/us.png";
+    const flagTitle = isTranslated
+      ? "Voltar para Português"
+      : "Translate to English";
+
     container.innerHTML = `
       <header class="article-header text-center mb-5 mt-3 mx-auto" style="max-width: 900px;">
         <div class="d-flex justify-content-center align-items-center flex-wrap gap-3 text-muted small text-uppercase fw-bold mb-4 border-bottom border-secondary border-opacity-10 pb-3 position-relative">
@@ -114,8 +122,8 @@ async function carregarNoticia() {
                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                </button>
              </div>
-             <button id="btn-traduzir" class="btn btn-sm btn-outline-secondary rounded-circle fw-bold d-flex align-items-center justify-content-center notranslate" translate="no" style="width: 32px; height: 32px; padding: 0;" onclick="window.traduzirArtigoEN(this)" title="Translate to English" aria-label="Translate to English">
-               <img src="https://flagcdn.com/w20/us.png" style="width: 18px; border-radius: 2px; opacity: 0.85;" alt="US Flag">
+             <button id="btn-traduzir" class="btn btn-sm btn-outline-secondary rounded-circle fw-bold d-flex align-items-center justify-content-center notranslate" translate="no" style="width: 32px; height: 32px; padding: 0;" onclick="window.traduzirArtigoEN(this)" title="${flagTitle}" aria-label="${flagTitle}">
+               <img src="${flagSrc}" style="width: 18px; border-radius: 2px; opacity: 0.85;" alt="Flag">
              </button>
              <button id="btn-ouvir" class="btn btn-sm btn-outline-secondary rounded-circle fw-bold d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.9rem;" onclick="window.ouvirArtigo()" title="Ouvir artigo" aria-label="Ouvir artigo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
              <button class="btn btn-sm btn-outline-secondary rounded-circle fw-bold d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.9rem;" onclick="window.copiarLinkArtigo()" title="Copiar Link"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>
@@ -511,13 +519,16 @@ function carregarVozes() {
 }
 
 function preencherSeletorVozes(vozes) {
+  const isTranslated = document.cookie.includes("googtrans=");
+  const langFilter = isTranslated ? "en" : "pt";
+
   window.vozesDisponiveis = vozes.filter((v) =>
     String(v.lang || "")
       .toLowerCase()
-      .includes("pt"),
+      .includes(langFilter),
   );
   if (window.vozesDisponiveis.length === 0) {
-    window.vozesDisponiveis = vozes; // Fallback caso o navegador não retorne a tag PT
+    window.vozesDisponiveis = vozes; // Fallback caso o navegador não retorne a tag
   }
   const container = document.getElementById("container-seletor-voz");
   const seletor = document.getElementById("seletor-voz");
@@ -528,13 +539,15 @@ function preencherSeletorVozes(vozes) {
       let nomeLimpo = v.name
         .replace(/Microsoft|Google|Online \(Natural\)/gi, "")
         .trim();
-      return `<option value="${i}">${nomeLimpo} (${
-        String(v.lang || "")
-          .toUpperCase()
-          .includes("BR")
-          ? "BR"
-          : "PT"
-      })</option>`;
+      let langLabel = String(v.lang || "").toUpperCase();
+      if (langLabel.includes("BR")) langLabel = "BR";
+      else if (langLabel.includes("PT")) langLabel = "PT";
+      else if (langLabel.includes("US")) langLabel = "US";
+      else if (langLabel.includes("UK") || langLabel.includes("GB"))
+        langLabel = "UK";
+      else if (langLabel.includes("EN")) langLabel = "EN";
+
+      return `<option value="${i}">${nomeLimpo} (${langLabel})</option>`;
     })
     .join("");
 
@@ -572,9 +585,13 @@ window.ouvirArtigo = function () {
   const iconPause =
     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
 
+  const isTranslated = document.cookie.includes("googtrans=");
+
   if (window.speechSynthesis.speaking) {
     window.speechSynthesis.cancel();
-    mostrarNotificacaoLeitor("🔇 Leitura pausada.");
+    mostrarNotificacaoLeitor(
+      isTranslated ? "🔇 Reading paused." : "🔇 Leitura pausada.",
+    );
     if (btnOuvir) btnOuvir.innerHTML = iconPlay;
     return;
   }
@@ -583,7 +600,7 @@ window.ouvirArtigo = function () {
 
   const texto = article.innerText;
   const utterance = new SpeechSynthesisUtterance(texto);
-  utterance.lang = "pt-BR";
+  utterance.lang = isTranslated ? "en-US" : "pt-BR";
   utterance.rate = 1.05; // Leitura um pouquinho mais dinâmica
 
   if (window.vozSelecionada) {
@@ -596,7 +613,11 @@ window.ouvirArtigo = function () {
 
   if (btnOuvir) btnOuvir.innerHTML = iconPause;
   window.speechSynthesis.speak(utterance);
-  mostrarNotificacaoLeitor("🔊 Lendo o artigo em voz alta...");
+  mostrarNotificacaoLeitor(
+    isTranslated
+      ? "🔊 Reading the article aloud..."
+      : "🔊 Lendo o artigo em voz alta...",
+  );
 };
 
 function initHighlightShare() {
@@ -642,32 +663,11 @@ function safeSlugify(texto) {
   );
 }
 
-window.isTranslatedEN = false;
-window.traduzirArtigoEN = function (btn) {
-  if (window.isTranslatedEN) {
-    window.location.reload(); // Recarrega a página para voltar ao idioma original impecavelmente
-    return;
-  }
-
-  mostrarNotificacaoLeitor("🇺🇸 Traduzindo página para o Inglês...", "success");
-
-  let gtCombo = document.querySelector(".goog-te-combo");
-  if (gtCombo) {
-    gtCombo.value = "en";
-    gtCombo.dispatchEvent(new Event("change", { bubbles: true }));
-    window.isTranslatedEN = true;
-    btn.innerHTML =
-      '<img src="https://flagcdn.com/w20/br.png" style="width: 18px; border-radius: 2px; opacity: 0.85;" alt="BR Flag">';
-    btn.title = "Voltar para Português";
-    return;
-  }
-
+// Inicializa o motor de tradução do Google se o cookie estiver presente
+if (document.cookie.includes("googtrans=")) {
   const gtDiv = document.createElement("div");
   gtDiv.id = "google_translate_element";
-  // Google ignora elementos com display: none, então usamos position absolute fora da tela
-  gtDiv.style.position = "absolute";
-  gtDiv.style.top = "-9999px";
-  gtDiv.style.opacity = "0";
+  gtDiv.style.display = "none";
   document.body.appendChild(gtDiv);
 
   window.googleTranslateElementInit = function () {
@@ -675,22 +675,6 @@ window.traduzirArtigoEN = function (btn) {
       { pageLanguage: "pt", includedLanguages: "en", autoDisplay: false },
       "google_translate_element",
     );
-
-    let tentativas = 0;
-    const checkInterval = setInterval(() => {
-      const select = document.querySelector(".goog-te-combo");
-      if (select) {
-        clearInterval(checkInterval);
-        select.value = "en";
-        select.dispatchEvent(new Event("change", { bubbles: true }));
-        window.isTranslatedEN = true;
-        btn.innerHTML =
-          '<img src="https://flagcdn.com/w20/br.png" style="width: 18px; border-radius: 2px; opacity: 0.85;" alt="BR Flag">';
-        btn.title = "Voltar para Português";
-      }
-      tentativas++;
-      if (tentativas > 30) clearInterval(checkInterval);
-    }, 300);
   };
 
   const script = document.createElement("script");
@@ -701,4 +685,38 @@ window.traduzirArtigoEN = function (btn) {
   const style = document.createElement("style");
   style.innerHTML = `body { top: 0 !important; position: static !important; } .goog-te-banner-frame, iframe.goog-te-banner-frame, iframe.skiptranslate, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf { display: none !important; } #goog-gt-tt { display: none !important; } .goog-te-spinner-pos { display: none !important; } .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; } html { transform: none !important; height: auto !important; min-height: 100vh !important; }`;
   document.head.appendChild(style);
+}
+
+window.traduzirArtigoEN = function (btn) {
+  if (document.cookie.includes("googtrans=")) {
+    // Remover cookies para reverter ao idioma original
+    document.cookie =
+      "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie =
+      "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=." +
+      location.hostname +
+      "; path=/;";
+    document.cookie =
+      "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" +
+      location.hostname +
+      "; path=/;";
+    // Reforço para garantir que domínios com 'www' também percam a memória de tradução
+    document.cookie =
+      "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=." +
+      window.location.hostname.replace(/^www\./, "") +
+      ";";
+    window.location.reload();
+  } else {
+    // Forçar cookies do Google Translate e recarregar a página
+    mostrarNotificacaoLeitor(
+      "🇺🇸 Traduzindo página para o Inglês...",
+      "success",
+    );
+    document.cookie = "googtrans=/pt/en; path=/;";
+    document.cookie =
+      "googtrans=/pt/en; domain=." + location.hostname + "; path=/;";
+    document.cookie =
+      "googtrans=/pt/en; domain=" + location.hostname + "; path=/;";
+    window.location.reload();
+  }
 };

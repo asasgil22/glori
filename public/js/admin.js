@@ -12,6 +12,7 @@ const conteudoCampo = document.getElementById("conteudo");
 const conteudoEditor = document.getElementById("conteudo-editor");
 const editorToolbar = document.getElementById("editor-toolbar");
 let fonteImagemAtual = "upload";
+let isHtmlMode = false;
 
 const formEnquete = document.getElementById("form-enquete");
 const formJogo = document.getElementById("form-jogo");
@@ -46,6 +47,7 @@ let autoresCache = [];
 let noticiasCarrosselCache = [];
 let usuariosCache = [];
 let tabelasCache = [];
+let programacaoCache = [];
 let currentUser = null;
 let ordemWidgetsAtual = [
   "maisLidas",
@@ -147,6 +149,7 @@ const HOME_SWITCH_IDS = [
   "mostrarVideos",
   "mostrarTwitter",
   "mostrarPortais",
+  "mostrarAnunciosNoGrid",
 ];
 
 function mostrarToast(mensagem, tipo = "success") {
@@ -192,6 +195,68 @@ document.addEventListener("DOMContentLoaded", async () => {
     const statusData = await resStatus.json();
     currentUser = statusData.user;
     aplicarPermissoes(currentUser);
+
+    if (currentUser && currentUser.usuario) {
+      const navControls =
+        document.querySelector(".navbar .container .d-flex") ||
+        document.querySelector(".navbar .container > div:last-child");
+      if (navControls) {
+        // --- PADRONIZAÇÃO DO HEADER ADMIN ---
+        document.querySelectorAll(".navbar a, .navbar button").forEach((el) => {
+          const texto = el.textContent.toLowerCase();
+          // 1. Remove o botão "Ver Site" (Cobre todas as variações possíveis)
+          if (
+            texto.includes("ver site") ||
+            texto.includes("visualizar site") ||
+            texto.includes("voltar ao site") ||
+            texto.includes("voltar a home")
+          ) {
+            el.remove();
+          }
+          // 2. Padroniza o botão "Estatísticas" com o visual Premium do portal
+          else if (
+            texto.includes("estatística") ||
+            texto.includes("estatistica") ||
+            texto.includes("dashboard") ||
+            texto.includes("gráficos")
+          ) {
+            el.className =
+              "btn btn-outline-light btn-sm rounded-pill px-3 fw-bold text-uppercase mx-1 shadow-sm";
+            el.style.letterSpacing = "0.5px";
+            el.style.fontSize = "0.75rem";
+          }
+        });
+
+        navControls.classList.add("align-items-center");
+
+        let ledColor = "#10b981"; // Verde (Usuário Padrão)
+        let roleName = "Editor";
+        if (currentUser.role === "super_admin") {
+          ledColor = "#8b5cf6"; // Roxo (Dono / Super Admin)
+          roleName = "Super Admin";
+        } else if (currentUser.role === "admin") {
+          ledColor = "#3b82f6"; // Azul (Administrador)
+          roleName = "Administrador";
+        }
+
+        const userBadge = document.createElement("div");
+        userBadge.className =
+          "d-none d-sm-flex align-items-center gap-2 me-2 px-3 py-1 rounded-pill bg-dark border border-secondary border-opacity-50 shadow-sm";
+        userBadge.innerHTML = `
+          <div class="rounded-circle flex-shrink-0" style="width: 8px; height: 8px; background-color: ${ledColor}; box-shadow: 0 0 8px ${ledColor}; animation: pulse-led 2s infinite;"></div>
+          <div class="d-flex flex-column justify-content-center"><span class="text-light fw-bold text-truncate lh-1" style="font-size: 0.75rem; letter-spacing: 0.5px; max-width: 120px;">${escapeHtml(currentUser.usuario)}</span><span class="text-uppercase fw-bolder lh-1 mt-1" style="font-size: 0.5rem; letter-spacing: 0.5px; color: ${ledColor};">${roleName}</span></div>
+        `;
+        navControls.insertBefore(userBadge, navControls.firstChild);
+
+        if (!document.getElementById("style-pulse-led")) {
+          const style = document.createElement("style");
+          style.id = "style-pulse-led";
+          style.innerHTML =
+            "@keyframes pulse-led { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }";
+          document.head.appendChild(style);
+        }
+      }
+    }
   } catch (e) {}
 
   inicializarEditorTexto();
@@ -200,12 +265,117 @@ document.addEventListener("DOMContentLoaded", async () => {
   carregarListaAdmin();
   carregarEnqueteAdmin();
   carregarJogosAdmin();
+
+  // INJEÇÃO DO LOCAL DE EXIBIÇÃO PARA PATROCINADORES
+  const formPatr = document.getElementById("form-patrocinador");
+  if (formPatr && !document.getElementById("patrocinador-local")) {
+    const boxImagem = document.getElementById("box-imagem-patrocinador");
+    const selectHtml = `
+      <div class="mb-3">
+        <label class="form-label small fw-bold text-secondary text-uppercase">Local de Exibição</label>
+        <select class="form-select rounded-3 border-secondary border-opacity-25" id="patrocinador-local" name="localExibicao">
+          <option value="ambos" selected>Ambos (Letreiro e Grid de Notícias)</option>
+          <option value="marquee">Apenas no Letreiro (Oferecimento)</option>
+          <option value="grid">Apenas no Grid (A cada 4 notícias)</option>
+        </select>
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="form-label small fw-bold text-secondary text-uppercase">Exibir a Partir de (Opcional)</label>
+          <input type="datetime-local" class="form-control rounded-3 border-secondary border-opacity-25" id="patrocinador-data-inicio" name="dataInicio">
+        </div>
+        <div class="col-6">
+          <label class="form-label small fw-bold text-secondary text-uppercase">Exibir Até (Opcional)</label>
+          <input type="datetime-local" class="form-control rounded-3 border-secondary border-opacity-25" id="patrocinador-data-fim" name="dataFim">
+        </div>
+      </div>
+      <div class="alert alert-light border-secondary border-opacity-25 small text-muted mb-0 mt-3 rounded-3 shadow-sm">
+        <strong>💡 Dica de Formato:</strong> Para um encaixe perfeito no Grid de Notícias e no Letreiro, use imagens horizontais largas (Proporção 8:1) no tamanho <b>1200 x 150 pixels</b>. Mantenha os logotipos e os textos centralizados para evitar cortes automáticos nas telas de celulares!
+      </div>
+    `;
+    if (boxImagem) boxImagem.insertAdjacentHTML("afterend", selectHtml);
+  }
+
   carregarPatrocinadoresAdmin();
   carregarVideosAdmin();
   carregarAutoresAdmin();
   carregarTabelasAdmin();
+
+  // INJEÇÃO DA ABA E PAINEL DE PROGRAMAÇÃO
+  const navTabs =
+    document.querySelector(".nav-tabs") || document.querySelector(".nav");
+  const tabContent = document.querySelector(".tab-content");
+  if (navTabs && tabContent && !document.getElementById("tab-programacao")) {
+    navTabs.insertAdjacentHTML(
+      "beforeend",
+      `
+      <li class="nav-item" role="presentation" id="nav-item-programacao">
+        <button class="nav-link fw-bold text-uppercase" id="tab-programacao" data-bs-toggle="tab" data-bs-target="#pane-programacao" type="button" role="tab" style="letter-spacing: 0.5px; font-size: 0.8rem;">Grade de TV</button>
+      </li>
+    `,
+    );
+    tabContent.insertAdjacentHTML(
+      "beforeend",
+      `
+      <div class="tab-pane fade" id="pane-programacao" role="tabpanel">
+        <div class="card border-0 shadow-sm p-4 rounded-3 bg-white">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold text-uppercase m-0 fs-5">Grade de Programação <span class="badge bg-secondary ms-2" style="font-size:0.6rem;">Template Semanal</span></h4>
+            <div class="form-check form-switch m-0" title="Ative ou desative o letreiro da Grade de TV na página inicial">
+              <input class="form-check-input" type="checkbox" id="mostrarStickerProgramacao" style="cursor: pointer;">
+              <label class="form-check-label small fw-bold text-secondary" for="mostrarStickerProgramacao" style="cursor: pointer;">Sticker na Home</label>
+            </div>
+          </div>
+          <div class="alert alert-light border-secondary border-opacity-25 small text-muted mb-4">
+            <strong>💡 Dica Inteligente:</strong> O sistema marca o canal como "Ao Vivo" automaticamente por 2 horas a partir do horário agendado. Se a transmissão terminar mais cedo, você pode ocultar o letreiro da página inicial desmarcando a opção <b>Sticker na Home</b> acima e salvando as alterações!
+          </div>
+          <div id="lista-programacao-admin"></div>
+        </div>
+      </div>
+    `,
+    );
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `
+      <div class="modal fade" id="modalEvento" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0">
+              <h5 class="modal-title fw-bold">Novo Evento</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <form id="form-evento" onsubmit="salvarEventoProgramacao(event)">
+                <input type="hidden" id="evento-dia-id">
+                <input type="hidden" id="evento-idx">
+                <div class="mb-3"><label class="form-label small fw-bold text-secondary">Horário</label><input type="time" class="form-control" id="evento-horario" required></div>
+                <div class="mb-3"><label class="form-label small fw-bold text-secondary">Canal</label><select class="form-select" id="evento-canal" required><option value="tf">Canal do TF</option><option value="setor">Setor Visitante</option><option value="arena">Arena Alvinegra</option></select></div>
+                <div class="mb-3"><label class="form-label small fw-bold text-secondary">Título do Programa</label><input type="text" class="form-control" id="evento-titulo" required placeholder="Ex: Live do Almoço"></div>
+                <div class="mb-3"><label class="form-label small fw-bold text-secondary">Descrição</label><input type="text" class="form-control" id="evento-desc" required placeholder="Ex: Análise profunda do elenco..."></div>
+                <button type="submit" class="btn btn-dark w-100 rounded-pill">Adicionar Evento</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+    );
+
+    document
+      .getElementById("mostrarStickerProgramacao")
+      ?.addEventListener("change", () => {
+        document
+          .querySelector(".admin-sticky-bar")
+          ?.classList.add("is-visible");
+      });
+  }
+  carregarProgramacaoAdmin();
+
+  // Reaplica as permissões para garantir que a aba recém injetada obedeça a hierarquia de usuários
+  if (currentUser) aplicarPermissoes(currentUser);
+
   iniciarAutoSave();
-  carregarTwitterAdmin();
+  // carregarTwitterAdmin(); // Desabilitado: Funcionalidade do Twitter instável.
   HOME_SWITCH_IDS.forEach((id) => {
     document.getElementById(id)?.addEventListener("change", (e) => {
       const widgetSwitch = document.querySelector(
@@ -347,7 +517,6 @@ function aplicarPermissoes(user) {
 
   // Define quem pode ver quais abas do Admin
   const tabs = {
-    "nav-item-dashboard": ["super_admin"],
     "nav-item-config": ["super_admin", "admin"],
     "nav-item-noticias": ["super_admin", "admin", "usuario"],
     "nav-item-noticias-lista": ["super_admin", "admin", "usuario"],
@@ -362,6 +531,8 @@ function aplicarPermissoes(user) {
     "nav-item-autores": ["super_admin", "admin"],
     "nav-item-usuarios": ["super_admin"],
     "nav-item-rss": ["super_admin", "admin", "usuario"],
+    "nav-item-lab": ["super_admin", "admin"],
+    "nav-item-programacao": ["super_admin", "admin"],
   };
 
   let firstActiveTab = null;
@@ -388,10 +559,17 @@ function aplicarPermissoes(user) {
   if (user.role === "super_admin") carregarUsuariosAdmin();
 }
 
+function removerAcentos(str) {
+  return String(str || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
 function aplicarFiltrosTabelaNoticias() {
-  const termo = (
-    document.getElementById("busca-noticias-admin")?.value || ""
-  ).toLowerCase();
+  const termo = removerAcentos(
+    document.getElementById("busca-noticias-admin")?.value || "",
+  );
   const tipo = document.getElementById("filtro-portal-admin")?.value || "todos";
 
   const containerPortais = document.getElementById("filtros-rss-portais");
@@ -410,7 +588,7 @@ function aplicarFiltrosTabelaNoticias() {
   document
     .querySelectorAll("#lista-admin-noticias tr.noticia-row")
     .forEach((row) => {
-      const texto = row.textContent.toLowerCase();
+      const texto = removerAcentos(row.textContent);
       const rowTipo = row.dataset.tipo;
       const rowPortal = row.dataset.portal || "";
       const bateTexto = texto.includes(termo);
@@ -604,6 +782,79 @@ document.getElementById("logoEfeito")?.addEventListener("change", (event) => {
       "var(--logo-anim-hover, logoShakeHover) 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) both";
   }
 });
+
+document
+  .getElementById("btn-lab-extract")
+  ?.addEventListener("click", async () => {
+    const btn = document.getElementById("btn-lab-extract");
+    const resBox = document.getElementById("lab-resultado");
+    const timeBox = document.getElementById("lab-tempo");
+    const url = document.getElementById("lab-url").value;
+    const seletor = document.getElementById("lab-seletor").value;
+    const preset = document.getElementById("lab-preset").value;
+
+    if (!url) {
+      mostrarToast("Preencha a URL da matéria primeiro.", "danger");
+      return;
+    }
+
+    const textoOriginal = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    btn.disabled = true;
+    resBox.innerHTML =
+      '<span class="text-muted">Iniciando extração inteligente (Título, Resumo, Capa e Conteúdo)... (aguarde)</span>';
+    const t0 = performance.now();
+
+    try {
+      const resposta = await fetch("/api/lab/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, seletor, preset }),
+      });
+      const dados = await resposta.json();
+      if (!resposta.ok) throw new Error(dados.erro || "Falha na extração");
+
+      // Preencher o formulário de Nova Notícia
+      document.getElementById("titulo").value = dados.titulo || "";
+      document.getElementById("resumo").value = dados.resumo || "";
+
+      if (dados.imagem) {
+        alternarFonteImagem("url");
+        const inputImagemUrl = document.getElementById("imagemUrl");
+        if (inputImagemUrl) inputImagemUrl.value = dados.imagem;
+        mostrarPreviewImagem(dados.imagem, "Capa Extraída");
+      }
+
+      if (dados.conteudoHTML) {
+        definirConteudoEditor(dados.conteudoHTML);
+      } else {
+        definirConteudoEditor(
+          `<p>Conteúdo não encontrado automaticamente. Verifique o seletor ou copie manualmente do Lab.</p>`,
+        );
+      }
+
+      // Trocar para a aba de "Publicar Notícias"
+      const tabNoticias = document.getElementById("tab-noticias");
+      if (tabNoticias && window.bootstrap) {
+        bootstrap.Tab.getOrCreateInstance(tabNoticias).show();
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      mostrarToast(
+        "Matéria importada com sucesso! Revise e publique.",
+        "success",
+      );
+
+      resBox.innerHTML =
+        '<span class="text-success fw-bold">Extração concluída! Redirecionando para o editor...</span>';
+    } catch (err) {
+      resBox.innerHTML = `<span class="text-danger fw-bold">Erro:</span> ${err.message}`;
+      mostrarToast("Erro ao extrair matéria.", "danger");
+    } finally {
+      btn.innerHTML = textoOriginal;
+      btn.disabled = false;
+      timeBox.textContent = ((performance.now() - t0) / 1000).toFixed(1) + "s";
+    }
+  });
 document
   .getElementById("buscaImagemAltura")
   ?.addEventListener("input", (event) => {
@@ -996,6 +1247,11 @@ async function carregarConfigAdmin() {
     }
   });
 
+  if (document.getElementById("mostrarStickerProgramacao")) {
+    document.getElementById("mostrarStickerProgramacao").checked =
+      configCache.home?.mostrarStickerProgramacao !== false;
+  }
+
   if (configCache.logoUrl)
     mostrarPreviewGenerico(
       "preview-logo",
@@ -1074,6 +1330,23 @@ async function carregarConfigAdmin() {
   if (chkPatrocinadores)
     chkPatrocinadores.checked =
       configCache.home?.mostrarPatrocinadores !== false;
+
+  if (chkPatrocinadores && !document.getElementById("mostrarAnunciosNoGrid")) {
+    const wrapper = document.createElement("div");
+    wrapper.className =
+      "form-check form-switch mt-2 mb-3 border-bottom border-secondary border-opacity-10 pb-3";
+    wrapper.innerHTML = `
+      <input class="form-check-input sync-widget-switch" type="checkbox" id="mostrarAnunciosNoGrid" style="cursor: pointer;">
+      <label class="form-check-label small fw-bold text-secondary" for="mostrarAnunciosNoGrid" style="cursor: pointer;">Exibir Patrocinadores no Grid de Notícias (a cada 4 itens)</label>
+    `;
+    chkPatrocinadores
+      .closest(".form-check")
+      ?.insertAdjacentElement("afterend", wrapper);
+  }
+  if (document.getElementById("mostrarAnunciosNoGrid")) {
+    document.getElementById("mostrarAnunciosNoGrid").checked =
+      configCache.home?.mostrarAnunciosNoGrid !== false;
+  }
 
   const inputPatrocinadoresTitulo = document.getElementById(
     "patrocinadoresTitulo",
@@ -1398,6 +1671,8 @@ async function salvarConfig(event) {
   if (document.getElementById("carrosselAutoRss")) {
     dados.set("carrosselAutoRss", chk("carrosselAutoRss"));
   }
+  dados.set("mostrarAnunciosNoGrid", chk("mostrarAnunciosNoGrid"));
+  dados.set("mostrarStickerProgramacao", chk("mostrarStickerProgramacao"));
   dados.set("modoMarca", val("modoMarca"));
   dados.set("alturaBannerMarca", val("alturaBannerMarca"));
   dados.set("mostrarTextoMarca", chk("mostrarTextoMarca"));
@@ -2207,7 +2482,6 @@ async function carregarListaAdmin() {
     const countRssEl = document.getElementById("rss-count");
     if (countRssEl) countRssEl.textContent = `${noticiasRss.length} item(ns)`;
 
-    atualizarDashboard();
     atualizarGaleria();
 
     const dashNoticias = document.getElementById("dash-noticias");
@@ -2356,31 +2630,6 @@ window.carregarCacheRss = async function () {
   mostrarToast("Cache do RSS atualizado na tela.", "success");
 };
 
-function atualizarDashboard() {
-  const dashViews = document.getElementById("dash-views");
-  const dashArtigos = document.getElementById("dash-artigos");
-  const dashTopNoticia = document.getElementById("dash-top-noticia");
-  const dashTopViews = document.getElementById("dash-top-views");
-  if (!dashViews || !noticiasCache) return;
-  const publicadas = noticiasCache.filter(
-    (n) => n.status !== "rascunho" && !n.isRss,
-  );
-  dashArtigos.textContent = publicadas.length;
-  const totalViews = publicadas.reduce(
-    (sum, n) => sum + (n.visualizacoes || 0),
-    0,
-  );
-  dashViews.textContent = totalViews;
-  if (publicadas.length > 0) {
-    const top = [...publicadas].sort(
-      (a, b) => (b.visualizacoes || 0) - (a.visualizacoes || 0),
-    )[0];
-    dashTopNoticia.textContent = top.titulo;
-    dashTopViews.textContent = `${top.visualizacoes || 0} visualizações`;
-  }
-  atualizarGraficoPortais();
-}
-
 function atualizarGaleria() {
   const grid = document.getElementById("grid-galeria");
   if (!grid) return;
@@ -2404,135 +2653,6 @@ function atualizarGaleria() {
   `,
     )
     .join("");
-}
-
-let chartPortaisInstance = null;
-async function atualizarGraficoPortais() {
-  const ctx = document.getElementById("chart-portais");
-  const tipo = document.getElementById("chart-tipo")?.value || "bar";
-  const periodo = document.getElementById("chart-periodo")?.value || "sempre";
-
-  if (!ctx || !noticiasCache || typeof Chart === "undefined") return;
-
-  let contagem = {};
-
-  if (periodo === "sempre") {
-    try {
-      const resposta = await fetch("/api/estatisticas");
-      if (resposta.ok) {
-        const stats = await resposta.json();
-        contagem = stats.totais || {};
-      }
-    } catch (e) {
-      const rssNoticias = noticiasCache.filter((n) => n.isRss && n.portal);
-      rssNoticias.forEach((n) => {
-        contagem[n.portal] = (contagem[n.portal] || 0) + 1;
-      });
-    }
-  } else {
-    // Filtragem de tempo baseada no cache em memória
-    const agora = new Date();
-    const rssNoticias = noticiasCache.filter((n) => {
-      if (!n.isRss || !n.portal || !n.data) return false;
-      const d = new Date(n.data);
-      if (periodo === "ano") {
-        return d.getFullYear() === agora.getFullYear();
-      } else if (!isNaN(parseInt(periodo))) {
-        return (
-          d.getMonth() === parseInt(periodo) &&
-          d.getFullYear() === agora.getFullYear()
-        );
-      }
-      return true;
-    });
-    rssNoticias.forEach((n) => {
-      contagem[n.portal] = (contagem[n.portal] || 0) + 1;
-    });
-  }
-
-  const labels = Object.keys(contagem).sort(
-    (a, b) => contagem[b] - contagem[a],
-  );
-  const data = labels.map((l) => contagem[l]);
-
-  // Paleta de Cores Dinâmica para os gráficos de Pizza/Rosca
-  const coresBase = [
-    "#0f766e",
-    "#f59e0b",
-    "#3b82f6",
-    "#ef4444",
-    "#8b5cf6",
-    "#10b981",
-    "#f97316",
-    "#6366f1",
-    "#ec4899",
-  ];
-  const bgColors = labels.map((_, i) => coresBase[i % coresBase.length]);
-
-  if (chartPortaisInstance) chartPortaisInstance.destroy();
-
-  chartPortaisInstance = new Chart(ctx, {
-    type: tipo,
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Matérias Publicadas",
-          data,
-          backgroundColor: bgColors,
-          borderRadius: tipo === "bar" ? 4 : 0,
-          borderWidth: tipo === "bar" ? 0 : 2,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } }, // Removemos a nativa para usar a de logos
-      scales:
-        tipo === "bar"
-          ? { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-          : undefined,
-      cutout: tipo === "doughnut" ? "65%" : undefined,
-    },
-  });
-
-  // Renderizar a Legenda Customizada com as Logomarcas
-  const legendContainer = document.getElementById("chart-custom-legend");
-  if (legendContainer) {
-    const dominios = {
-      FOGÃONET: "fogaonet.com",
-      "GLOBO ESPORTE": "ge.globo.com",
-      "UOL ESPORTE": "uol.com.br",
-      "LANCE!": "lance.com.br",
-      OGOL: "ogol.com.br",
-      "O DIA": "odia.ig.com.br",
-      "ESPN BRASIL": "espn.com.br",
-      "TNT SPORTS": "tntsports.com.br",
-      "365SCORES": "365scores.com",
-    };
-
-    if (labels.length === 0) {
-      legendContainer.innerHTML =
-        '<span class="text-muted small">Nenhum dado encontrado para o período selecionado.</span>';
-      return;
-    }
-
-    legendContainer.innerHTML = labels
-      .map((label, index) => {
-        const url = dominios[label] || "google.com";
-        const logo = `https://www.google.com/s2/favicons?domain=${url}&sz=128`;
-        const cor = bgColors[index];
-        return `
-        <div class="d-flex align-items-center gap-2 border rounded-pill px-3 py-1 shadow-sm bg-light" style="color: var(--ink);">
-          <img src="${logo}" style="width: 16px; height: 16px; object-fit: contain; border-radius: 2px;" alt="">
-          <span class="fw-bold small" style="font-size: 0.75rem;">${escapeHtml(label)}</span>
-          <span class="badge rounded-pill" style="background-color: ${cor}; font-size: 0.7rem;">${data[index]}</span>
-        </div>
-      `;
-      })
-      .join("");
-  }
 }
 
 window.selecionarImagemGaleria = function (url) {
@@ -2593,21 +2713,52 @@ function inicializarEditorTexto() {
       return;
     }
 
+    if (cmd === "toggleHtml") {
+      if (!isHtmlMode) {
+        conteudoCampo.value = conteudoEditor.innerHTML;
+        conteudoEditor.classList.add("d-none");
+        conteudoCampo.classList.remove("d-none");
+        conteudoCampo.style.cssText =
+          "width: 100%; min-height: 400px; font-family: monospace; font-size: 0.9rem; padding: 15px; border: 1px solid var(--line); border-top: none; border-radius: 0 0 8px 8px; outline: none; resize: vertical; background: var(--surface-muted); color: var(--ink);";
+        botao.classList.add("text-danger");
+        isHtmlMode = true;
+        conteudoCampo.focus();
+      } else {
+        conteudoEditor.innerHTML = conteudoCampo.value;
+        conteudoCampo.classList.add("d-none");
+        conteudoEditor.classList.remove("d-none");
+        botao.classList.remove("text-danger");
+        isHtmlMode = false;
+        conteudoEditor.focus();
+      }
+      return;
+    }
+
     document.execCommand(cmd, false, valor);
   });
 
   conteudoEditor.addEventListener("input", sincronizarConteudoEditor);
+  conteudoCampo.addEventListener("input", sincronizarConteudoEditor);
 }
 
 function sincronizarConteudoEditor() {
   if (!conteudoCampo || !conteudoEditor) return;
-  const texto = conteudoEditor.innerText.replace(/\u00a0/g, " ").trim();
-  conteudoCampo.value = texto ? conteudoEditor.innerHTML.trim() : "";
+  if (isHtmlMode) {
+    conteudoEditor.innerHTML = conteudoCampo.value;
+  } else {
+    const texto = conteudoEditor.innerText.replace(/\u00a0/g, " ").trim();
+    conteudoCampo.value = texto ? conteudoEditor.innerHTML.trim() : "";
+  }
 }
 
 function definirConteudoEditor(html = "") {
   if (!conteudoEditor) return;
+  if (isHtmlMode) {
+    const btnHtml = document.querySelector("[data-cmd='toggleHtml']");
+    if (btnHtml) btnHtml.click();
+  }
   conteudoEditor.innerHTML = html || "";
+  conteudoCampo.value = html || "";
   sincronizarConteudoEditor();
 }
 
@@ -3087,7 +3238,12 @@ async function carregarPatrocinadoresAdmin() {
           ${p.tipo === "imagem" && p.imagemUrl ? `<img src="${p.imagemUrl}" style="max-height: 30px; max-width: 60px; object-fit: contain;">` : `<span class="badge bg-secondary">Botão</span>`}
           <div>
             <strong>${escapeHtml(p.nome)}</strong>
-                <span class="d-flex align-items-center gap-2 mt-1"><span class="status-dot ${p.ativo === false ? "offline" : "online"}"></span> ${p.ativo === false ? "Inativo" : "Ativo"}${p.link ? ` <span class="text-muted mx-1">•</span> <a href="${escapeHtml(p.link)}" target="_blank" class="text-muted text-decoration-none">Link</a>` : ""}</span>
+                <span class="d-flex align-items-center gap-2 mt-1">
+                  <span class="badge bg-light text-dark border border-secondary border-opacity-25" style="font-size: 0.6rem;">${p.localExibicao === "marquee" ? "Letreiro" : p.localExibicao === "grid" ? "Grid" : "Ambos"}</span>
+                  ${p.dataInicio || p.dataFim ? `<span class="badge bg-warning text-dark border border-warning border-opacity-25" style="font-size: 0.6rem;">📅 Agendado</span>` : ""}
+                  <span class="status-dot ${p.ativo === false ? "offline" : "online"}"></span> 
+                  ${p.ativo === false ? "Inativo" : "Ativo"}${p.link ? ` <span class="text-muted mx-1">•</span> <a href="${escapeHtml(p.link)}" target="_blank" class="text-muted text-decoration-none">Link</a>` : ""}
+                </span>
           </div>
         </div>
         <div class="d-flex gap-2">
@@ -3127,6 +3283,15 @@ async function salvarPatrocinador(event) {
     document.getElementById("remover-imagem-patrocinador").value,
   );
 
+  const localEl = document.getElementById("patrocinador-local");
+  if (localEl) dados.append("localExibicao", localEl.value);
+
+  const dataInicioEl = document.getElementById("patrocinador-data-inicio");
+  if (dataInicioEl) dados.append("dataInicio", dataInicioEl.value);
+
+  const dataFimEl = document.getElementById("patrocinador-data-fim");
+  if (dataFimEl) dados.append("dataFim", dataFimEl.value);
+
   const inputImagem = document.getElementById("patrocinador-imagem");
   if (inputImagem.files[0]) dados.append("imagem", inputImagem.files[0]);
 
@@ -3155,6 +3320,15 @@ function editarPatrocinador(id) {
   document.getElementById("patrocinador-link").value = p.link || "";
   document.getElementById("patrocinador-ativo").checked = p.ativo !== false;
   document.getElementById("remover-imagem-patrocinador").value = "false";
+
+  const localEl = document.getElementById("patrocinador-local");
+  if (localEl) localEl.value = p.localExibicao || "ambos";
+
+  const dataInicioEl = document.getElementById("patrocinador-data-inicio");
+  if (dataInicioEl) dataInicioEl.value = p.dataInicio || "";
+
+  const dataFimEl = document.getElementById("patrocinador-data-fim");
+  if (dataFimEl) dataFimEl.value = p.dataFim || "";
 
   const boxImagem = document.getElementById("box-imagem-patrocinador");
   if (p.tipo === "imagem") {
@@ -3194,6 +3368,15 @@ function limparFormularioPatrocinador() {
   document.getElementById("patrocinador-ativo").checked = true;
   document.getElementById("remover-imagem-patrocinador").value = "false";
   document.getElementById("box-imagem-patrocinador").classList.add("d-none");
+  const localEl = document.getElementById("patrocinador-local");
+  if (localEl) localEl.value = "ambos";
+
+  const dataInicioEl = document.getElementById("patrocinador-data-inicio");
+  if (dataInicioEl) dataInicioEl.value = "";
+
+  const dataFimEl = document.getElementById("patrocinador-data-fim");
+  if (dataFimEl) dataFimEl.value = "";
+
   esconderPreviewPatrocinador();
   document.getElementById("titulo-form-patrocinador").textContent =
     "Novo patrocinador";
@@ -3436,6 +3619,21 @@ function preencherSelectAutores() {
   } else if (valorAtual !== "Redacao") {
     selectAutor.innerHTML += `<option value="${escapeHtml(valorAtual)}">${escapeHtml(valorAtual)}</option>`;
     selectAutor.value = valorAtual;
+  }
+
+  // Destaca visualmente o campo de seleção de Autor
+  selectAutor.style.border = "2px solid #0f766e";
+  selectAutor.style.backgroundColor = "rgba(15, 118, 110, 0.05)";
+
+  // Adiciona a observação logo abaixo do select (se ainda não existir)
+  if (!document.getElementById("aviso-autor-menu")) {
+    const aviso = document.createElement("div");
+    aviso.id = "aviso-autor-menu";
+    aviso.className = "form-text fw-bold mt-1";
+    aviso.style.color = "#0f766e";
+    aviso.innerHTML =
+      "💡 Não esqueça de escolher o autor para aparecer no menu da pagina inicial.";
+    selectAutor.insertAdjacentElement("afterend", aviso);
   }
 }
 
@@ -3799,47 +3997,47 @@ window.rodarRoboManualmente = async function (btn) {
   }
 };
 
-// ==========================================
-// ADMIN DO TWITTER / X
-// ==========================================
-let twitterCache = [];
-async function carregarTwitterAdmin() {
-  const lista = document.getElementById("lista-twitter-admin");
-  if (!lista) return;
-  lista.innerHTML = '<div class="loading-box">Carregando perfis...</div>';
-  try {
-    const resposta = await fetch("/api/twitter-gerenciador");
-    twitterCache = await resposta.json();
-    const countEl = document.getElementById("twitter-count");
-    if (countEl) countEl.textContent = `${twitterCache.length} item(ns)`;
-    if (!twitterCache.length) {
-      lista.innerHTML =
-        '<div class="empty-box">Nenhum perfil cadastrado.</div>';
-      return;
-    }
-    lista.innerHTML = twitterCache
-      .map(
-        (c) => `
-      <div class="admin-game-row align-items-center">
-        <div class="d-flex align-items-center gap-3">
-          ${c.avatarUrl ? `<img src="${escapeHtml(c.avatarUrl)}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">` : `<div style="width:40px; height:40px; border-radius:50%; background:#ccc;"></div>`}
-          <div>
-            <strong>${escapeHtml(c.nome)}</strong>
-            <span class="d-flex align-items-center gap-2 mt-1"><span class="status-dot ${c.ativo === false ? "offline" : "online"}"></span> ${escapeHtml(c.handle)}</span>
-          </div>
-        </div>
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="editarTwitter('${c.id}')">Editar</button>
-          <button type="button" class="btn btn-outline-danger btn-sm" onclick="excluirTwitter('${c.id}')">Excluir</button>
-        </div>
-      </div>
-    `,
-      )
-      .join("");
-  } catch {
-    lista.innerHTML = '<div class="empty-box">Erro ao carregar perfis.</div>';
-  }
-}
+// // ==========================================
+// // ADMIN DO TWITTER / X (Funcionalidade Desabilitada)
+// // ==========================================
+// let twitterCache = [];
+// async function carregarTwitterAdmin() {
+//   const lista = document.getElementById("lista-twitter-admin");
+//   if (!lista) return;
+//   lista.innerHTML = '<div class="loading-box">Carregando perfis...</div>';
+//   try {
+//     const resposta = await fetch("/api/twitter-gerenciador");
+//     twitterCache = await resposta.json();
+//     const countEl = document.getElementById("twitter-count");
+//     if (countEl) countEl.textContent = `${twitterCache.length} item(ns)`;
+//     if (!twitterCache.length) {
+//       lista.innerHTML =
+//         '<div class="empty-box">Nenhum perfil cadastrado.</div>';
+//       return;
+//     }
+//     lista.innerHTML = twitterCache
+//       .map(
+//         (c) => `
+//       <div class="admin-game-row align-items-center">
+//         <div class="d-flex align-items-center gap-3">
+//           ${c.avatarUrl ? `<img src="${escapeHtml(c.avatarUrl)}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">` : `<div style="width:40px; height:40px; border-radius:50%; background:#ccc;"></div>`}
+//           <div>
+//             <strong>${escapeHtml(c.nome)}</strong>
+//             <span class="d-flex align-items-center gap-2 mt-1"><span class="status-dot ${c.ativo === false ? "offline" : "online"}"></span> ${escapeHtml(c.handle)}</span>
+//           </div>
+//         </div>
+//         <div class="d-flex gap-2">
+//           <button type="button" class="btn btn-outline-secondary btn-sm" onclick="editarTwitter('${c.id}')">Editar</button>
+//           <button type="button" class="btn btn-outline-danger btn-sm" onclick="excluirTwitter('${c.id}')">Excluir</button>
+//         </div>
+//       </div>
+//     `,
+//       )
+//       .join("");
+//   } catch {
+//     lista.innerHTML = '<div class="empty-box">Erro ao carregar perfis.</div>';
+//   }
+// }
 async function salvarTwitter(event) {
   event.preventDefault();
   const id = document.getElementById("twitter-id").value;
@@ -3926,6 +4124,198 @@ window.limparTodosRascunhos = async function (btn) {
     await carregarListaAdmin();
   } catch (e) {
     mostrarToast("Erro ao limpar rascunhos.", "danger");
+  } finally {
+    btn.innerHTML = textoOriginal;
+    btn.disabled = false;
+  }
+};
+
+// ==========================================
+// GERENCIADOR DE GRADE DE PROGRAMAÇÃO
+// ==========================================
+async function carregarProgramacaoAdmin() {
+  const lista = document.getElementById("lista-programacao-admin");
+  if (!lista) return;
+  lista.innerHTML = '<div class="loading-box">Carregando grade...</div>';
+  try {
+    const resposta = await fetch("/api/programacao?t=" + Date.now(), {
+      cache: "no-store",
+    });
+    programacaoCache = await resposta.json();
+    renderizarProgramacaoAdmin();
+  } catch (e) {
+    lista.innerHTML =
+      '<div class="empty-box">Erro ao carregar programação.</div>';
+  }
+}
+
+function renderizarProgramacaoAdmin() {
+  const lista = document.getElementById("lista-programacao-admin");
+  if (!lista) return;
+  let html = "";
+  programacaoCache.forEach((diaInfo) => {
+    html += `<div class="card mb-3 shadow-sm border-0 border-start border-4 border-dark"><div class="card-header bg-light fw-bold">${diaInfo.dia}</div><div class="card-body p-2">`;
+    if (diaInfo.eventos.length === 0) {
+      html += `<div class="text-muted small p-2 text-center">Nenhum evento cadastrado.</div>`;
+    } else {
+      diaInfo.eventos
+        .sort((a, b) => a.horario.localeCompare(b.horario))
+        .forEach((ev, idx) => {
+          html += `<div class="d-flex justify-content-between align-items-center border-bottom py-2 px-2"><div><span class="badge bg-secondary me-2 fs-6">${ev.horario}</span><strong class="text-dark">${escapeHtml(ev.titulo)}</strong> <span class="badge ms-2" style="background: var(--surface-muted); color: var(--ink); border: 1px solid var(--line);">${escapeHtml(ev.canal).toUpperCase()}</span></div><div class="btn-group"><button class="btn btn-sm btn-outline-secondary px-3 rounded-start-pill" onclick="editarEventoProgramacao('${diaInfo.id}', ${idx})">Editar</button><button class="btn btn-sm btn-outline-danger px-3 rounded-end-pill" onclick="removerEventoProgramacao('${diaInfo.id}', ${idx})">Remover</button></div></div>`;
+        });
+    }
+    html += `<button class="btn btn-sm btn-outline-dark mt-3 w-100 fw-bold rounded-pill" onclick="abrirModalEvento('${diaInfo.id}')">+ Adicionar Programa na ${diaInfo.dia}</button></div></div>`;
+  });
+  lista.innerHTML = html;
+}
+
+window.abrirModalEvento = function (diaId) {
+  document.getElementById("form-evento").reset();
+  document.getElementById("evento-dia-id").value = diaId;
+  const inputIdx = document.getElementById("evento-idx");
+  if (inputIdx) inputIdx.value = "";
+  const titleEl = document.querySelector("#modalEvento .modal-title");
+  if (titleEl) titleEl.textContent = "Novo Evento";
+  const btnEl = document.querySelector("#form-evento button[type='submit']");
+  if (btnEl) btnEl.textContent = "Adicionar Evento";
+  new bootstrap.Modal(document.getElementById("modalEvento")).show();
+};
+
+window.editarEventoProgramacao = function (diaId, idx) {
+  const diaIndex = programacaoCache.findIndex((d) => d.id === diaId);
+  if (diaIndex === -1) return;
+  const evento = programacaoCache[diaIndex].eventos[idx];
+  if (!evento) return;
+
+  document.getElementById("evento-dia-id").value = diaId;
+  const inputIdx = document.getElementById("evento-idx");
+  if (inputIdx) inputIdx.value = idx;
+
+  document.getElementById("evento-horario").value = evento.horario;
+  document.getElementById("evento-canal").value = evento.canal;
+  document.getElementById("evento-titulo").value = evento.titulo;
+  document.getElementById("evento-desc").value = evento.desc;
+
+  const titleEl = document.querySelector("#modalEvento .modal-title");
+  if (titleEl) titleEl.textContent = "Editar Evento";
+  const btnEl = document.querySelector("#form-evento button[type='submit']");
+  if (btnEl) btnEl.textContent = "Salvar Alterações";
+
+  new bootstrap.Modal(document.getElementById("modalEvento")).show();
+};
+
+window.salvarEventoProgramacao = async function (event) {
+  event.preventDefault();
+  const diaId = document.getElementById("evento-dia-id").value;
+  const diaIndex = programacaoCache.findIndex((d) => d.id === diaId);
+  if (diaIndex === -1) return;
+
+  const inputIdx = document.getElementById("evento-idx");
+  const idx = inputIdx && inputIdx.value !== "" ? parseInt(inputIdx.value) : -1;
+
+  const novoEvento = {
+    horario: document.getElementById("evento-horario").value,
+    canal: document.getElementById("evento-canal").value,
+    titulo: document.getElementById("evento-titulo").value.trim(),
+    desc: document.getElementById("evento-desc").value.trim(),
+  };
+
+  if (idx > -1 && programacaoCache[diaIndex].eventos[idx]) {
+    programacaoCache[diaIndex].eventos[idx] = novoEvento;
+  } else {
+    programacaoCache[diaIndex].eventos.push(novoEvento);
+  }
+
+  // Ordena os eventos cronologicamente no banco de dados para evitar bugs no site público
+  programacaoCache[diaIndex].eventos.sort((a, b) =>
+    a.horario.localeCompare(b.horario),
+  );
+
+  await fetch("/api/programacao", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(programacaoCache),
+  });
+  bootstrap.Modal.getInstance(document.getElementById("modalEvento")).hide();
+  document.getElementById("form-evento").reset();
+  if (inputIdx) inputIdx.value = "";
+  renderizarProgramacaoAdmin();
+};
+
+window.removerEventoProgramacao = async function (diaId, idx) {
+  if (!confirm("Remover este evento da grade?")) return;
+  const diaIndex = programacaoCache.findIndex((d) => d.id === diaId);
+  if (diaIndex === -1) return;
+  programacaoCache[diaIndex].eventos.splice(idx, 1);
+  await fetch("/api/programacao", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(programacaoCache),
+  });
+  renderizarProgramacaoAdmin();
+};
+
+// ==========================================
+// LAB DE RASPAGEM (SCRAPING)
+// ==========================================
+document
+  .getElementById("form-lab-scrape")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("btn-lab-scrape");
+    const resBox = document.getElementById("lab-resultado");
+    const timeBox = document.getElementById("lab-tempo");
+    const url = document.getElementById("lab-url").value;
+    const seletor = document.getElementById("lab-seletor").value;
+    const preset = document.getElementById("lab-preset").value;
+
+    const textoOriginal = btn.innerHTML;
+    btn.innerHTML =
+      '<span class="spinner-border spinner-border-sm"></span> Processando...';
+    btn.disabled = true;
+    resBox.innerHTML =
+      '<span class="text-muted">Despachando robô... Tentando simular presença humana e contornar bloqueios... (aguarde até 15s)</span>';
+    const t0 = performance.now();
+
+    try {
+      const resposta = await fetch("/api/lab/scrape", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, seletor, preset }),
+      });
+      const dados = await resposta.json();
+      if (!resposta.ok) throw new Error(dados.erro || "Falha na raspagem");
+
+      resBox.textContent =
+        dados.resultado ||
+        "Conteúdo vazio (o seletor existe mas não tem texto dentro).";
+    } catch (err) {
+      resBox.innerHTML = `<span class="text-danger fw-bold">Erro:</span> ${err.message}`;
+    } finally {
+      btn.innerHTML = textoOriginal;
+      btn.disabled = false;
+      timeBox.textContent = ((performance.now() - t0) / 1000).toFixed(1) + "s";
+    }
+  });
+
+window.sincronizarElenco = async function (btn) {
+  const textoOriginal = btn.innerHTML;
+  btn.innerHTML =
+    '<span class="spinner-border spinner-border-sm"></span> Analisando histórico... (pode demorar 1min)';
+  btn.disabled = true;
+
+  try {
+    const resposta = await fetch("/api/elenco/sincronizar", {
+      method: "POST",
+    });
+    if (!resposta.ok) throw new Error();
+    mostrarToast(
+      "Histórico sincronizado com sucesso! Jogadores atualizados no campo.",
+      "success",
+    );
+    await renderizarCampoTatico();
+  } catch (e) {
+    mostrarToast("Erro ao sincronizar o histórico de escalações.", "danger");
   } finally {
     btn.innerHTML = textoOriginal;
     btn.disabled = false;

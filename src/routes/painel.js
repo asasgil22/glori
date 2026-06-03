@@ -22,6 +22,7 @@ const PATH_VIDEOS = path.join(__dirname, "../../data/videos.json");
 const PATH_CONFIG = path.join(__dirname, "../../data/config.json");
 const PATH_NOTICIAS = path.join(__dirname, "../../data/noticias.json");
 const PATH_ESTATISTICAS = path.join(__dirname, "../../data/estatisticas.json");
+const PATH_PROGRAMACAO = path.join(__dirname, "../../data/programacao.json");
 
 function normalizarBoolean(valor) {
   return valor === true || valor === "true" || valor === "on" || valor === "1";
@@ -54,6 +55,9 @@ router.post(
       id: Date.now().toString(),
       nome: req.body.nome || "Patrocinador",
       tipo: req.body.tipo || "texto",
+      localExibicao: req.body.localExibicao || "ambos",
+      dataInicio: req.body.dataInicio || "",
+      dataFim: req.body.dataFim || "",
       imagemUrl: req.file ? await uploadParaSupabase(req.file) : "",
       link: req.body.link || "",
       ativo: normalizarBoolean(req.body.ativo),
@@ -88,6 +92,16 @@ router.put(
       ...patrocinadores[idx],
       nome: req.body.nome || patrocinadores[idx].nome,
       tipo: req.body.tipo || patrocinadores[idx].tipo,
+      localExibicao:
+        req.body.localExibicao || patrocinadores[idx].localExibicao || "ambos",
+      dataInicio:
+        req.body.dataInicio !== undefined
+          ? req.body.dataInicio
+          : patrocinadores[idx].dataInicio || "",
+      dataFim:
+        req.body.dataFim !== undefined
+          ? req.body.dataFim
+          : patrocinadores[idx].dataFim || "",
       imagemUrl,
       link: req.body.link ?? patrocinadores[idx].link ?? "",
       ativo:
@@ -229,6 +243,290 @@ router.delete("/autores/:id", exigirPermissaoAdmin, async (req, res) => {
     autores.filter((a) => String(a.id) !== String(req.params.id)),
   );
   res.json({ mensagem: "Autor excluído." });
+});
+
+// ==========================================
+// SISTEMA DE PROGRAMAÇÃO (GRADE DE TV)
+// ==========================================
+const defaultProgramacao = [
+  {
+    dia: "Segunda",
+    id: "segunda",
+    eventos: [
+      {
+        horario: "08:00",
+        canal: "tf",
+        titulo: "Giro de Notícias",
+        desc: "Atualizações do Botafogo.",
+      },
+      {
+        horario: "10:00",
+        canal: "setor",
+        titulo: "Resenha Matinal",
+        desc: "Debate.",
+      },
+      {
+        horario: "12:00",
+        canal: "tf",
+        titulo: "Live do TF",
+        desc: "Informações exclusivas.",
+      },
+      {
+        horario: "14:00",
+        canal: "arena",
+        titulo: "Opinião Alvinegra",
+        desc: "Análise.",
+      },
+      {
+        horario: "20:00",
+        canal: "tf",
+        titulo: "Live Noturna",
+        desc: "Fechamento do dia.",
+      },
+      {
+        horario: "22:00",
+        canal: "arena",
+        titulo: "Arena Madrugada",
+        desc: "A resenha.",
+      },
+    ],
+  },
+  {
+    dia: "Terça",
+    id: "terca",
+    eventos: [
+      {
+        horario: "08:00",
+        canal: "tf",
+        titulo: "Giro de Notícias",
+        desc: "As primeiras atualizações do dia.",
+      },
+      {
+        horario: "11:30",
+        canal: "setor",
+        titulo: "Live do Setor Visitante",
+        desc: "Análise e muito debate alvinegro.",
+      },
+      {
+        horario: "12:30",
+        canal: "arena",
+        titulo: "Arena Alvinegra",
+        desc: "Resenha e informações de momento.",
+      },
+      {
+        horario: "12:30",
+        canal: "tf",
+        titulo: "Almoço com TF",
+        desc: "Atualização e debate tático.",
+      },
+      {
+        horario: "18:00",
+        canal: "arena",
+        titulo: "6 é Fogo",
+        desc: "Debate no fim de tarde.",
+      },
+      {
+        horario: "21:00",
+        canal: "setor",
+        titulo: "Live do Setor Visitante",
+        desc: "Resenha noturna e interatividade.",
+      },
+    ],
+  },
+  {
+    dia: "Quarta",
+    id: "quarta",
+    eventos: [
+      {
+        horario: "08:00",
+        canal: "tf",
+        titulo: "Giro de Notícias",
+        desc: "As primeiras atualizações do dia.",
+      },
+      {
+        horario: "11:30",
+        canal: "setor",
+        titulo: "Live do Setor Visitante",
+        desc: "Análise e muito debate alvinegro.",
+      },
+      {
+        horario: "12:30",
+        canal: "arena",
+        titulo: "Arena Alvinegra",
+        desc: "Resenha e informações de momento.",
+      },
+      {
+        horario: "12:30",
+        canal: "tf",
+        titulo: "Almoço com TF",
+        desc: "Atualização e debate tático.",
+      },
+      {
+        horario: "18:00",
+        canal: "arena",
+        titulo: "6 é Fogo",
+        desc: "Debate no fim de tarde.",
+      },
+      {
+        horario: "21:00",
+        canal: "setor",
+        titulo: "Live do Setor Visitante",
+        desc: "Resenha noturna e interatividade.",
+      },
+    ],
+  },
+  {
+    dia: "Quinta",
+    id: "quinta",
+    eventos: [
+      {
+        horario: "08:00",
+        canal: "tf",
+        titulo: "Giro de Notícias",
+        desc: "As primeiras atualizações do dia.",
+      },
+      {
+        horario: "11:30",
+        canal: "setor",
+        titulo: "Live do Setor Visitante",
+        desc: "Análise e muito debate alvinegro.",
+      },
+      {
+        horario: "12:30",
+        canal: "arena",
+        titulo: "Arena Alvinegra",
+        desc: "Resenha e informações de momento.",
+      },
+      {
+        horario: "12:30",
+        canal: "tf",
+        titulo: "Almoço com TF",
+        desc: "Atualização e debate tático.",
+      },
+      {
+        horario: "18:00",
+        canal: "arena",
+        titulo: "6 é Fogo",
+        desc: "Debate no fim de tarde.",
+      },
+      {
+        horario: "21:00",
+        canal: "setor",
+        titulo: "Live do Setor Visitante",
+        desc: "Resenha noturna e interatividade.",
+      },
+    ],
+  },
+  {
+    dia: "Sexta",
+    id: "sexta",
+    eventos: [
+      {
+        horario: "08:00",
+        canal: "tf",
+        titulo: "Giro de Notícias",
+        desc: "As primeiras atualizações do dia.",
+      },
+      {
+        horario: "11:30",
+        canal: "setor",
+        titulo: "Live do Setor Visitante",
+        desc: "Análise e muito debate alvinegro.",
+      },
+      {
+        horario: "12:30",
+        canal: "arena",
+        titulo: "Arena Alvinegra",
+        desc: "Resenha e informações de momento.",
+      },
+      {
+        horario: "12:30",
+        canal: "tf",
+        titulo: "Almoço com TF",
+        desc: "Atualização e debate tático.",
+      },
+      {
+        horario: "18:00",
+        canal: "arena",
+        titulo: "6 é Fogo",
+        desc: "Debate no fim de tarde.",
+      },
+      {
+        horario: "21:00",
+        canal: "setor",
+        titulo: "Live do Setor Visitante",
+        desc: "Resenha noturna e interatividade.",
+      },
+    ],
+  },
+  {
+    dia: "Sábado",
+    id: "sabado",
+    eventos: [
+      {
+        horario: "09:00",
+        canal: "tf",
+        titulo: "Boletim",
+        desc: "O que esperar.",
+      },
+      {
+        horario: "14:00",
+        canal: "arena",
+        titulo: "Arena Especial",
+        desc: "Conteúdo focado na história.",
+      },
+      {
+        horario: "18:00",
+        canal: "setor",
+        titulo: "Pré-jogo",
+        desc: "Aquecimento.",
+      },
+    ],
+  },
+  {
+    dia: "Domingo",
+    id: "domingo",
+    eventos: [
+      {
+        horario: "10:00",
+        canal: "tf",
+        titulo: "Manhã Alvinegra",
+        desc: "Preparação.",
+      },
+      {
+        horario: "14:00",
+        canal: "setor",
+        titulo: "Pré-jogo Oficial",
+        desc: "A festa.",
+      },
+      {
+        horario: "16:00",
+        canal: "arena",
+        titulo: "Narração Arena",
+        desc: "O jogo.",
+      },
+      {
+        horario: "18:00",
+        canal: "tf",
+        titulo: "Pós-Jogo Quente",
+        desc: "A análise imediata.",
+      },
+    ],
+  },
+];
+
+router.get("/programacao", async (req, res) => {
+  const programacao = await lerJSON(PATH_PROGRAMACAO, defaultProgramacao);
+  res.json(programacao);
+});
+
+router.put("/programacao", exigirPermissaoAdmin, async (req, res) => {
+  try {
+    await salvarJSON(PATH_PROGRAMACAO, req.body);
+    res.json({ mensagem: "Programação atualizada com sucesso!" });
+  } catch (error) {
+    res.status(500).json({ erro: "Erro ao salvar programação." });
+  }
 });
 
 // ==========================================

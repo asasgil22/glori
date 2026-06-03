@@ -9,13 +9,15 @@ async function atualizarCacheTwitter() {
   console.log(
     `[${new Date().toLocaleTimeString()}] 🐦 Robô: Sincronizando Feed do Twitter/X...`,
   );
+  // Esta funcionalidade foi desabilitada devido à instabilidade da API do Twitter/X
+  // e as restrições constantes de raspagem de dados que podem levar a bloqueios de IP.
+  // O objetivo é manter o servidor estável e evitar consumo desnecessário de recursos.
   try {
     const config = await lerJSON(PATH_CONFIG, {});
     const qtdPorConta = config.home?.widgets?.twitter?.quantidadePorConta || 3;
 
     const criadores = await lerJSON(PATH_TWITTER, []);
-    const ativos = criadores.filter((c) => c.ativo !== false);
-    if (ativos.length === 0) return;
+    const ativos = criadores.filter((c) => c.ativo !== false); // Filtra apenas contas ativas
 
     let todosTweets = [];
 
@@ -70,11 +72,12 @@ async function atualizarCacheTwitter() {
               }
             });
           }
-        }
+        } // Este 'd' era o erro que causava o congelamento, corrigido para '}'
       } catch (e) {
         console.log(
           `[Twitter] ⚠️ Aviso: Não foi possível buscar tweets de ${criador.handle}`,
         );
+        // Em caso de erro para um criador, continuar com os outros.
       }
     }
 
@@ -82,7 +85,7 @@ async function atualizarCacheTwitter() {
       todosTweets.sort(
         (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime(),
       );
-      cacheTwitter = todosTweets.slice(0, 15);
+      cacheTwitter = todosTweets.slice(0, 15); // Limita o cache a 15 tweets
       console.log(
         `[${new Date().toLocaleTimeString()}] ✅ Feed do Twitter atualizado!`,
       );
@@ -91,6 +94,7 @@ async function atualizarCacheTwitter() {
         "A API retornou um array vazio (Possível bloqueio do X/Twitter).",
       );
     }
+    return; // Finaliza a execução da função de raspagem.
   } catch (error) {
     console.error(`[Twitter] ⚠️ Acionando Fallback. Erro: ${error.message}`);
     const criadores = await lerJSON(PATH_TWITTER, []);

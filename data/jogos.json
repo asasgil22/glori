@@ -1,18 +1,5 @@
 [
   {
-    "id": "15832146",
-    "campeonato": "CONMEBOL Sudamericana, Group E",
-    "dataHora": "2026-05-27T22:00:00.000Z",
-    "mandante": "Caracas",
-    "visitante": "Botafogo",
-    "escudoMandante": "/escudos/escudo-padrao.png",
-    "escudoVisitante": "/escudos/botafogo.svg",
-    "placarMandante": 1,
-    "placarVisitante": 3,
-    "status": "finished",
-    "tempoReal": "Ended"
-  },
-  {
     "id": "15235585",
     "campeonato": "Brasileirão Betano",
     "dataHora": "2026-05-30T20:30:00.000Z",
@@ -20,10 +7,10 @@
     "visitante": "Botafogo",
     "escudoMandante": "/escudos/bahia.png",
     "escudoVisitante": "/escudos/botafogo.svg",
-    "placarMandante": null,
-    "placarVisitante": null,
-    "status": "notstarted",
-    "tempoReal": "Not started"
+    "placarMandante": 2,
+    "placarVisitante": 1,
+    "status": "finished",
+    "tempoReal": "Ended"
   },
   {
     "id": "15237976",
@@ -46,6 +33,19 @@
     "visitante": "Botafogo",
     "escudoMandante": "/escudos/cruzeiro.svg",
     "escudoVisitante": "/escudos/botafogo.svg",
+    "placarMandante": null,
+    "placarVisitante": null,
+    "status": "notstarted",
+    "tempoReal": "Not started"
+  },
+  {
+    "id": "15235419",
+    "campeonato": "Brasileirão Betano",
+    "dataHora": "2026-07-29T18:00:00.000Z",
+    "mandante": "Botafogo",
+    "visitante": "Grêmio",
+    "escudoMandante": "/escudos/botafogo.svg",
+    "escudoVisitante": "/escudos/gremio.png",
     "placarMandante": null,
     "placarVisitante": null,
     "status": "notstarted",

@@ -1,0 +1,266 @@
+[
+  {
+    "id": "segunda",
+    "dia": "Segunda",
+    "eventos": [
+      {
+        "desc": "Atualizações do Botafogo.",
+        "canal": "tf",
+        "titulo": "Giro de Notícias",
+        "horario": "08:00"
+      },
+      {
+        "desc": "Debate.",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "horario": "11:30"
+      },
+      {
+        "desc": "Informações exclusivas.",
+        "canal": "tf",
+        "titulo": "Almoço com TF",
+        "horario": "12:30"
+      },
+      {
+        "desc": "Análise.",
+        "canal": "arena",
+        "titulo": "Arena Alvinegra",
+        "horario": "12:30"
+      },
+      {
+        "desc": "A resenha.",
+        "canal": "arena",
+        "titulo": "Casa Cheia",
+        "horario": "18:00"
+      },
+      {
+        "desc": "Live do Setor Visitante",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "horario": "21:00"
+      }
+    ]
+  },
+  {
+    "id": "terca",
+    "dia": "Terça",
+    "eventos": [
+      {
+        "desc": "O que rolou.",
+        "canal": "tf",
+        "titulo": "Giro de Notícias",
+        "horario": "08:00"
+      },
+      {
+        "horario": "11:30",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "desc": "Live do Setor Visitante"
+      },
+      {
+        "horario": "12:30",
+        "canal": "arena",
+        "titulo": "Arena Alvinegra",
+        "desc": "Arena Alvinegra"
+      },
+      {
+        "horario": "12:30",
+        "canal": "tf",
+        "titulo": "Almoço com TF",
+        "desc": "Almoço com TF"
+      },
+      {
+        "horario": "18:00",
+        "canal": "tf",
+        "titulo": "6 é Fogo",
+        "desc": "6 é Fogo"
+      },
+      {
+        "horario": "21:00",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "desc": "Live do Setor Visitante"
+      }
+    ]
+  },
+  {
+    "id": "quarta",
+    "dia": "Quarta",
+    "eventos": [
+      {
+        "desc": "Notícias rápidas.",
+        "canal": "tf",
+        "titulo": "Giro de Notícias",
+        "horario": "08:00"
+      },
+      {
+        "desc": "Debate alvinegro.",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "horario": "11:30"
+      },
+      {
+        "desc": "Resenha.",
+        "canal": "arena",
+        "titulo": "Arena Alvinegra",
+        "horario": "12:30"
+      },
+      {
+        "desc": "Atualização.",
+        "canal": "tf",
+        "titulo": "Almoço com TF",
+        "horario": "12:30"
+      },
+      {
+        "desc": "Narração.",
+        "canal": "arena",
+        "titulo": "6 é Fogo",
+        "horario": "18:00"
+      },
+      {
+        "desc": "Expectativa.",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "horario": "21:00"
+      }
+    ]
+  },
+  {
+    "id": "quinta",
+    "dia": "Quinta",
+    "eventos": [
+      {
+        "desc": "A repercussão.",
+        "canal": "tf",
+        "titulo": "Giro de Notícias",
+        "horario": "08:00"
+      },
+      {
+        "desc": "Análise tática.",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "horario": "11:30"
+      },
+      {
+        "horario": "12:30",
+        "canal": "tf",
+        "titulo": "Almoço com TF",
+        "desc": "Bastidores."
+      },
+      {
+        "desc": "Convidados.",
+        "canal": "arena",
+        "titulo": "Arena Alvinegra",
+        "horario": "12:30"
+      },
+      {
+        "desc": "6 é Fogo",
+        "canal": "arena",
+        "titulo": "6 é Fogo",
+        "horario": "18:00"
+      },
+      {
+        "desc": "Live do Setor Visitante",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "horario": "21:00"
+      }
+    ]
+  },
+  {
+    "id": "sexta",
+    "dia": "Sexta",
+    "eventos": [
+      {
+        "desc": "Bom dia alvinegro.",
+        "canal": "tf",
+        "titulo": "Giro de Notícias",
+        "horario": "08:00"
+      },
+      {
+        "horario": "11:30",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "desc": "Live do Setor Visitante"
+      },
+      {
+        "horario": "12:30",
+        "canal": "arena",
+        "titulo": "Arena Alvinegra",
+        "desc": "Arena Alvinegra"
+      },
+      {
+        "horario": "12:30",
+        "canal": "tf",
+        "titulo": "Almoço com TF",
+        "desc": "Almoço com TF"
+      },
+      {
+        "horario": "18:00",
+        "canal": "arena",
+        "titulo": "6 é Fogo",
+        "desc": "6 é Fogo"
+      },
+      {
+        "horario": "21:00",
+        "canal": "setor",
+        "titulo": "Live do Setor Visitante",
+        "desc": "Live do Setor Visitante"
+      }
+    ]
+  },
+  {
+    "id": "sabado",
+    "dia": "Sábado",
+    "eventos": [
+      {
+        "desc": "O que esperar.",
+        "canal": "tf",
+        "titulo": "Boletim",
+        "horario": "09:00"
+      },
+      {
+        "desc": "Conteúdo focado na história.",
+        "canal": "arena",
+        "titulo": "Arena Especial",
+        "horario": "14:00"
+      },
+      {
+        "desc": "Aquecimento.",
+        "canal": "setor",
+        "titulo": "Pré-jogo",
+        "horario": "18:00"
+      }
+    ]
+  },
+  {
+    "id": "domingo",
+    "dia": "Domingo",
+    "eventos": [
+      {
+        "desc": "Preparação.",
+        "canal": "tf",
+        "titulo": "Manhã Alvinegra",
+        "horario": "10:00"
+      },
+      {
+        "desc": "A festa.",
+        "canal": "setor",
+        "titulo": "Pré-jogo Oficial",
+        "horario": "14:00"
+      },
+      {
+        "desc": "O jogo.",
+        "canal": "arena",
+        "titulo": "Narração Arena",
+        "horario": "16:00"
+      },
+      {
+        "desc": "A análise imediata.",
+        "canal": "tf",
+        "titulo": "Pós-Jogo Quente",
+        "horario": "18:00"
+      }
+    ]
+  }
+]

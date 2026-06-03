@@ -123,24 +123,24 @@ function slugify(texto) {
 }
 
 async function buscarUltimosVideos() {
-  // Lógica anterior restabelecida (Endpoint Search Oficial) com a Nova Chave
-  const url = `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&maxResults=6`;
+  // OTIMIZAÇÃO: Trocamos o endpoint "/search" (que custa 100 pontos de cota)
+  // pelo "/playlistItems" (que custa 1 ponto). Para isso, trocamos "UC" por "UU" no ID do canal.
+  const uploadsPlaylistId = CHANNEL_ID.replace(/^UC/, "UU");
+  const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=6&key=${YOUTUBE_API_KEY}`;
   const res = await fetch(url);
   const data = await res.json();
 
   if (data.error) {
     console.error(
-      "[Robô IA] ❌ Erro na API do YouTube (Cota ou Chave):",
+      "[Robô IA] ❌ Erro na API do YouTube (Cota esgotada ou Chave):",
       data.error.message,
     );
     return [];
   }
 
-  // Filtra apenas vídeos e ignora transmissões ao vivo acontecendo no momento (live) ou agendadas (upcoming)
+  // Mapeamento ajustado para o novo formato do JSON retornado pela Playlist
   return (data.items || []).filter(
-    (item) =>
-      item.id.kind === "youtube#video" &&
-      item.snippet.liveBroadcastContent === "none",
+    (item) => item.snippet.resourceId.kind === "youtube#video",
   );
 }
 
@@ -185,6 +185,9 @@ async function processarVideo(video) {
       materiaAntiga.conteudo.includes("Principais Pontos") &&
       materiaAntiga.conteudo.includes("Matéria Completa")
     ) {
+      console.log(
+        `[Robô IA] ⏭️ Vídeo ignorado (já processado anteriormente): ${tituloOriginal}`,
+      );
       return;
     } else {
       // Se for a matéria curta, ele apaga do banco de dados para gerar a versão na íntegra!
@@ -536,9 +539,18 @@ async function executarRoboTF() {
     // Inverte a ordem para processar o mais antigo primeiro, mantendo a ordem correta na sua index
     videos.reverse();
 
+    if (videos.length === 0) {
+      console.log(
+        `[Robô IA] ⚠️ Nenhum vídeo foi retornado pelo YouTube nesta varredura.`,
+      );
+      return;
+    }
+
     for (const video of videos) {
       await processarVideo(video);
     }
+
+    console.log(`[Robô IA] ✅ Varredura finalizada.`);
   } catch (error) {
     errosConsecutivos++;
     console.error(

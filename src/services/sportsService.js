@@ -5,10 +5,12 @@ const { lerJSON, salvarJSON } = require("../config/database");
 
 let buscarOddsBotafogo;
 let buscarAgendaBotafogo;
+let buscarEscalacoesHistorico;
 try {
   const scraper = require("../../scraper");
   buscarOddsBotafogo = scraper.buscarOddsBotafogo;
   buscarAgendaBotafogo = scraper.buscarAgendaBotafogo;
+  buscarEscalacoesHistorico = scraper.buscarEscalacoesHistorico;
 } catch (e) {
   console.error("⚠️ Aviso: Erro ao carregar scraper.js:", e.message);
 }
@@ -16,6 +18,7 @@ try {
 const PATH_TABELAS = path.join(__dirname, "../../data/tabelas.json");
 const PATH_JOGOS = path.join(__dirname, "../../data/jogos.json");
 const PATH_ESCUDOS = path.join(__dirname, "../../public/escudos");
+const PATH_ELENCO = path.join(__dirname, "../../data/elenco.json");
 
 // ==========================================
 // 🧠 MEMÓRIA CACHE (Tabela + Emblemas)
@@ -359,6 +362,24 @@ async function atualizarAgendaAutomatica() {
   }
 }
 
+async function sincronizarElencoAPI() {
+  console.log(
+    `[Sistema] Sincronizando elenco atualizado do Botafogo via SofaScore...`,
+  );
+  if (typeof buscarEscalacoesHistorico === "function") {
+    const elencoScraper = await buscarEscalacoesHistorico();
+    if (elencoScraper && elencoScraper.length > 0) {
+      const elencoAprimorado = elencoScraper.map((j) => ({
+        ...j,
+        foto: `https://api.sofascore.app/api/v1/player/${j.id}/image`,
+      }));
+      await salvarJSON(PATH_ELENCO, elencoAprimorado);
+      return elencoAprimorado;
+    }
+  }
+  throw new Error("Não foi possível sincronizar o elenco no momento.");
+}
+
 function getCacheTabela() {
   return cacheTabela;
 }
@@ -385,4 +406,5 @@ module.exports = {
   setCacheTabela,
   getCacheOdds,
   isOddsPronto,
+  sincronizarElencoAPI,
 };
