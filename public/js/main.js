@@ -2026,8 +2026,7 @@ async function carregarMenuAutores() {
           background: linear-gradient(135deg, #32d74b, #0da61c); /* Verde 'Melhores Amigos' do Instagram */
         }
         
-        [data-bs-theme="dark"] .ring-active,
-        [data-bs-theme="dark"] .ring-new {
+        [data-bs-theme="dark"] .ring-active {
           background: linear-gradient(135deg, #f70068, #d40059) !important; /* Rosa VBET */
         }
 
