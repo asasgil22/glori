@@ -46,6 +46,8 @@
     "mostrarVideos": true,
     "mostrarTwitter": false,
     "mostrarPortais": true,
+    "mostrarAnunciosNoGrid": true,
+    "mostrarStickerProgramacao": true,
     "carrosselAutoRss": true,
     "limiteNoticias": 80,
     "limiteRss": 20,

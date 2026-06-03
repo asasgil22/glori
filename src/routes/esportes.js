@@ -134,10 +134,39 @@ router.get("/odds/botafogo", async (req, res) => {
     (a, b) => parseFloat(b.vitoria || 0) - parseFloat(a.vitoria || 0),
   );
 
-  const oddsFinal = [...oddsDestaque, ...oddsRestante].map((odd, index) => ({
+  let oddsFinal = [...oddsDestaque, ...oddsRestante].map((odd, index) => ({
     ...odd,
     destaque: index === 0 && oddsDestaque.length > 0,
   }));
+
+  // INTEGRAÇÃO INTELIGENTE: Se o servidor estiver no Render e o scraper for bloqueado,
+  // ele substitui o "Aguardando" pelo nome do adversário real cadastrado na Agenda de Jogos do Admin!
+  try {
+    const jogos = await lerJSON(PATH_JOGOS, []);
+    const agora = new Date();
+    // Pega o próximo jogo que ainda vai acontecer
+    const proximoJogo =
+      jogos.find(
+        (j) =>
+          new Date(j.dataHora) >= agora ||
+          (j.placarMandante === null && j.placarVisitante === null),
+      ) || jogos[0];
+
+    if (proximoJogo) {
+      const nomeMandante = String(proximoJogo.mandante || "").toLowerCase();
+      const isBotafogoHome = nomeMandante.includes("bot");
+      const adversarioReal = isBotafogoHome
+        ? proximoJogo.visitante
+        : proximoJogo.mandante;
+
+      oddsFinal = oddsFinal.map((odd) => {
+        if (odd.adversario === "Aguardando") {
+          odd.adversario = adversarioReal;
+        }
+        return odd;
+      });
+    }
+  } catch (e) {}
 
   res.json(oddsFinal);
 });
