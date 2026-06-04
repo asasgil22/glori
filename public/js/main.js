@@ -28,7 +28,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           body: JSON.stringify({ access_token: accessToken }),
         });
         if (res.ok) {
-          history.replaceState(null, null, " ");
+          history.replaceState(
+            null,
+            null,
+            window.location.pathname + window.location.search,
+          );
           const redirectBack = localStorage.getItem("redirect_after_login");
           if (redirectBack) {
             localStorage.removeItem("redirect_after_login");

@@ -25,7 +25,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           const err = await res.json();
           erroBox.classList.replace("alert-info", "alert-danger");
           erroBox.innerHTML = err.erro || "Falha ao registrar sessão.";
-          history.replaceState(null, null, " "); // Limpa o hash falho da URL
+          history.replaceState(
+            null,
+            null,
+            window.location.pathname + window.location.search,
+          ); // Limpa o hash falho da URL
         }
       } catch (e) {
         erroBox.classList.replace("alert-info", "alert-danger");
