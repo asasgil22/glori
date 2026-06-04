@@ -66,10 +66,13 @@
     "id": "1779852736117",
     "data": "2026-05-27T03:32:16.568Z",
     "link": "",
-    "nome": "turin",
+    "nome": "turim",
     "tipo": "imagem",
     "ativo": true,
-    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852736117-678123448.png"
+    "dataFim": "",
+    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852736117-678123448.png",
+    "dataInicio": "",
+    "localExibicao": "ambos"
   },
   {
     "id": "1779852708235",
@@ -93,10 +96,13 @@
     "id": "1779852680001",
     "data": "2026-05-27T03:31:20.435Z",
     "link": "",
-    "nome": "turin",
+    "nome": "turim",
     "tipo": "imagem",
     "ativo": true,
-    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852680001-350439273.png"
+    "dataFim": "",
+    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852680001-350439273.png",
+    "dataInicio": "",
+    "localExibicao": "ambos"
   },
   {
     "id": "1779852661385",
@@ -120,10 +126,13 @@
     "id": "1779852604280",
     "data": "2026-05-27T03:30:04.575Z",
     "link": "",
-    "nome": "turin",
+    "nome": "turim",
     "tipo": "imagem",
     "ativo": true,
-    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852604280-236840643.png"
+    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852604280-236840643.png",
+    "localExibicao": "ambos",
+    "dataInicio": "",
+    "dataFim": ""
   },
   {
     "id": "1779852587425",

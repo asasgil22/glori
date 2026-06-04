@@ -606,7 +606,7 @@ function observarRevelacaoCards() {
   );
 
   document
-    .querySelectorAll(".news-item.reveal-on-scroll:not(.is-revealed)")
+    .querySelectorAll(".reveal-on-scroll:not(.is-revealed)")
     .forEach((el) => {
       observer.observe(el);
     });
@@ -2345,7 +2345,15 @@ async function carregarStickerProgramacao() {
       eventoAoVivo = hoje.eventos.find((ev) => {
         const [h, m] = ev.horario.split(":").map(Number);
         const horaEvento = h * 60 + m;
-        return horaAtual >= horaEvento && horaAtual < horaEvento + 120; // 2 horas de duração da live
+        const tituloLimpo = (ev.titulo || "").toLowerCase();
+        const isArenaOrFogo =
+          tituloLimpo.includes("6 é fogo") ||
+          tituloLimpo.includes("arena alvinegra");
+        return (
+          isArenaOrFogo &&
+          horaAtual >= horaEvento &&
+          horaAtual < horaEvento + 120
+        ); // 2 horas de duração da live
       });
     }
 
