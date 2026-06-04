@@ -10,6 +10,10 @@ const container = document.getElementById("noticia-detalhe");
 let configPortal = null;
 let ordemComentarios = "recentes";
 let intervaloLiveComentarios = null;
+let parentIdParaResponder = null;
+let filtroSentimento = "todos";
+let gifSelecionado = null;
+let typingTimeout = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   const hash = window.location.hash;
@@ -36,8 +40,35 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  iniciarBarraDeProgresso();
   carregarNoticia();
 });
+
+function iniciarBarraDeProgresso() {
+  // Cria a barra e injeta no topo da página
+  const progressBar = document.createElement("div");
+  progressBar.id = "reading-progress-bar";
+  progressBar.style.cssText =
+    "position: fixed; top: 0; left: 0; height: 3px; background: var(--accent, #0f766e); width: 0%; z-index: 10000; transition: width 0.1s ease-out; box-shadow: 0 1px 3px rgba(0,0,0,0.2);";
+  document.body.appendChild(progressBar);
+
+  // Atualiza a largura da barra conforme o scroll do usuário
+  window.addEventListener("scroll", () => {
+    const winScroll =
+      document.body.scrollTop || document.documentElement.scrollTop;
+    const height =
+      document.documentElement.scrollHeight -
+      document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    progressBar.style.width = scrolled + "%";
+  });
+}
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
 
 async function carregarNoticia() {
   if (!identificador) {
@@ -132,20 +163,36 @@ async function carregarNoticia() {
       <div class="glass-panel p-3 rounded-4 mb-4" style="border: 1px solid var(--line); background: var(--surface-muted);">
           <div class="d-flex align-items-center justify-content-between mb-2">
               <div class="d-flex align-items-center gap-2">
-                  <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" style="width: 32px; height: 32px; background: var(--accent);">${iniciais(statusAuth.user?.usuario)}</div>
+                  <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm overflow-hidden" style="width: 32px; height: 32px; background: var(--accent);">
+                      ${statusAuth.user?.avatarUrl ? `<img src="${statusAuth.user.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" referrerpolicy="no-referrer">` : iniciais(statusAuth.user?.usuario)}
+                  </div>
                   <strong class="small" style="color: var(--ink);">${escapeHtml(statusAuth.user?.usuario)}</strong>
               </div>
-              <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none" onclick="logoutComentario()" title="Sair da conta">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-              </button>
+              <div class="d-flex align-items-center gap-3">
+                  <div class="dropdown">
+                      <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none position-relative" data-bs-toggle="dropdown" onclick="marcarNotificacoesLidas()" title="Notificações">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                          <span id="notif-badge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none"></span>
+                      </button>
+                      <ul class="dropdown-menu dropdown-menu-end shadow-sm border-secondary border-opacity-10 p-2" id="notif-list" style="width: 250px; max-height: 300px; overflow-y: auto; font-size: 0.8rem;"><li class="text-center text-muted small">Carregando...</li></ul>
+                  </div>
+                  <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none" onclick="logoutComentario()" title="Sair da conta"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></button>
+              </div>
+          </div>
+          <div id="reply-indicator" class="d-none mb-2 px-2 py-1 rounded bg-secondary bg-opacity-10 text-muted small d-flex justify-content-between align-items-center">
+              <span>Respondendo a <strong id="reply-to-name"></strong></span>
+              <button class="btn-close" style="width: 0.5em; height: 0.5em;" onclick="cancelarResposta()"></button>
           </div>
           <div class="position-relative mb-2">
-              <textarea id="comment-text" class="form-control rounded-3 border-secondary border-opacity-25 pb-4" rows="3" placeholder="Deixe sua opinião sobre a matéria..." style="resize: none;" maxlength="500" oninput="document.getElementById('char-count').innerText = this.value.length + '/500'"></textarea>
+              <textarea id="comment-text" class="form-control rounded-3 border-secondary border-opacity-25 pb-4" rows="3" placeholder="Deixe sua opinião sobre a matéria... Use @ para mencionar alguém." style="resize: none;" maxlength="500" oninput="document.getElementById('char-count').innerText = this.value.length + '/500'; notificarDigitacao('${noticia.id}')"></textarea>
               <div class="position-absolute bottom-0 end-0 p-2 text-muted fw-bold" style="font-size: 0.65rem;" id="char-count">0/500</div>
           </div>
-          <div class="d-flex justify-content-between align-items-center">
-              <small class="text-muted" style="font-size: 0.7rem;">Evite links e palavras ofensivas.</small>
-              <button class="btn btn-sm text-white fw-bold px-4 rounded-pill shadow-sm" style="background: var(--ink);" onclick="enviarComentario('${noticia.id}')">Comentar</button>
+          <div class="d-flex justify-content-between align-items-center position-relative">
+              <div class="d-flex align-items-center gap-2">
+                  <button class="btn btn-sm btn-outline-secondary rounded-pill d-flex align-items-center gap-1" style="font-size: 0.7rem; font-weight: 700;" onclick="abrirModalGif()">GIF</button>
+                  <span id="gif-preview" class="d-none badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 d-flex align-items-center gap-1">GIF Anexado <button class="btn-close" style="width:0.4em; height:0.4em;" onclick="removerGif()"></button></span>
+              </div>
+              <button class="btn btn-sm fw-bold px-4 rounded-pill shadow-sm" style="background: var(--ink); color: var(--surface) !important;" onclick="enviarComentario('${noticia.id}', this)">Comentar</button>
           </div>
       </div>
     `
@@ -242,15 +289,32 @@ async function carregarNoticia() {
       </div>
       
       <div class="comments-section mt-5 border-top border-secondary border-opacity-10 pt-5 mx-auto" style="max-width: 760px;">
-          <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-              <h4 class="fw-bolder m-0 text-uppercase" style="letter-spacing: -0.5px; color: var(--ink);">💬 Tribuna Alvinegra</h4>
+          <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                  <h4 class="fw-bolder m-0 text-uppercase" style="letter-spacing: -0.5px; color: var(--ink);">💬 Tribuna Alvinegra</h4>
+                  <div id="typing-indicator" class="d-none ms-2"></div>
+              </div>
               <div class="d-flex bg-secondary bg-opacity-10 rounded-pill p-1 border border-secondary border-opacity-10" style="font-size: 0.75rem; font-weight: 700;">
                   <button id="btn-ordem-recentes" class="btn btn-sm rounded-pill px-3 py-1 bg-white shadow-sm text-dark" style="border: none;" onclick="mudarOrdemComentarios('recentes', '${noticia.id}')">Recentes</button>
                   <button id="btn-ordem-alta" class="btn btn-sm rounded-pill px-3 py-1 text-muted" style="border: none;" onclick="mudarOrdemComentarios('alta', '${noticia.id}')">Em Alta 🔥</button>
               </div>
           </div>
+          <div class="d-flex align-items-center gap-2 overflow-auto custom-scrollbar mb-4 pb-1" id="filtros-sentimento">
+              <button class="btn btn-sm rounded-pill px-3 py-1 bg-dark text-white shadow-sm btn-filtro-sentimento" style="border: 1px solid var(--line); font-weight: 700; white-space: nowrap;" data-filtro="todos" onclick="mudarFiltroSentimento('todos', '${noticia.id}')">Todos</button>
+              <button class="btn btn-sm rounded-pill px-3 py-1 bg-surface-muted text-muted btn-filtro-sentimento" style="border: 1px solid var(--line); font-weight: 700; white-space: nowrap;" data-filtro="Otimista" onclick="mudarFiltroSentimento('Otimista', '${noticia.id}')">Otimistas 🔥</button>
+              <button class="btn btn-sm rounded-pill px-3 py-1 bg-surface-muted text-muted btn-filtro-sentimento" style="border: 1px solid var(--line); font-weight: 700; white-space: nowrap;" data-filtro="Pessimista" onclick="mudarFiltroSentimento('Pessimista', '${noticia.id}')">Pessimistas 😤</button>
+          </div>
           ${htmlComentariosAuth}
-          <div id="comments-list" class="mt-4 d-flex flex-column gap-3"></div>
+          <style>
+            @keyframes commentFadeIn {
+              from { opacity: 0; transform: translateY(15px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+            .comment-anim {
+              animation: commentFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+          </style>
+          <div id="comments-list" class="mt-4 d-flex flex-column gap-3 overflow-hidden"></div>
       </div>
     `;
 
@@ -281,6 +345,7 @@ async function carregarNoticia() {
     if (typeof initHighlightShare === "function") initHighlightShare();
     if (typeof initSmartHeaderNoticia === "function") initSmartHeaderNoticia();
     carregarComentarios(noticia.id);
+    if (statusAuth.logado) carregarNotificacoes();
 
     // FEED LIVE: Atualização fantasma a cada 15 segundos!
     if (intervaloLiveComentarios) clearInterval(intervaloLiveComentarios);
@@ -310,6 +375,28 @@ window.mudarOrdemComentarios = function (ordem, noticiaId) {
   carregarComentarios(noticiaId);
 };
 
+window.mudarFiltroSentimento = function (filtro, noticiaId) {
+  filtroSentimento = filtro;
+  document.querySelectorAll(".btn-filtro-sentimento").forEach((btn) => {
+    if (btn.dataset.filtro === filtro) {
+      if (filtro === "Otimista")
+        btn.className =
+          "btn btn-sm rounded-pill px-3 py-1 bg-success text-white shadow-sm btn-filtro-sentimento border-success";
+      else if (filtro === "Pessimista")
+        btn.className =
+          "btn btn-sm rounded-pill px-3 py-1 bg-danger text-white shadow-sm btn-filtro-sentimento border-danger";
+      else
+        btn.className =
+          "btn btn-sm rounded-pill px-3 py-1 bg-dark text-white shadow-sm btn-filtro-sentimento";
+    } else {
+      btn.className =
+        "btn btn-sm rounded-pill px-3 py-1 bg-surface-muted text-muted btn-filtro-sentimento";
+      btn.style.border = "1px solid var(--line)";
+    }
+  });
+  carregarComentarios(noticiaId);
+};
+
 window.carregarComentarios = async function (noticiaId, silent = false) {
   const list = document.getElementById("comments-list");
   if (!list) return;
@@ -325,90 +412,215 @@ window.carregarComentarios = async function (noticiaId, silent = false) {
       statusAuth.user &&
       ["admin", "super_admin"].includes(statusAuth.user.role);
 
-    const fixado = comentarios.find((c) => c.fixado);
-    if (fixado) {
+    comentarios = comentarios.filter((c) => !c.oculto);
+    if (filtroSentimento !== "todos") {
       comentarios = comentarios.filter(
-        (c) => String(c.id) !== String(fixado.id),
+        (c) => c.sentimento === filtroSentimento,
       );
     }
 
+    const sentimentos = comentarios
+      .filter((c) => c.sentimento)
+      .map((c) => c.sentimento);
+    const qtdOtimista = sentimentos.filter((s) => s === "Otimista").length;
+    const qtdPessimista = sentimentos.filter((s) => s === "Pessimista").length;
+    let humor = "Neutro 😐";
+    let colorHumor = "var(--ink)";
+    if (qtdOtimista > qtdPessimista) {
+      humor = "Otimista 🔥";
+      colorHumor = "#10b981";
+    } else if (qtdPessimista > qtdOtimista) {
+      humor = "Pessimista 😤";
+      colorHumor = "#ef4444";
+    }
+
+    const termometroHtml =
+      comentarios.length > 0
+        ? `
+        <div class="d-flex align-items-center gap-2 mb-3 px-3 py-2 rounded-pill shadow-sm" style="background: var(--surface-muted); border: 1px solid var(--line); width: fit-content;">
+            <span class="small fw-bold text-uppercase text-muted">Termômetro da Torcida (IA):</span>
+            <span class="small fw-bolder" style="color: ${colorHumor};">${humor}</span>
+        </div>
+    `
+        : "";
+
+    const comentariosPais = comentarios.filter((c) => !c.parentId);
+    const respostas = comentarios.filter((c) => c.parentId);
+
+    const fixado = comentariosPais.find((c) => c.fixado);
+    if (fixado) {
+      comentariosPais.splice(comentariosPais.indexOf(fixado), 1);
+    }
+
     if (ordemComentarios === "alta") {
-      comentarios.sort(
+      comentariosPais.sort(
         (a, b) => (b.likes?.length || 0) - (a.likes?.length || 0),
       );
     } else {
-      comentarios.sort((a, b) => new Date(b.data) - new Date(a.data));
+      comentariosPais.sort((a, b) => new Date(b.data) - new Date(a.data));
     }
-    if (fixado) comentarios.unshift(fixado);
+    if (fixado) comentariosPais.unshift(fixado);
 
     if (comentarios.length === 0) {
       if (!silent)
         list.innerHTML = `<div class="text-muted text-center small py-4">Seja o primeiro a deixar um comentário nesta matéria!</div>`;
       return;
     }
-    list.innerHTML = comentarios
-      .map((c) => {
-        const isAutor = c.role === "admin" || c.role === "super_admin";
-        const badgeAutor = isAutor
-          ? `<span class="badge rounded-pill ms-2" style="font-size: 0.55rem; background: linear-gradient(135deg, #f8db52, #d4b51c) !important; color: #111 !important; box-shadow: 0 2px 5px rgba(248,219,82,0.4);">AUTOR</span>`
+
+    const renderComment = (c, isReply = false) => {
+      const isAutor = c.role === "admin" || c.role === "super_admin";
+      const badgeAutor = isAutor
+        ? `<span class="badge rounded-pill ms-2" style="font-size: 0.55rem; background: linear-gradient(135deg, #f8db52, #d4b51c) !important; color: #111 !important; box-shadow: 0 2px 5px rgba(248,219,82,0.4);">AUTOR</span>`
+        : "";
+      const badgeGamificacao = c.badgeGamificacao
+        ? `<span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill ms-1" style="font-size: 0.55rem;">${c.badgeGamificacao}</span>`
+        : "";
+      const badgeSentimento =
+        c.sentimento && c.sentimento !== "Neutro"
+          ? `<span class="badge bg-transparent ms-1" style="font-size: 0.6rem; color: ${c.sentimento === "Otimista" ? "#10b981" : "#ef4444"};">${c.sentimento === "Otimista" ? "🔥" : "😤"}</span>`
           : "";
-        const isFixado = c.fixado;
-        const badgeFixado = isFixado
-          ? `<span class="badge bg-dark rounded-pill ms-2 text-white" style="font-size: 0.55rem; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">📌 FIXADO</span>`
+
+      const isFixado = c.fixado;
+      const badgeFixado = isFixado
+        ? `<span class="badge bg-dark rounded-pill ms-2 text-white" style="font-size: 0.55rem; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">📌 FIXADO</span>`
+        : "";
+
+      const borderStyle = isFixado
+        ? `border: 2px solid var(--ink); background: var(--surface);`
+        : isAutor
+          ? `border: 1px solid rgba(248,219,82,0.4); background: color-mix(in srgb, #f8db52 5%, var(--surface));`
+          : `border: 1px solid var(--line); background: var(--surface);`;
+
+      const curtidas = c.likes ? c.likes.length : 0;
+      const curtidoPorMim =
+        c.likes && userId ? c.likes.includes(userId) : false;
+      const heartFill = curtidoPorMim ? "#f70068" : "none";
+      const heartColor = curtidoPorMim ? "#f70068" : "currentColor";
+
+      const minutosPassados = (new Date() - new Date(c.data)) / 60000;
+      const podeEditar =
+        c.usuarioId === userId && minutosPassados < 5 && !isFixado;
+      const btnEditar = podeEditar
+        ? `<button class="btn btn-link p-0 text-muted d-flex align-items-center ms-2 text-decoration-none" style="font-size: 0.75rem; font-weight: bold;" title="Editar comentário" onclick="editarMeuComentario('${c.id}', '${escapeAttr(c.texto)}', '${noticiaId}')">Editar</button>`
+        : "";
+
+      const reportBtn =
+        statusAuth.logado && c.usuarioId !== userId
+          ? `<hr class="dropdown-divider my-1">
+             <button class="dropdown-item text-danger small d-flex align-items-center gap-1" style="font-size: 0.75rem; font-weight: bold;" onclick="denunciarComentario('${c.id}', '${noticiaId}')">🚩 Denunciar Abuso</button>`
           : "";
 
-        const borderStyle = isFixado
-          ? `border: 2px solid var(--ink); background: var(--surface);`
-          : isAutor
-            ? `border: 1px solid rgba(248,219,82,0.4); background: color-mix(in srgb, #f8db52 5%, var(--surface));`
-            : `border: 1px solid var(--line); background: var(--surface);`;
+      const btnResponder =
+        statusAuth.logado && !isReply
+          ? `<button class="btn btn-link p-0 text-muted small fw-bold ms-3 text-decoration-none" style="font-size: 0.75rem;" onclick="iniciarResposta('${c.id}', '${escapeAttr(c.usuarioNome)}')">Responder</button>`
+          : "";
 
-        const curtidas = c.likes ? c.likes.length : 0;
-        const curtidoPorMim =
-          c.likes && userId ? c.likes.includes(userId) : false;
-        const heartFill = curtidoPorMim ? "#f70068" : "none";
-        const heartColor = curtidoPorMim ? "#f70068" : "currentColor";
-
-        const btnApagar =
-          c.usuarioId === userId && !isFixado
-            ? `
-            <button class="btn btn-link p-0 text-muted d-flex align-items-center" title="Apagar meu comentário" onclick="apagarMeuComentario('${c.id}', '${noticiaId}')">
+      const btnApagar =
+        c.usuarioId === userId && !isFixado
+          ? `<button class="btn btn-link p-0 text-muted d-flex align-items-center ms-3" title="Apagar meu comentário" onclick="apagarMeuComentario('${c.id}', '${noticiaId}')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
-        `
-            : "";
-
-        const btnFixar = isUserAdmin
-          ? `
-            <button class="btn btn-link p-0 ${isFixado ? "text-dark" : "text-muted"} d-flex align-items-center ms-auto" title="Fixar/Desfixar comentário" onclick="fixarComentario('${c.id}', '${noticiaId}')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFixado ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.68V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v4.68a2 2 0 0 1-1.11 1.87l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
-            </button>
-        `
+             </button>`
           : "";
 
-        return `
-        <div class="glass-panel p-3 rounded-4 shadow-sm" style="${borderStyle}">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="d-flex align-items-center gap-2">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 28px; height: 28px; background: ${isAutor ? "#111" : "var(--line)"}; color: ${isAutor ? "#f8db52" : "var(--ink)"}; font-size: 0.7rem;">${iniciais(c.usuarioNome)}</div>
-                    <strong class="small" style="color: var(--ink);">${escapeHtml(c.usuarioNome)} ${badgeAutor} ${badgeFixado}</strong>
-                </div>
-                    <span class="text-muted" style="font-size: 0.65rem;" title="${formatarData(c.data)}">${tempoRelativo(c.data)}</span>
-            </div>
-                <p class="m-0 small mb-3" style="color: var(--ink); line-height: 1.45;">${escapeHtml(c.texto).replace(/\n/g, "<br>")}</p>
-                <div class="d-flex align-items-center gap-3 border-top border-secondary border-opacity-10 pt-2">
-                    <button class="btn btn-link p-0 text-decoration-none d-flex align-items-center gap-1" style="color: ${heartColor}; font-size: 0.75rem;" onclick="curtirComentario('${c.id}', '${noticiaId}')">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="${heartFill}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                        <span class="fw-bold">${curtidas}</span>
-                    </button>
-                    ${btnApagar}
-                    ${btnFixar}
-                </div>
-        </div>
+      const btnFixar =
+        isUserAdmin && !isReply
+          ? `<button class="btn btn-link p-0 ${isFixado ? "text-dark" : "text-muted"} d-flex align-items-center ms-auto" title="Fixar/Desfixar comentário" onclick="fixarComentario('${c.id}', '${noticiaId}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFixado ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.68V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v4.68a2 2 0 0 1-1.11 1.87l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+             </button>`
+          : "";
+
+      const reacoesDisponiveis = ["🔥", "😂", "😡", "👏"];
+      const reacoesHtml = reacoesDisponiveis
+        .map((emoji) => {
+          const users = c.reactions?.[emoji] || [];
+          if (users.length === 0) return "";
+          const reactAtivo = users.includes(userId)
+            ? "bg-secondary bg-opacity-25 border-secondary"
+            : "bg-transparent border-secondary border-opacity-25";
+          return `<button class="btn btn-sm p-1 d-flex align-items-center gap-1 rounded border ${reactAtivo}" style="font-size: 0.7rem;" onclick="reagirComentario('${c.id}', '${noticiaId}', '${emoji}')">${emoji} <span class="fw-bold">${users.length}</span></button>`;
+        })
+        .join("");
+
+      const addReactionBtn = statusAuth.logado
+        ? `<div class="dropdown">
+              <button class="btn btn-link p-0 text-muted d-flex align-items-center" data-bs-toggle="dropdown" title="Reagir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></button>
+              <div class="dropdown-menu p-1 shadow-sm rounded-3 border border-secondary border-opacity-10" style="min-width: auto;">
+                  <div class="d-flex gap-1 mb-1">
+                      ${reacoesDisponiveis.map((emoji) => `<button class="btn btn-sm btn-light px-2" onclick="reagirComentario('${c.id}', '${noticiaId}', '${emoji}')">${emoji}</button>`).join("")}
+                  </div>
+                  ${reportBtn}
+              </div>
+          </div>`
+        : "";
+
+      const btnShare = `
+          <button class="btn btn-link p-0 text-muted d-flex align-items-center ms-2" title="Compartilhar comentário" onclick="compartilharComentario('${c.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+          </button>
       `;
-      })
-      .join("");
+
+      let textoRenderizado = c.texto
+        ? escapeHtml(c.texto).replace(/\n/g, "<br>")
+        : "";
+      textoRenderizado = textoRenderizado.replace(
+        /@(\w+)/g,
+        '<strong style="color: var(--accent);">@$1</strong>',
+      );
+      const gifHtml = c.gifUrl
+        ? `<img src="${escapeAttr(c.gifUrl)}" class="rounded-3 mt-2 shadow-sm d-block" style="max-height: 120px;" alt="GIF">`
+        : "";
+      const editadoHtml = c.editado
+        ? '<span class="text-muted ms-2 fst-italic" style="font-size: 0.6rem;">(editado)</span>'
+        : "";
+
+      const replyClass = isReply ? "ms-4 mt-2 mb-0" : "mb-3";
+
+      return `
+      <div id="comment-${c.id}" class="glass-panel p-3 rounded-4 shadow-sm comment-anim ${replyClass}" style="${borderStyle}">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-2">
+                      <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm overflow-hidden" style="width: 28px; height: 28px; background: ${isAutor ? "#111" : "var(--line)"}; color: ${isAutor ? "#f8db52" : "var(--ink)"}; font-size: 0.7rem;">
+                          ${c.avatarUrl ? `<img src="${c.avatarUrl}" style="width: 100%; height: 100%; object-fit: cover;" alt="Avatar" referrerpolicy="no-referrer">` : iniciais(c.usuarioNome)}
+                      </div>
+                  <strong class="small" style="color: var(--ink);">${escapeHtml(c.usuarioNome)} ${badgeAutor} ${badgeFixado} ${badgeGamificacao} ${badgeSentimento}</strong>
+              </div>
+                  <span class="text-muted" style="font-size: 0.65rem;" title="${formatarData(c.data)}">${tempoRelativo(c.data)}</span>
+          </div>
+              ${textoRenderizado ? `<p class="m-0 small mb-2" style="color: var(--ink); line-height: 1.45;">${textoRenderizado} ${editadoHtml}</p>` : ""}
+              ${gifHtml}
+              <div class="d-flex align-items-center gap-2 border-top border-secondary border-opacity-10 pt-2 flex-wrap comment-actions">
+                  <button class="btn btn-link p-0 text-decoration-none d-flex align-items-center gap-1" style="color: ${heartColor}; font-size: 0.75rem;" onclick="curtirComentario('${c.id}', '${noticiaId}')">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="${heartFill}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                      <span class="fw-bold">${curtidas}</span>
+                  </button>
+                  ${addReactionBtn}
+                  ${reacoesHtml}
+                  ${btnShare}
+                  ${btnResponder}
+                  ${btnEditar}
+                  ${btnApagar}
+                  ${btnFixar}
+              </div>
+      </div>
+      `;
+    };
+
+    list.innerHTML =
+      termometroHtml +
+      comentariosPais
+        .map((c) => {
+          const filhotes = respostas.filter(
+            (r) => String(r.parentId) === String(c.id),
+          );
+          filhotes.sort((a, b) => new Date(a.data) - new Date(b.data));
+          return (
+            renderComment(c, false) +
+            filhotes.map((f) => renderComment(f, true)).join("")
+          );
+        })
+        .join("");
   } catch (e) {
+    console.error("Erro ao renderizar comentarios:", e);
     if (!silent)
       list.innerHTML = `<div class="text-danger small text-center">Erro ao carregar comentários.</div>`;
   }
@@ -461,33 +673,278 @@ function tempoRelativo(dataISO) {
   return `Há ${diffDias} d`;
 }
 
-window.enviarComentario = async function (noticiaId) {
+window.enviarComentario = async function (noticiaId, btn) {
   const txtArea = document.getElementById("comment-text");
-  if (!txtArea.value.trim()) return;
-  const btn = event.currentTarget;
-  const txtOrig = btn.innerHTML;
-  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-  btn.disabled = true;
+  if (!txtArea.value.trim() && !gifSelecionado) return;
+  const txtOrig = btn ? btn.innerHTML : "Comentar";
+  if (btn) {
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+    btn.disabled = true;
+  }
   try {
     const res = await fetch(`/api/comentarios/noticia/${noticiaId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ texto: txtArea.value }),
+      body: JSON.stringify({
+        texto: txtArea.value,
+        parentId: parentIdParaResponder,
+        gifUrl: gifSelecionado,
+      }),
     });
     const data = await res.json();
     if (!res.ok) {
       mostrarNotificacaoLeitor(data.erro || "Erro ao comentar", "danger");
     } else {
       txtArea.value = "";
+      document.getElementById("char-count").innerText = "0/500";
+      removerGif();
+      cancelarResposta(); // Limpa estado de resposta
       carregarComentarios(noticiaId);
       mostrarNotificacaoLeitor("Comentário publicado com sucesso!", "success");
     }
   } catch (e) {
     mostrarNotificacaoLeitor("Erro de conexão", "danger");
   } finally {
-    btn.innerHTML = txtOrig;
-    btn.disabled = false;
+    if (btn) {
+      btn.innerHTML = txtOrig;
+      btn.disabled = false;
+    }
   }
+};
+
+window.notificarDigitacao = function (noticiaId) {
+  if (typingTimeout) return;
+  fetch(`/api/comentarios/typing/${noticiaId}`, { method: "POST" }).catch(
+    () => {},
+  );
+  typingTimeout = setTimeout(() => {
+    typingTimeout = null;
+  }, 4000);
+};
+
+window.abrirModalGif = function () {
+  let gifBox = document.getElementById("gif-search-box");
+  if (!gifBox) {
+    gifBox = document.createElement("div");
+    gifBox.id = "gif-search-box";
+    gifBox.className = "glass-panel position-absolute p-2 rounded-3 shadow-lg";
+    gifBox.style.cssText =
+      "bottom: 100%; left: 0; width: 280px; z-index: 1000; margin-bottom: 10px; border: 1px solid var(--line); background: var(--surface);";
+    gifBox.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <input type="text" id="gif-search-input" class="form-control form-control-sm rounded-pill" placeholder="Buscar GIF (Ex: Botafogo)..." onkeyup="if(event.key === 'Enter') buscarGifs(this.value)">
+                <button class="btn-close ms-2" onclick="document.getElementById('gif-search-box').classList.add('d-none')"></button>
+            </div>
+            <div id="gif-results" class="d-flex flex-wrap gap-1 overflow-auto" style="height: 150px;"></div>
+        `;
+    document.getElementById("comment-text").parentElement.appendChild(gifBox);
+  }
+  gifBox.classList.remove("d-none");
+  window.buscarGifs("botafogo");
+};
+
+window.buscarGifs = async function (termo) {
+  const resEl = document.getElementById("gif-results");
+  resEl.innerHTML =
+    '<span class="text-muted small w-100 text-center mt-3">Buscando...</span>';
+  try {
+    const res = await fetch(
+      `https://g.tenor.com/v1/search?q=${encodeURIComponent(termo)}&key=LIVDSRZULELA&limit=12`,
+    );
+    const data = await res.json();
+    resEl.innerHTML = data.results
+      .map(
+        (g) => `
+            <img src="${g.media[0].tinygif.url}" style="width: 48%; height: 70px; object-fit: cover; cursor: pointer; border-radius: 4px;" onclick="selecionarGif('${g.media[0].tinygif.url}')">
+        `,
+      )
+      .join("");
+  } catch (e) {
+    resEl.innerHTML =
+      '<span class="text-danger small w-100 text-center mt-3">Erro na busca.</span>';
+  }
+};
+
+window.selecionarGif = function (url) {
+  gifSelecionado = url;
+  document.getElementById("gif-preview").classList.remove("d-none");
+  document.getElementById("gif-search-box").classList.add("d-none");
+};
+
+window.removerGif = function () {
+  gifSelecionado = null;
+  document.getElementById("gif-preview").classList.add("d-none");
+};
+
+window.editarMeuComentario = async function (id, textoAtual, noticiaId) {
+  const novoTexto = prompt(
+    "Edite seu comentário (até 5 min da postagem):",
+    textoAtual,
+  );
+  if (novoTexto !== null && novoTexto.trim() !== "") {
+    try {
+      const res = await fetch(`/api/comentarios/meu/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texto: novoTexto }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        mostrarNotificacaoLeitor("Comentário atualizado.", "success");
+        carregarComentarios(noticiaId);
+      } else {
+        mostrarNotificacaoLeitor(data.erro || "Erro ao editar.", "danger");
+      }
+    } catch (e) {
+      mostrarNotificacaoLeitor("Erro de conexão.", "danger");
+    }
+  }
+};
+
+window.denunciarComentario = async function (id, noticiaId) {
+  if (
+    !confirm(
+      "Tem certeza que deseja reportar este comentário por ofensa ou abuso? (3 denúncias ocultam a mensagem)",
+    )
+  )
+    return;
+  try {
+    const res = await fetch(`/api/comentarios/report/${id}`, {
+      method: "POST",
+    });
+    if (res.ok) {
+      mostrarNotificacaoLeitor(
+        "Denúncia enviada. Obrigado por manter a comunidade segura!",
+        "success",
+      );
+      carregarComentarios(noticiaId);
+    } else {
+      mostrarNotificacaoLeitor("Erro ao denunciar.", "danger");
+    }
+  } catch (e) {
+    mostrarNotificacaoLeitor("Erro de conexão.", "danger");
+  }
+};
+
+window.iniciarResposta = function (id, nome) {
+  parentIdParaResponder = id;
+  const ind = document.getElementById("reply-indicator");
+  const nameEl = document.getElementById("reply-to-name");
+  const txtArea = document.getElementById("comment-text");
+  if (ind && nameEl && txtArea) {
+    nameEl.textContent = nome;
+    ind.classList.remove("d-none");
+    txtArea.focus();
+  }
+};
+
+window.cancelarResposta = function () {
+  parentIdParaResponder = null;
+  const ind = document.getElementById("reply-indicator");
+  if (ind) ind.classList.add("d-none");
+};
+
+window.reagirComentario = async function (comentarioId, noticiaId, emoji) {
+  try {
+    const res = await fetch(`/api/comentarios/react/${comentarioId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ emoji }),
+    });
+    if (res.status === 401) {
+      mostrarNotificacaoLeitor("Faça login para reagir.", "danger");
+      return;
+    }
+    if (res.ok) carregarComentarios(noticiaId);
+  } catch (e) {}
+};
+
+window.compartilharComentario = async function (id) {
+  const el = document.getElementById(`comment-${id}`);
+  if (!el) return;
+
+  const btn = event.currentTarget;
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+  try {
+    if (typeof html2canvas === "undefined") {
+      await new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.src =
+          "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+
+    const actions = el.querySelector(".comment-actions");
+    if (actions) actions.style.display = "none";
+    const canvas = await html2canvas(el, {
+      backgroundColor:
+        getComputedStyle(document.body).backgroundColor || "#fff",
+    });
+    if (actions) actions.style.display = "";
+
+    canvas.toBlob(async (blob) => {
+      const file = new File([blob], "comentario.png", { type: "image/png" });
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({ files: [file] })
+      ) {
+        await navigator.share({
+          title: "Tribuna Alvinegra",
+          text: "Olha esse comentário!",
+          files: [file],
+        });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "comentario.png";
+        a.click();
+        URL.revokeObjectURL(url);
+        mostrarNotificacaoLeitor("Imagem salva no seu dispositivo!", "success");
+      }
+    });
+  } catch (e) {
+    mostrarNotificacaoLeitor("Erro ao compartilhar", "danger");
+  } finally {
+    btn.innerHTML = originalHtml;
+  }
+};
+
+window.carregarNotificacoes = async function () {
+  try {
+    const res = await fetch("/api/comentarios/notificacoes");
+    if (res.ok) {
+      const notifs = await res.json();
+      const list = document.getElementById("notif-list");
+      const badge = document.getElementById("notif-badge");
+      if (list) {
+        const unread = notifs.filter((n) => !n.lida).length;
+        if (unread > 0) badge.classList.remove("d-none");
+        else badge.classList.add("d-none");
+
+        if (notifs.length === 0)
+          list.innerHTML =
+            '<li class="text-center text-muted small p-2">Sem notificações</li>';
+        else
+          list.innerHTML = notifs
+            .map(
+              (n) =>
+                `<li><a class="dropdown-item text-wrap rounded px-2 py-1 mb-1 ${n.lida ? "text-muted" : "fw-bold bg-secondary bg-opacity-10"}" href="${n.link}" style="font-size: 0.75rem;">${escapeHtml(n.mensagem)}</a></li>`,
+            )
+            .join("");
+      }
+    }
+  } catch (e) {}
+};
+
+window.marcarNotificacoesLidas = async function () {
+  document.getElementById("notif-badge")?.classList.add("d-none");
+  await fetch("/api/comentarios/notificacoes/ler", { method: "POST" });
 };
 
 window.logoutComentario = async function () {
@@ -759,6 +1216,10 @@ function escapeHtml(valor = "") {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function escapeAttr(valor = "") {
+  return escapeHtml(valor).replaceAll("`", "&#096;");
 }
 
 window.mostrarNotificacaoLeitor = function (mensagem, cor = "success") {

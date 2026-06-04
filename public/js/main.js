@@ -15,6 +15,12 @@ window.estadoHome = estadoHome; // Expõe o estado globalmente para o carrossel 
 let timeoutBusca = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    });
+  }
+
   // Processa o retorno do login social se o Supabase redirecionar para a raiz
   const hash = window.location.hash;
   if (hash && hash.includes("access_token")) {
@@ -759,23 +765,6 @@ async function carregarWidgetEnquete() {
     let imagemHtml = "";
     if (enquete.imagemUrl) {
       imagemHtml = `<img src="${escapeAttr(enquete.imagemUrl)}" class="w-100 rounded-3 mb-3 shadow-sm" style="object-fit: cover; max-height: 200px;" alt="Enquete">`;
-    }
-
-    // Substituir título do widget por imagem se houver
-    const widgetCard = alvo.closest(".widget-card");
-    if (widgetCard) {
-      const head = widgetCard.querySelector(".widget-card__head");
-      if (head) {
-        if (enquete.imagemUrl) {
-          head.innerHTML = `<img src="${escapeAttr(enquete.imagemUrl)}" class="w-100" style="object-fit: cover; max-height: 200px; border-top-left-radius: inherit; border-top-right-radius: inherit;" alt="Enquete">`;
-          head.style.padding = "0";
-          imagemHtml = ""; // Remove a imagem do corpo para não duplicar
-        } else {
-          if (typeof aplicarConfigWidgets === "function")
-            aplicarConfigWidgets(estadoHome.config);
-          head.style.padding = "";
-        }
-      }
     }
 
     alvo.innerHTML =

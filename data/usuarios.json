@@ -28,7 +28,8 @@
     "role": "usuario",
     "email": "desafiov4company.2024@gmail.com",
     "senha": "",
-    "usuario": "Desafio v4"
+    "usuario": "Desafio v4",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocJwPDyZrZnoQYAKUQub9Rcmx5Apq6HTBKJIZs8pPRHuLFYucw=s96-c"
   },
   {
     "id": "1780541412838",
@@ -39,9 +40,50 @@
   },
   {
     "id": "1780544491159",
-    "usuario": "Romulo SEP",
+    "role": "usuario",
     "email": "romulosepxxx@gmail.com",
     "senha": "",
-    "role": "usuario"
+    "usuario": "Romulo SEP",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocIF1VYKJ7jahBNhggfjCTxXEAJdaGlL_GaHdn3jtImhsLjGWw=s96-c"
+  },
+  {
+    "id": "1780579607605",
+    "role": "usuario",
+    "email": "tv602blocob@gmail.com",
+    "senha": "",
+    "usuario": "TV Sala",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocKMuRqK8a3EgtMzH_G01nVoGUW9WLkHbDd6xQBLS5HHUj10mBs=s96-c"
+  },
+  {
+    "id": "1780579795202",
+    "role": "usuario",
+    "email": "asasgil@gmail.com",
+    "senha": "",
+    "usuario": "Sérgio Gil",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocJKyRu1Hb2cqMAr8sL7oplmVrzpb2W3rqSf4yXEaf6UNG2gg3gqqQ=s96-c"
+  },
+  {
+    "id": "1780582090749",
+    "role": "usuario",
+    "email": "joaoseedorfxxx@gmail.com",
+    "senha": "",
+    "usuario": "João Papada Seedorf",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocJrQ1CZQnUbJ7mM2GT3ZTkGN5epLZCvEznerIkvvtFumNjNnn8=s96-c"
+  },
+  {
+    "id": "1780582148208",
+    "role": "usuario",
+    "email": "romulosepxxx00@gmail.com",
+    "senha": "",
+    "usuario": "Romulo Sep",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocLfGeJmeHv90Hf_75Ah7uV8N_6YOAb1PhHZj37J3UCEcYqZTQ=s96-c"
+  },
+  {
+    "id": "1780584994064",
+    "usuario": "sergio gil",
+    "email": "sergiogil.ti.bkp@gmail.com",
+    "senha": "",
+    "role": "usuario",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocKJqsuUIlCuxsGffUd_sd9G9P6wSZHiJxGpUTA35_1UDFToCw=s96-c"
   }
 ]

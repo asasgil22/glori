@@ -50,6 +50,10 @@ router.post("/login/social", async (req, res) => {
 
     const email = data.user.email;
     const nome = data.user.user_metadata?.full_name || email.split("@")[0];
+    const avatarUrl =
+      data.user.user_metadata?.avatar_url ||
+      data.user.user_metadata?.picture ||
+      "";
 
     const usuarios = await lerJSON(PATH_USUARIOS, []);
     let user = usuarios.find(
@@ -64,13 +68,22 @@ router.post("/login/social", async (req, res) => {
         email: email,
         senha: "", // Sem senha local
         role: "usuario", // Acesso restrito! Não é Super Admin por padrão.
+        avatarUrl: avatarUrl,
       };
       usuarios.push(user);
+      await salvarJSON(PATH_USUARIOS, usuarios);
+    } else if (avatarUrl && user.avatarUrl !== avatarUrl) {
+      user.avatarUrl = avatarUrl;
       await salvarJSON(PATH_USUARIOS, usuarios);
     }
 
     req.session.logado = true;
-    req.session.user = { id: user.id, usuario: user.usuario, role: user.role };
+    req.session.user = {
+      id: user.id,
+      usuario: user.usuario,
+      role: user.role,
+      avatarUrl: user.avatarUrl,
+    };
     return res.sendStatus(200);
   } catch (err) {
     return res.status(500).json({ erro: "Erro interno ao validar token." });

@@ -1,14 +1,14 @@
 {
   "totais": {
     "OGOL": 233,
-    "O DIA": 67,
-    "LANCE!": 2826,
-    "365SCORES": 18,
-    "FOGÃONET": 154,
-    "TNT SPORTS": 2,
-    "ESPN BRASIL": 96,
-    "UOL ESPORTE": 650,
-    "GLOBO ESPORTE": 99
+    "O DIA": 68,
+    "LANCE!": 2829,
+    "365SCORES": 20,
+    "FOGÃONET": 160,
+    "TNT SPORTS": 3,
+    "ESPN BRASIL": 97,
+    "UOL ESPORTE": 654,
+    "GLOBO ESPORTE": 103
   },
   "processados": [
     "https://news.google.com/rss/articles/CBMi6wFBVV95cUxOUzlzTzlpc3hmOHNXU0RtU3Vrdy02cGVyaGVsSGNEXzQ1ZldPb1JndDFtSzdETUh2OTBfYVpDNTJOWDlQQ1IwVl8yd0w0R2JwaE9yT194UWZmUGE3VkE3Sm1NcVFjSUtKZGdDSEtvZl9QTldLZG85azlfSU1zektWUy1WN0dYR1BqaHlVWGR1cUtVcFBuclRHbUZIZXZDdzlXR1dMNDdBVUhmOU5uUkYtbFFfTnNRMEJiUVBFVEhub0VtMW81ZDNRSXVhaGJrbVVMcDRLNC1PbVBWX0xsX2FRR2F5dGdxU0xLNXZR0gH6AUFVX3lxTE9NbGFwVDYzblNzUm1ta2NEUW1qVW5jY0REcy1xdzBFZmJxcDJTMGN1RDJENi14OVFCbktJcVA2eU1OZ2dDY3hDVTJGckFFQVBEZFJmS3hnbTZ0bV9qT0lYcDIxVWk1emNxMVRyM0JGa2oyaEVocnlqUjM5eHZWbEZNNDRNODRETW9RdGxuUDNZcHFQamJQdk9JNHkxVnlOaHltb1FFeWZ6YVZoZHFLc0RFaWpfZHZYY0pOd29UV09TSVVCWVlRVjNlWGVBdTJ2Tlp2RGt6LU5nVXdTZ0ZYYUpLcVFINUt1VHVjdFZjWlJ2cl9GUGxKdldZS2c?oc=5",
@@ -4155,6 +4155,28 @@
     "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6a210002d93e4504b975d9fe74ff13d1&url=https%3a%2f%2fwww.lance.com.br%2fbotafogo%2fbotafogo-renova-com-joia-que-treinou-com-a-selecao-de-ancelotti.html&c=7095826988484858993&mkt=pt-br",
     "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6a210002d93e4504b975d9fe74ff13d1&url=https%3a%2f%2fwww.lance.com.br%2ffutebol-internacional%2fex-botafogo-brilha-na-europa-e-celebra-resultado-da-temporada.html&c=4430368670509047007&mkt=pt-br",
     "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6a210002d93e4504b975d9fe74ff13d1&url=https%3a%2f%2fwww.lance.com.br%2fbotafogo%2fbotafogo-quebra-projecoes-e-campanha-permite-sonhar-na-sul-americana.html&c=7108976144797940693&mkt=pt-br",
-    "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6a21000e5b9240c99cbd18d2c82ecade&url=https%3a%2f%2fwww.ogol.com.br%2fnoticias%2fsao-paulo-avanca-nas-negociacoes-com-botafogo-e-se-aproxima-da-contratacao-de-newton%2f1139425&c=15409980684902000107&mkt=pt-br"
+    "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6a21000e5b9240c99cbd18d2c82ecade&url=https%3a%2f%2fwww.ogol.com.br%2fnoticias%2fsao-paulo-avanca-nas-negociacoes-com-botafogo-e-se-aproxima-da-contratacao-de-newton%2f1139425&c=15409980684902000107&mkt=pt-br",
+    "https://news.google.com/rss/articles/CBMinwJBVV95cUxNcGtCWG5TV1FBUDNDajJFckxvMm0zXzFsaHJJQmY4ejhMeFNmYnZ2OU1fTERnbS16N3lSN3lPdnJfR1licjBJODI3TzJGbmVMaHZrNU4xTnEtdVV3clNwRmtuRkZRbWpaeUxRTHpiZXMxU1JwR0RSRlVLWXNLLU1jZ0hDSWt0cFRvZlBYWmxjMFZFRWc0Z0llWjVxbk1nR2VDY3pKd29Hdjdkc19uRVNMeTFGVXI5WlBaNFlZSmZlM3RuTThITEZxMGlNZWdaYjVJeHltTUVkbURyOHVUQnNLSWNUTFN2eDhRVWlQd0VKZExMemRCazVhRzJXZkZaYkZrdmVEWDlCQm1jRWFacEwyeVdCXzBfSnJnczBNRVpRcw?oc=5",
+    "https://news.google.com/rss/articles/CBMiXkFVX3lxTE4yWUpmdk1keUJmMzZxbHBNblhxZGREcHozSVlYck1UQ0NaTlVCVEVqbHZGaTN4NGtBOXk4Tl9Ccnl0dXczY2xZa1FyT0F6QWVMcjF4cWhUMnlZNUdkcEE?oc=5",
+    "https://news.google.com/rss/articles/CBMi4AFBVV95cUxPcWdvVzRMSFc4R2F1eXZHUEhqOUFLOXVRNnlOVG9hY2gxSlVlNS1RVXpBMk9IVmc4QWM1Y0dKVUVxV0Z1aFZ5NGJaS05weGhOQ1AydDlQaDkyTUNnZzg3NFJKbFRkQm5xdEdhQVRJZmFQNDJuNm55ajVka0RfUzQwYTFLNmNkaFlPS0FGN3FhczY5bWV6M0VBTFk4VmxfUFZJU1k5NFJaV0tGUXhyMFlCZFBPUDEyMjZ2NVdHWW9mM2c1UFdUeERsYkxJZmNCc3JwU2R3V2tNTW5qWDM5T1pnNtIB7wFBVV95cUxPY3RITHljUUZsOTE3cnlTaDZLeTVaUWZzclk2a0xhM2xSdExCME43TkdBVTNxR2tWMFl3YmRHV0FoVUpwUWxKekhmb2YzR05Ga1BVb1JPNHJZa09oOXBLbDRUTkNqMWdha0JveVdtNGFhZERlTUxhRW5MZEZ6TGU1U1hDaW95Y1NrdTJuV2JrUHpUYks1c2RNTXpuSjE1anhWaDBZOHl6b0p0NEV2X3hKSmExY1BBWWg1RHR6Um4ycmxOUmQ4a3FFZXRVaG43aFVCbU9YcHFuWlhNNGxqbTJmVjVyMU9pcDR4YnptZ0ZHSQ?oc=5",
+    "https://news.google.com/rss/articles/CBMi7AFBVV95cUxPelVTOFVTQ3hPc2JmYTc2M0QtS1N5WEdJMDhsa1FUSnpjNEFKVUtUUnJNbFJRdW1wM3l1TXlOdzhLOWEwQUV5cFFVT3l3VXRpbl9wcFhKblc0bFJIVjh1V2d1MDU2MzJMQ3BpYXRiVzFZMmVnM1VtMDdGbVpNRVBEV3BRTVdkc3F1SmsxazZYV0RCWkVueXlFd0VqLWlNTnhrYXN6TW9aNHJ2dnB6TkpPaEE0Q3RSY1hwclV5eEN5ZjgyU1FpelJsMExsN3pISTB1SG5fN1NRZjVmMXdQTlllV2V4Mjc1STF1dnpqbtIB-wFBVV95cUxNMmtKQWJuV1FWTHhVd0xsWGFoUDhPWG1Fb1hZekt1Q3NjLWQxLWZicE5FSDh5OGE3MWptdGVyMkhXTFVjamduTDN1VzZrMXFuQ09nWmRudENpcHI3czJwTnlYZ2UwUDVlYVpoTzFLMHJYU3pmSE5qQ0N2dlRtdXJWYnhPc2dMSUp1S0RUVHVaOGtUcER6QWJQT1YyT21UTnIxUnI3RVdDeG1lOHF2bUMwcHhmaHhoWUI3Yko2b3JTSkRVdVVvWDVhWHAxSU53UXBFRXY0dzdvcWpLcDJsbktXejU2MGtMT3ZJaUtUZGJ6dmttbVlLWjE0ZnhZbw?oc=5",
+    "https://news.google.com/rss/articles/CBMinwFBVV95cUxQd0QzZTFWcWd0cm00UE1veDU1a3BCMU5Xb3JzSHlvZk9ZSzJqbWpwS0VWU2h6SEp1RFZaVDdjcDFuZjVqeFBRZ0EzZFFEcnNiS244X3VxWFlkSGlRRUJWYUlKOVFrd1d2M292cWVJVXZmMW01ZjUtZHFQU1RrN3ZRaVJjZmZncV93MFRhck5TQ2NWNm9YX0RhdkEyem5FRnc?oc=5",
+    "https://news.google.com/rss/articles/CBMi_gFBVV95cUxOOW51djkzQ2JfS3BGMzlCZGtTaS16dG9zV0FJZ2pHblNpRnlUSGEzb1Vrdk9QMmFNcTBoYUVZZjVHc0FEMG52UmxjZEpyLXItY24wUXBHN1RXbDVyNjhKSWl6Ykg3bGJwODRhX3RZbHFHbFA1aGtZTGRYalRid29mZUN4VnpkMlItWmg5NVVjbkNaZHFwZUVKeDFON1d1bUg5dUp6N2NHdlJJRHlQZHVfRzVQblJmNkZiLTcxUkEzc2pyeVdPMEczbUJOQmpMbDRZUXh4R1Z4aUcxMjdXZXFXQkZnNmlMTDMxaC0yQVZRSFdZN3Y2T281ODQ4bjV6Zw?oc=5",
+    "https://news.google.com/rss/articles/CBMi-wFBVV95cUxNR1c5Y2VmdU1EcXU1MjI1ZmJFNXRNRGtvbXFlN3NXdjRXNFFOZjljUFJ5cnNreDY2dGNOWVlWM0QxSTFJMGJTWGxNNS1udTJTSVcyNVJQRXRpeFlfYnk5N3RlRUlYWUdPSEd4UGVnRFJpRXdaZmNTcC1Va2JkNkxIODY0Q21Tb3dwcUVHdF9FcnpDWnNxSGZIMEszN2dJTVg5T05MRF9qTXRGRnloM2x6WjloMVBleXRTZ0pDTFBTN1hHZkVXUDktSmlwSnVMeUk1X3VoalF4Z01MX0hMemtZOVRGYnEwSWdGcjlCQ29ObjZBREhQb3dFY0dONNIB-wFBVV95cUxNR1c5Y2VmdU1EcXU1MjI1ZmJFNXRNRGtvbXFlN3NXdjRXNFFOZjljUFJ5cnNreDY2dGNOWVlWM0QxSTFJMGJTWGxNNS1udTJTSVcyNVJQRXRpeFlfYnk5N3RlRUlYWUdPSEd4UGVnRFJpRXdaZmNTcC1Va2JkNkxIODY0Q21Tb3dwcUVHdF9FcnpDWnNxSGZIMEszN2dJTVg5T05MRF9qTXRGRnloM2x6WjloMVBleXRTZ0pDTFBTN1hHZkVXUDktSmlwSnVMeUk1X3VoalF4Z01MX0hMemtZOVRGYnEwSWdGcjlCQ29ObjZBREhQb3dFY0dONA?oc=5",
+    "https://news.google.com/rss/articles/CBMiYkFVX3lxTE4zX3BCMzk0QkJPQlE1X0pWT1ZfLUdudlZjY1hZX3BsYnhQWi1yNXZrZnRwQjBSUlBiczlRZ0RKUTlLMmV1OF9HOWJWNkhveUVIdC15SnF5enhGY2RTcVYwd3hB?oc=5",
+    "https://www.fogaonet.com/noticias-do-botafogo/ex-coordenador-scout-botafogo-elenco-de-24-nao-era-tao-caro-se-pagava-receita/",
+    "https://news.google.com/rss/articles/CBMi0AFBVV95cUxOQUFnNDkxVmxfRWxZOXQ0OFBKbzJOc2RwczRLXzJQZ3FfQy1OY2ZRaGc2X201bmtJbzYtQ0JvSE1nM0s2QVgwc1RSREF4dWQ4RnV4cVpiQzZWMjdOc0phckthRGtFeU1SVkNlOGZ2WGkwMjZubmhRTW54Um1NeGtIUWVKbm5fcUkxaUNtSEdfRHFOWG5lSWpZLUE2RExtUDNtWnNvZEsweGhKNEl0RDF3NWg5YUw5VVZFbWtSSzdFRXc4cV81SHYwZjlWLTlpMU030gHQAUFVX3lxTE5BQWc0OTFWbF9FbFk5dDQ4UEpvMk5zZHBzNEtfMlBncV9DLU5jZlFoZzZfbTVua0lvNi1DQm9ITWczSzZBWDBzVFJEQXh1ZDhGdXhxWmJDNlYyN05zSmFyS2FEa0V5TVJWQ2U4ZnZYaTAyNm5uaFFNbnhSbU14a0hRZUpubl9xSTFpQ21IR19EcU5YbmVJalktQTZETG1QM21ac29kSzB4aEo0SXREMXc1aDlhTDlVVkVta1JLN0VFdzhxXzVIdjBmOVYtOWkxTTc?oc=5",
+    "https://www.fogaonet.com/noticias-do-botafogo/botafogo-trata-quarteto-nomes-antigos-tem-novos-alvos-contratar-gol-diz-canal/",
+    "https://news.google.com/rss/articles/CBMiggJBVV95cUxQQUhyUWFjWm5YUE56eG1nODlyUDhLcDFhUWZOWU40bU0zbUU4TmQyWjRJbmdpX01nZC1YX0dMNXdtMVFiYW83UTNjM0RPWTA0Q09pd0ZJWGhWeGUxMnVkcHIzakliLTU0V29GVWducXlldHRDRllLWHVsNk9TMkhteTgzTDNoaW8yaHcxbC1aVHhDRkFteFVoS2UzV0FMcW1ZZ3FVUndxMmcyN3pBZVRrOUpWUTZXT2xwdHJUbTk3b0lab3JBVWloc2dwVnpaOU93RGt2SnFmUmFCajVkWnk3d0JtUFZESEpXck1Dc05TTU1nb1lQeXF0Z0xzTnFqY19LYXfSAZACQVVfeXFMT3ZTV0ZNOHpTcFQ2OF91cjQ0Q3ZlYnludk9jdzRVVjRMZHRUSU1tZzVOQmFoWjh2cUk4VlJYVmpsdF9ZcVp2UHNJTnpfWGpsa1VRZXJYZEpMcTA2OFdUZ1pkQVJ3b3k5ZkM2Y1pXMUp5anBLdGVONTdfdkMxbnZrdDc2VEk0OEcxV0szSDQ2WjBDQWQwd3lfNkpkT01VdWR3Y3RXU1FnbWNROTdKN2k4NVdEeWhZQ0NUaHhYV1JsOHI3Z3RRRDlqSVRQOE01MzlQaWIxdVpNSU8wbGdNaGhnV3RORHNqaHNkOU0wQmE2OExIVDlldG9QbVg4SnZrVHlhNGp3QUJqeGNCek9uQVEwNXo?oc=5",
+    "https://news.google.com/rss/articles/CBMi9gFBVV95cUxNNHBXblkzRXFDelFraDhoMHI1TFJfN2VZOTQybG40QUtQT25kQ1dzNmw2dnNPNC10UEFNdW12blBPYjdDQW9NZ1pSdWFZRDB5b0IwODNaN21wd3pYMGx2Um1na1pmaDNEZ1FsY0paT1U2OENmd0RXVGl6SzRaZ1VfVTJWTE12RG9SV0xhcEZJWjhTaG1BOENGZG9lamcwZDhGaV9EeHBUWnNrbjB6Qk5KRjhCbWFhamZ0WXBfbjZYaHBPWmwtWll4S0g0QUJlZ0lCeVZleURRUlBaQnJsME1SLUhuZXZmS2V1VWIweXkwTUp1TkEwVGc?oc=5",
+    "https://www.fogaonet.com/noticias-do-botafogo/agencia-fair-play-financeiro-prazo-improrrogavel-botafogo-apresentar-informacoes/",
+    "https://www.fogaonet.com/noticias-do-botafogo/joaquin-correa-botafogo-radar-river-plate/",
+    "https://news.google.com/rss/articles/CBMifEFVX3lxTE5jSlJmSGk5RzFNZVd6SmdDZ3hrQnNJYzVqbUVQRFVSV2ZCamVEc3lCN3Bra3BZSHRyVTNSZmRxb0hxVnpPcG9mUjJVX1E1dzJpZU44NzFsLVFWQ3ZNUlpOaXBRVHhaYktZWmRGblJDS3M1X2hPdkRXRDh5SC0?oc=5",
+    "http://www.bing.com/news/apiclick.aspx?ref=FexRss&aid=&tid=6a217d9cc8ff408c8efc6fc97dd711e5&url=https%3a%2f%2ftntsports.com.br%2fchampionsleague%2flille-anuncia-davide-ancelotti-como-treinador-para-a-proxima-temporada-20260601-0004.html&c=5502537953866638711&mkt=en-us",
+    "https://news.google.com/rss/articles/CBMilwFBVV95cUxPVThlTlB0YTJpUElsMEF3cHlkRThqeTdiNkdldXpqeGl1a1YyeWdyRi1wZW1oZFpIUTRrbVdpY0E5RmgtaWxCYTBXWnhOd0FxX01LTXNQXzAyR0RRbmtpUnNiREtaN0NCTVNkbmVpUk1uZTlCa190ZG0teGJ2ZDAwX3RrVmtmcmhCV29YcV9NRmJUcEl4bHlV?oc=5",
+    "https://news.google.com/rss/articles/CBMijwFBVV95cUxOMHBTY3gxT3N2VngwNFNNbGVBZzBzRk5xcjNxLWY4M1ctMFp0N3NpamFUUF83WkkzcTJscmdtZjVVLUR6aDd2U2J6YktJbGd0ZXVXY2I2TEhkR0JELTViRkxsQnZhVHVXbTIwa1JiU05qcWhNX1RRWWFzVW5ROTRoNHM1RDJjdTVkcFFld2tnbw?oc=5",
+    "https://www.fogaonet.com/blog-do-mansell/dois-reforcos-no-gol-botafogo-vai-liberar-goleiros/",
+    "https://news.google.com/rss/articles/CBMiwgFBVV95cUxQM0FXNmdzT3pPcWQ1ajVWVG1CTTg4Q0g1amFVbmVuZmNtWS1RblFJaUJSc0IxblB5ZTIzSnpWdUJsLUJ4XzV2MlFRNUEwajB5NmQxLUhzaS1RZk43ci1wbW9Edk1tMWFJN3A0RTBqeFhtNllsVXRhZ2lFZENhajdXMHZCTC1tLXlxdjE3eDdzZW42MWdtOFQ3eUlIbU9tbmE3Mk9Nc1RreEpRYkNWQldtS1ZQWGJKQWxLS09YN2ktMy1mdw?oc=5",
+    "https://www.fogaonet.com/noticias-do-botafogo/administradora-eagle-quem-decidir-dono-saf-botafogo-gabriel-de-alba-ares/"
   ]
 }
