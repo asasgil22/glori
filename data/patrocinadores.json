@@ -42,7 +42,10 @@
     "nome": "turim",
     "tipo": "imagem",
     "ativo": true,
-    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852807994-980669627.png"
+    "dataFim": "",
+    "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852807994-980669627.png",
+    "dataInicio": "",
+    "localExibicao": "marquee"
   },
   {
     "id": "1779852777974",
@@ -72,7 +75,7 @@
     "dataFim": "",
     "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852736117-678123448.png",
     "dataInicio": "",
-    "localExibicao": "ambos"
+    "localExibicao": "marquee"
   },
   {
     "id": "1779852708235",
@@ -102,7 +105,7 @@
     "dataFim": "",
     "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852680001-350439273.png",
     "dataInicio": "",
-    "localExibicao": "ambos"
+    "localExibicao": "marquee"
   },
   {
     "id": "1779852661385",
@@ -129,10 +132,10 @@
     "nome": "turim",
     "tipo": "imagem",
     "ativo": true,
+    "dataFim": "",
     "imagemUrl": "https://gyftanrapdzyxftfyrcw.supabase.co/storage/v1/object/public/uploads/1779852604280-236840643.png",
-    "localExibicao": "ambos",
     "dataInicio": "",
-    "dataFim": ""
+    "localExibicao": "marquee"
   },
   {
     "id": "1779852587425",

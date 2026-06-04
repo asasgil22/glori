@@ -70,6 +70,7 @@ const PATH_JOGOS = path.join(DATA_DIR, "jogos.json");
 const PATH_CONFIG = path.join(DATA_DIR, "config.json");
 const PATH_PATROCINADORES = path.join(DATA_DIR, "patrocinadores.json");
 const PATH_VIDEOS = path.join(DATA_DIR, "videos.json");
+const PATH_COMENTARIOS = path.join(DATA_DIR, "comentarios.json");
 const PATH_TABELAS = path.join(DATA_DIR, "tabelas.json");
 const PATH_AUTORES = path.join(DATA_DIR, "autores.json");
 const PATH_TWITTER = path.join(DATA_DIR, "twitter.json");
@@ -203,6 +204,7 @@ async function garantirEstrutura() {
     },
   ]);
   await garantirArquivo(PATH_VIDEOS, []);
+  await garantirArquivo(PATH_COMENTARIOS, []);
   await garantirArquivo(PATH_CONFIG, {
     nomePortal: "Portal Noticias",
     slogan: "Informacao clara, direta e em tempo real",
@@ -1075,8 +1077,8 @@ app.get("/categoria/:slug", async (req, res) => {
   );
 });
 
-// 🚀 Cache de 1 dia para arquivos estáticos (CSS, JS, Imagens) economiza muita banda!
-app.use(express.static(PUBLIC_DIR, { index: false, maxAge: "1d" }));
+// 🚀 Cache estático flexível (Desativado temporariamente para você ver as atualizações na hora durante os testes)
+app.use(express.static(PUBLIC_DIR, { index: false }));
 
 app.get("/", async (req, res) => {
   const config = normalizarConfig(
@@ -1090,6 +1092,7 @@ app.use("/api", require("./src/routes/auth"));
 app.use("/api/usuarios", require("./src/routes/usuarios"));
 app.use("/api", require("./src/routes/painel"));
 app.use("/api", require("./src/routes/esportes"));
+app.use("/api/comentarios", require("./src/routes/comentarios"));
 app.use("/api", require("./src/routes/twitter"));
 app.use("/api/lab", require("./src/routes/lab"));
 

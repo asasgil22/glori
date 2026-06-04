@@ -361,6 +361,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     `,
     );
 
+    if (navTabs && tabContent && !document.getElementById("tab-comentarios")) {
+      navTabs.insertAdjacentHTML(
+        "beforeend",
+        `
+        <li class="nav-item" role="presentation" id="nav-item-comentarios">
+          <button class="nav-link fw-bold text-uppercase" id="tab-comentarios" data-bs-toggle="tab" data-bs-target="#pane-comentarios" type="button" role="tab" style="letter-spacing: 0.5px; font-size: 0.8rem;">Comentários</button>
+        </li>
+      `,
+      );
+      tabContent.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="tab-pane fade" id="pane-comentarios" role="tabpanel">
+          <div class="card border-0 shadow-sm p-4 rounded-3 bg-white">
+            <h4 class="fw-bold text-uppercase mb-4 fs-5">Tribuna Alvinegra <span id="comentarios-count" class="badge bg-secondary ms-2" style="font-size:0.6rem;">0</span></h4>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle" style="font-size: 0.85rem;">
+                <thead class="table-light"><tr><th>Usuário</th><th>Comentário</th><th>Data</th><th class="text-end">Ação</th></tr></thead>
+                <tbody id="lista-comentarios-admin"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `,
+      );
+    }
+
     document
       .getElementById("mostrarStickerProgramacao")
       ?.addEventListener("change", () => {
@@ -370,6 +397,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
   }
   carregarProgramacaoAdmin();
+  carregarComentariosAdmin();
 
   // Reaplica as permissões para garantir que a aba recém injetada obedeça a hierarquia de usuários
   if (currentUser) aplicarPermissoes(currentUser);
@@ -533,6 +561,7 @@ function aplicarPermissoes(user) {
     "nav-item-rss": ["super_admin", "admin", "usuario"],
     "nav-item-lab": ["super_admin", "admin"],
     "nav-item-programacao": ["super_admin", "admin"],
+    "nav-item-comentarios": ["super_admin", "admin"],
   };
 
   let firstActiveTab = null;
@@ -4319,5 +4348,54 @@ window.sincronizarElenco = async function (btn) {
   } finally {
     btn.innerHTML = textoOriginal;
     btn.disabled = false;
+  }
+};
+
+// ==========================================
+// ADMIN DE COMENTÁRIOS (TRIBUNA)
+// ==========================================
+async function carregarComentariosAdmin() {
+  const lista = document.getElementById("lista-comentarios-admin");
+  if (!lista) return;
+  lista.innerHTML =
+    '<tr><td colspan="4" class="text-center text-muted py-3">Carregando...</td></tr>';
+  try {
+    const res = await fetch("/api/comentarios");
+    const comentarios = await res.json();
+    document.getElementById("comentarios-count").textContent =
+      comentarios.length;
+    if (!comentarios.length) {
+      lista.innerHTML =
+        '<tr><td colspan="4" class="text-center text-muted py-3">Nenhum comentário.</td></tr>';
+      return;
+    }
+    lista.innerHTML = comentarios
+      .map(
+        (c) => `
+      <tr>
+        <td><strong class="d-block">${escapeHtml(c.usuarioNome)}</strong><small class="text-muted">${c.role}</small></td>
+        <td style="max-width: 300px;"><span class="d-block text-truncate" title="${escapeAttr(c.texto)}">${escapeHtml(c.texto)}</span></td>
+        <td class="text-muted">${new Date(c.data).toLocaleString("pt-BR")}</td>
+        <td class="text-end"><button class="btn btn-sm btn-outline-danger px-3 rounded-pill" onclick="excluirComentarioAdmin('${c.id}')">Apagar</button></td>
+      </tr>
+    `,
+      )
+      .join("");
+  } catch (e) {
+    lista.innerHTML =
+      '<tr><td colspan="4" class="text-danger text-center py-3">Erro ao carregar comentários.</td></tr>';
+  }
+}
+
+window.excluirComentarioAdmin = async function (id) {
+  if (!confirm("Tem certeza que deseja apagar este comentário?")) return;
+  try {
+    const res = await fetch(`/api/comentarios/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      mostrarToast("Comentário removido", "success");
+      carregarComentariosAdmin();
+    }
+  } catch (e) {
+    mostrarToast("Erro ao excluir", "danger");
   }
 };

@@ -1,10 +1,16 @@
 const express = require("express");
 const router = express.Router();
 const path = require("path");
-const { lerJSON } = require("../config/database");
+const { lerJSON, salvarJSON } = require("../config/database");
 const { estaLogado } = require("../middlewares/auth");
+const { createClient } = require("@supabase/supabase-js");
 
 const PATH_USUARIOS = path.join(__dirname, "../../data/usuarios.json");
+
+// Rota para exportar apenas a URL pública do Supabase para o Frontend
+router.get("/auth/config", (req, res) => {
+  res.json({ supabaseUrl: process.env.SUPABASE_URL });
+});
 
 router.post("/login", async (req, res) => {
   const { usuario, senha } = req.body;
@@ -17,6 +23,58 @@ router.post("/login", async (req, res) => {
     return res.sendStatus(200);
   }
   res.status(401).json({ erro: "Usuario ou senha incorretos." });
+});
+
+// Rota de Login Social Super Protegida
+router.post("/login/social", async (req, res) => {
+  const { access_token } = req.body;
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    return res
+      .status(500)
+      .json({ erro: "Supabase não configurado no backend." });
+  }
+
+  try {
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // O Supabase valida a autenticidade do token diretamente na nuvem
+    const { data, error } = await supabase.auth.getUser(access_token);
+    if (error || !data || !data.user) {
+      return res
+        .status(401)
+        .json({ erro: "Autenticação social falhou ou expirou." });
+    }
+
+    const email = data.user.email;
+    const nome = data.user.user_metadata?.full_name || email.split("@")[0];
+
+    const usuarios = await lerJSON(PATH_USUARIOS, []);
+    let user = usuarios.find(
+      (u) => u.email === email || u.usuario === email || u.usuario === nome,
+    );
+
+    // Se é a primeira vez desse usuário, cria uma conta automática de 'Redator'
+    if (!user) {
+      user = {
+        id: Date.now().toString(),
+        usuario: nome,
+        email: email,
+        senha: "", // Sem senha local
+        role: "usuario", // Acesso restrito! Não é Super Admin por padrão.
+      };
+      usuarios.push(user);
+      await salvarJSON(PATH_USUARIOS, usuarios);
+    }
+
+    req.session.logado = true;
+    req.session.user = { id: user.id, usuario: user.usuario, role: user.role };
+    return res.sendStatus(200);
+  } catch (err) {
+    return res.status(500).json({ erro: "Erro interno ao validar token." });
+  }
 });
 
 router.get("/logout", (req, res) => {
