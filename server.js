@@ -21,10 +21,6 @@ const {
 } = require("./src/middlewares/auth");
 
 const {
-  atualizarCacheTwitter,
-  getCacheTwitter,
-} = require("./src/services/twitterService");
-const {
   fetchLatestVideos,
   getVideoCache,
   setVideoCache,
@@ -73,7 +69,6 @@ const PATH_VIDEOS = path.join(DATA_DIR, "videos.json");
 const PATH_COMENTARIOS = path.join(DATA_DIR, "comentarios.json");
 const PATH_TABELAS = path.join(DATA_DIR, "tabelas.json");
 const PATH_AUTORES = path.join(DATA_DIR, "autores.json");
-const PATH_TWITTER = path.join(DATA_DIR, "twitter.json");
 const PATH_USUARIOS = path.join(DATA_DIR, "usuarios.json");
 const PATH_ESCUDOS = path.join(PUBLIC_DIR, "escudos");
 
@@ -193,16 +188,6 @@ async function garantirEstrutura() {
     },
   ]);
   await garantirArquivo(PATH_AUTORES, []);
-  await garantirArquivo(PATH_TWITTER, [
-    {
-      id: "1",
-      nome: "Botafogo F.R.",
-      handle: "@Botafogo",
-      avatarUrl:
-        "https://pbs.twimg.com/profile_images/1792610731773403136/O1V8vR5M_400x400.jpg",
-      ativo: true,
-    },
-  ]);
   await garantirArquivo(PATH_VIDEOS, []);
   await garantirArquivo(PATH_COMENTARIOS, []);
   await garantirArquivo(PATH_CONFIG, {
@@ -461,7 +446,6 @@ const ICONES_WIDGET_VALIDOS = new Set([
   "relogio",
   "lista",
   "play",
-  "twitter",
 ]);
 const LAYOUTS_WIDGET_VALIDOS = {
   maisLidas: new Set(["lista", "compacto", "cards"]),
@@ -471,7 +455,6 @@ const LAYOUTS_WIDGET_VALIDOS = {
   odds: new Set(["cards", "lista"]),
   portais: new Set(["lista"]),
   videos: new Set(["carrossel", "lista"]),
-  twitter: new Set(["cards", "lista", "carrossel"]),
 };
 
 const CASAS_APOSTAS_PADRAO = [
@@ -552,17 +535,6 @@ function normalizarWidgets(home = {}) {
       icone: "play",
       layout: "carrossel",
     },
-    twitter: {
-      titulo: "Comunidade Alvinegra",
-      subtitulo: "O que estão falando no X",
-      icone: "twitter",
-      layout: "cards",
-      tempoExibicao: 5,
-      tipoTransicao: "slide",
-      velocidadeTransicao: 500,
-      quantidadePorConta: 3,
-      mostrarMidia: true,
-    },
   };
   const entrada = home.widgets || {};
   const widgets = {};
@@ -580,28 +552,6 @@ function normalizarWidgets(home = {}) {
         : padrao.layout,
     };
   });
-
-  if (widgets["twitter"]) {
-    const atualTw = entrada["twitter"] || {};
-    widgets["twitter"].tempoExibicao =
-      atualTw.tempoExibicao !== undefined
-        ? Number(atualTw.tempoExibicao)
-        : padroes.twitter.tempoExibicao;
-    widgets["twitter"].tipoTransicao =
-      atualTw.tipoTransicao || padroes.twitter.tipoTransicao;
-    widgets["twitter"].velocidadeTransicao =
-      atualTw.velocidadeTransicao !== undefined
-        ? Number(atualTw.velocidadeTransicao)
-        : padroes.twitter.velocidadeTransicao;
-    widgets["twitter"].quantidadePorConta =
-      atualTw.quantidadePorConta !== undefined
-        ? Number(atualTw.quantidadePorConta)
-        : padroes.twitter.quantidadePorConta;
-    widgets["twitter"].mostrarMidia =
-      atualTw.mostrarMidia !== undefined
-        ? atualTw.mostrarMidia
-        : padroes.twitter.mostrarMidia;
-  }
 
   return widgets;
 }
@@ -628,7 +578,6 @@ function normalizarConfig(config = {}) {
     "tabela",
     "odds",
     "videos",
-    "twitter",
     "portais",
   ];
   let ordemWidgets = Array.isArray(config.home?.ordemWidgets)
@@ -712,7 +661,6 @@ function normalizarConfig(config = {}) {
       mostrarTabela: config.home?.mostrarTabela !== false,
       mostrarOdds: config.home?.mostrarOdds !== false,
       mostrarVideos: config.home?.mostrarVideos !== false,
-      mostrarTwitter: config.home?.mostrarTwitter !== false,
       mostrarPortais: config.home?.mostrarPortais !== false,
       mostrarAnunciosNoGrid: config.home?.mostrarAnunciosNoGrid !== false,
       mostrarStickerProgramacao:
@@ -1093,7 +1041,6 @@ app.use("/api/usuarios", require("./src/routes/usuarios"));
 app.use("/api", require("./src/routes/painel"));
 app.use("/api", require("./src/routes/esportes"));
 app.use("/api/comentarios", require("./src/routes/comentarios"));
-app.use("/api", require("./src/routes/twitter"));
 app.use("/api/lab", require("./src/routes/lab"));
 
 // Rota leve para o UptimeRobot monitorar e manter o servidor acordado
@@ -1301,10 +1248,6 @@ app.put(
           mostrarVideos: lerBooleanConfig(
             req.body.mostrarVideos,
             atual.home.mostrarVideos,
-          ),
-          mostrarTwitter: lerBooleanConfig(
-            req.body.mostrarTwitter,
-            atual.home.mostrarTwitter,
           ),
           mostrarPortais: lerBooleanConfig(
             req.body.mostrarPortais,
@@ -1514,45 +1457,6 @@ app.put(
               )
                 ? req.body.widgetVideosLayout
                 : atual.home.widgets?.videos?.layout || "carrossel",
-            },
-            twitter: {
-              titulo:
-                req.body.widgetTwitterTitulo !== undefined
-                  ? req.body.widgetTwitterTitulo
-                  : atual.home.widgets?.twitter?.titulo ||
-                    "Comunidade Alvinegra",
-              subtitulo:
-                req.body.widgetTwitterSubtitulo !== undefined
-                  ? req.body.widgetTwitterSubtitulo
-                  : atual.home.widgets?.twitter?.subtitulo || "",
-              icone: ICONES_WIDGET_VALIDOS.has(req.body.widgetTwitterIcone)
-                ? req.body.widgetTwitterIcone
-                : atual.home.widgets?.twitter?.icone || "twitter",
-              layout: LAYOUTS_WIDGET_VALIDOS.twitter.has(
-                req.body.widgetTwitterLayout,
-              )
-                ? req.body.widgetTwitterLayout
-                : atual.home.widgets?.twitter?.layout || "cards",
-              tempoExibicao:
-                req.body.widgetTwitterTempoExibicao !== undefined
-                  ? Math.max(1, Number(req.body.widgetTwitterTempoExibicao))
-                  : atual.home.widgets?.twitter?.tempoExibicao || 5,
-              tipoTransicao:
-                req.body.widgetTwitterTipoTransicao ||
-                atual.home.widgets?.twitter?.tipoTransicao ||
-                "slide",
-              velocidadeTransicao:
-                req.body.widgetTwitterVelocidade !== undefined
-                  ? Math.max(100, Number(req.body.widgetTwitterVelocidade))
-                  : atual.home.widgets?.twitter?.velocidadeTransicao || 500,
-              quantidadePorConta:
-                req.body.widgetTwitterQtdConta !== undefined
-                  ? Math.max(1, Number(req.body.widgetTwitterQtdConta))
-                  : atual.home.widgets?.twitter?.quantidadePorConta || 3,
-              mostrarMidia:
-                req.body.widgetTwitterMostrarMidia !== undefined
-                  ? lerBooleanConfig(req.body.widgetTwitterMostrarMidia)
-                  : atual.home.widgets?.twitter?.mostrarMidia !== false,
             },
             portais: {
               titulo:
@@ -1820,7 +1724,7 @@ app.delete(
   },
 );
 app.get("/api/rss", async (req, res) => {
-  if (!servidorRssPronto) {
+  if (!isRssPronto()) {
     return res.status(503).json({
       erro: "O servidor esta carregando as fotos pela primeira vez. Recarregue em instantes.",
     });
@@ -1828,7 +1732,7 @@ app.get("/api/rss", async (req, res) => {
   const config = normalizarConfig(
     await getJSONCached(PATH_CONFIG, {}, "config"),
   );
-  res.json(cacheDeNoticiasRSS.slice(0, config.home.limiteRss));
+  res.json(getCacheRSS().slice(0, config.home.limiteRss));
 });
 
 app.get("/api/noticias", async (req, res) => {

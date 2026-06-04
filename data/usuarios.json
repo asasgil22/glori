@@ -19,8 +19,29 @@
   },
   {
     "id": "1779843432272",
-    "usuario": "teste",
+    "role": "super_admin",
     "senha": "teste",
-    "role": "super_admin"
+    "usuario": "teste"
+  },
+  {
+    "id": "1780541265804",
+    "role": "usuario",
+    "email": "desafiov4company.2024@gmail.com",
+    "senha": "",
+    "usuario": "Desafio v4"
+  },
+  {
+    "id": "1780541412838",
+    "role": "usuario",
+    "email": "sergiogil.ti@gmail.com",
+    "senha": "",
+    "usuario": "Sérgio Gil Comercial"
+  },
+  {
+    "id": "1780544491159",
+    "usuario": "Romulo SEP",
+    "email": "romulosepxxx@gmail.com",
+    "senha": "",
+    "role": "usuario"
   }
 ]

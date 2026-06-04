@@ -56,7 +56,6 @@ let ordemWidgetsAtual = [
   "tabela",
   "odds",
   "videos",
-  "twitter",
   "portais",
 ];
 
@@ -147,7 +146,6 @@ const HOME_SWITCH_IDS = [
   "mostrarTabela",
   "mostrarOdds",
   "mostrarVideos",
-  "mostrarTwitter",
   "mostrarPortais",
   "mostrarAnunciosNoGrid",
 ];
@@ -221,9 +219,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             texto.includes("gráficos")
           ) {
             el.className =
-              "btn btn-outline-light btn-sm rounded-pill px-3 fw-bold text-uppercase mx-1 shadow-sm";
+              "btn btn-dark btn-sm rounded-pill px-3 fw-bold text-uppercase mx-1 border border-secondary border-opacity-50 shadow-sm d-flex align-items-center gap-1";
             el.style.letterSpacing = "0.5px";
             el.style.fontSize = "0.75rem";
+            if (!el.innerHTML.includes("<svg")) {
+              el.innerHTML =
+                '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg> ' +
+                el.innerHTML;
+            }
           }
         });
 
@@ -310,7 +313,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       "beforeend",
       `
       <li class="nav-item" role="presentation" id="nav-item-programacao">
-        <button class="nav-link fw-bold text-uppercase" id="tab-programacao" data-bs-toggle="tab" data-bs-target="#pane-programacao" type="button" role="tab" style="letter-spacing: 0.5px; font-size: 0.8rem;">Grade de TV</button>
+        <button class="nav-link d-flex align-items-center gap-2" id="tab-programacao" data-bs-toggle="tab" data-bs-target="#pane-programacao" type="button" role="tab">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>
+          Grade de TV
+        </button>
       </li>
     `,
     );
@@ -366,7 +372,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         "beforeend",
         `
         <li class="nav-item" role="presentation" id="nav-item-comentarios">
-          <button class="nav-link fw-bold text-uppercase" id="tab-comentarios" data-bs-toggle="tab" data-bs-target="#pane-comentarios" type="button" role="tab" style="letter-spacing: 0.5px; font-size: 0.8rem;">Comentários</button>
+          <button class="nav-link d-flex align-items-center gap-2" id="tab-comentarios" data-bs-toggle="tab" data-bs-target="#pane-comentarios" type="button" role="tab">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            Comentários
+          </button>
         </li>
       `,
       );
@@ -402,8 +411,46 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Reaplica as permissões para garantir que a aba recém injetada obedeça a hierarquia de usuários
   if (currentUser) aplicarPermissoes(currentUser);
 
+  // NOVO: REORDENAR AS ABAS E RENOMEAR USUÁRIOS
+  if (navTabs) {
+    const ordemAbas = [
+      "nav-item-config",
+      "nav-item-autores",
+      "nav-item-noticias",
+      "nav-item-noticias-lista",
+      "nav-item-programacao",
+      "nav-item-comentarios",
+      "nav-item-enquete",
+      "nav-item-portais",
+      "nav-item-odds",
+      "nav-item-tabelas",
+      "nav-item-jogos",
+      "nav-item-videos",
+      "nav-item-patrocinadores",
+      "nav-item-usuarios",
+      "nav-item-lab",
+      "nav-item-rss",
+    ];
+
+    ordemAbas.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) navTabs.appendChild(el);
+    });
+
+    const btnUsuarios = document.querySelector("#nav-item-usuarios button");
+    if (btnUsuarios && btnUsuarios.innerHTML.includes("Usuários")) {
+      btnUsuarios.innerHTML = btnUsuarios.innerHTML.replace(
+        "Usuários",
+        "Usuários Cadastrados",
+      );
+    }
+  }
+
+  // Remove definitivamente as abas residuais do Twitter / Comunidade X que possam estar no HTML
+  document.getElementById("nav-item-twitter")?.remove();
+  document.getElementById("pane-twitter")?.remove();
+
   iniciarAutoSave();
-  // carregarTwitterAdmin(); // Desabilitado: Funcionalidade do Twitter instável.
   HOME_SWITCH_IDS.forEach((id) => {
     document.getElementById(id)?.addEventListener("change", (e) => {
       const widgetSwitch = document.querySelector(
@@ -555,7 +602,6 @@ function aplicarPermissoes(user) {
     "nav-item-jogos": ["super_admin", "admin"],
     "nav-item-patrocinadores": ["super_admin", "admin"],
     "nav-item-videos": ["super_admin", "admin"],
-    "nav-item-twitter": ["super_admin", "admin"],
     "nav-item-autores": ["super_admin", "admin"],
     "nav-item-usuarios": ["super_admin"],
     "nav-item-rss": ["super_admin", "admin", "usuario"],
@@ -658,13 +704,6 @@ btnCancelarAutor?.addEventListener("click", limparFormularioAutor);
 
 formUsuario?.addEventListener("submit", salvarUsuario);
 btnCancelarUsuario?.addEventListener("click", limparFormularioUsuario);
-
-document
-  .getElementById("form-twitter")
-  ?.addEventListener("submit", salvarTwitter);
-document
-  .getElementById("btn-cancelar-twitter")
-  ?.addEventListener("click", limparFormularioTwitter);
 
 document.getElementById("video-link")?.addEventListener("input", (e) => {
   const url = e.target.value;
@@ -1716,16 +1755,6 @@ async function salvarConfig(event) {
       dados.set(`${meta.prefix}Subtitulo`, cfg.subtitulo || "");
       dados.set(`${meta.prefix}Icone`, cfg.icone || "sem");
       dados.set(`${meta.prefix}Layout`, cfg.layout || "");
-      if (k === "twitter") {
-        dados.set(`${meta.prefix}TempoExibicao`, cfg.tempoExibicao || "5");
-        dados.set(`${meta.prefix}TipoTransicao`, cfg.tipoTransicao || "slide");
-        dados.set(`${meta.prefix}Velocidade`, cfg.velocidadeTransicao || "500");
-        dados.set(`${meta.prefix}QtdConta`, cfg.quantidadePorConta || "3");
-        dados.set(
-          `${meta.prefix}MostrarMidia`,
-          cfg.mostrarMidia !== false ? "true" : "false",
-        );
-      }
     }
   });
 
@@ -1866,7 +1895,6 @@ function renderizarPreviewLayout() {
     { id: "mostrarTabela", label: "Tabela" },
     { id: "mostrarOdds", label: "Odds" },
     { id: "mostrarVideos", label: "Vídeos" },
-    { id: "mostrarTwitter", label: "Twitter" },
     { id: "mostrarPortais", label: "Portais" },
   ];
 
@@ -1920,7 +1948,6 @@ const WIDGETS_ADMIN_MAP = {
   tabela: { prefix: "widgetTabela", label: "Tabela Brasileirão" },
   odds: { prefix: "widgetOdds", label: "Odds Esportivas" },
   videos: { prefix: "widgetVideos", label: "Vídeos do YouTube" },
-  twitter: { prefix: "widgetTwitter", label: "Twitter / X" },
   portais: { prefix: "widgetPortais", label: "Últimas dos Portais" },
 };
 
@@ -1935,20 +1962,6 @@ function salvarEstadoWidgetsAdmin() {
       document.getElementById(`${meta.prefix}Icone`)?.value || "sem";
     configCache.home.widgets[k].layout =
       document.getElementById(`${meta.prefix}Layout`)?.value || "";
-    if (k === "twitter") {
-      configCache.home.widgets[k].tempoExibicao =
-        document.getElementById(`${meta.prefix}TempoExibicao`)?.value || "5";
-      configCache.home.widgets[k].tipoTransicao =
-        document.getElementById(`${meta.prefix}TipoTransicao`)?.value ||
-        "slide";
-      configCache.home.widgets[k].velocidadeTransicao =
-        document.getElementById(`${meta.prefix}Velocidade`)?.value || "500";
-      configCache.home.widgets[k].quantidadePorConta =
-        document.getElementById(`${meta.prefix}QtdConta`)?.value || "3";
-      configCache.home.widgets[k].mostrarMidia = document.getElementById(
-        `${meta.prefix}MostrarMidia`,
-      )?.checked;
-    }
   });
 }
 
@@ -1970,14 +1983,6 @@ window.moverWidgetAdmin = function (chave, dir) {
 function montarFormularioWidgetsAdmin() {
   const grid = document.getElementById("widgets-admin-grid");
   if (!grid || typeof LAYOUTS_WIDGET === "undefined") return;
-
-  // Garante que o layout "carrossel" exista internamente para o Twitter
-  if (LAYOUTS_WIDGET.twitter && !LAYOUTS_WIDGET.twitter.carrossel) {
-    LAYOUTS_WIDGET.twitter.carrossel = {
-      label: "Carrossel de Slides",
-      icone: "play",
-    };
-  }
 
   grid.innerHTML = ordemWidgetsAtual
     .map((chave, index) => {
@@ -2038,39 +2043,6 @@ function montarFormularioWidgetsAdmin() {
             <select class="form-select" id="${meta.prefix}Layout" name="${meta.prefix}Layout">${layoutOptions}</select>
           </div>
         </div>
-        ${
-          chave === "twitter"
-            ? `
-        <div class="row g-2 mt-2 border-top border-secondary border-opacity-10 pt-2">
-          <div class="col-md-6 mb-2">
-            <label class="form-label small fw-bold text-secondary">Tempo de Exibição (s)</label>
-            <input type="number" class="form-control" id="${meta.prefix}TempoExibicao" name="${meta.prefix}TempoExibicao" min="1">
-          </div>
-          <div class="col-md-6 mb-2">
-            <label class="form-label small fw-bold text-secondary">Qtd Tweets / Conta</label>
-            <input type="number" class="form-control" id="${meta.prefix}QtdConta" name="${meta.prefix}QtdConta" min="1" max="15">
-          </div>
-        </div>
-        <div class="row g-2">
-          <div class="col-md-6 mb-2">
-            <label class="form-label small fw-bold text-secondary">Tipo de Transição</label>
-            <select class="form-select" id="${meta.prefix}TipoTransicao" name="${meta.prefix}TipoTransicao">
-              <option value="slide">Deslizamento (Slide)</option>
-              <option value="fade">Esmaecimento (Fade)</option>
-            </select>
-          </div>
-          <div class="col-md-6 mb-2">
-            <label class="form-label small fw-bold text-secondary">Velocidade Efeito (ms)</label>
-            <input type="number" class="form-control" id="${meta.prefix}Velocidade" name="${meta.prefix}Velocidade" min="100" step="100">
-          </div>
-        </div>
-        <div class="form-check form-switch mt-2">
-          <input class="form-check-input" type="checkbox" role="switch" id="${meta.prefix}MostrarMidia" name="${meta.prefix}MostrarMidia">
-          <label class="form-check-label small fw-bold text-secondary" for="${meta.prefix}MostrarMidia">Exibir mídias e fotos anexadas aos tweets</label>
-        </div>
-        `
-            : ""
-        }
         <div class="widget-admin-preview" id="${meta.prefix}Preview"></div>
       </article>
     `;
@@ -2167,19 +2139,6 @@ function preencherFormularioWidgetsAdmin(config) {
     if (iconeEl) iconeEl.value = cfg.icone || "sem";
     const layoutEl = document.getElementById(`${meta.prefix}Layout`);
     if (layoutEl) layoutEl.value = cfg.layout || "";
-
-    if (chave === "twitter") {
-      const tempoEl = document.getElementById(`${meta.prefix}TempoExibicao`);
-      if (tempoEl) tempoEl.value = cfg.tempoExibicao || "5";
-      const tipoEl = document.getElementById(`${meta.prefix}TipoTransicao`);
-      if (tipoEl) tipoEl.value = cfg.tipoTransicao || "slide";
-      const velEl = document.getElementById(`${meta.prefix}Velocidade`);
-      if (velEl) velEl.value = cfg.velocidadeTransicao || "500";
-      const qtdEl = document.getElementById(`${meta.prefix}QtdConta`);
-      if (qtdEl) qtdEl.value = cfg.quantidadePorConta || "3";
-      const midiaEl = document.getElementById(`${meta.prefix}MostrarMidia`);
-      if (midiaEl) midiaEl.checked = cfg.mostrarMidia !== false;
-    }
 
     atualizarPreviewWidgetAdmin({
       target: document.getElementById(`${meta.prefix}Icone`),
@@ -4025,102 +3984,6 @@ window.rodarRoboManualmente = async function (btn) {
     }, 3000);
   }
 };
-
-// // ==========================================
-// // ADMIN DO TWITTER / X (Funcionalidade Desabilitada)
-// // ==========================================
-// let twitterCache = [];
-// async function carregarTwitterAdmin() {
-//   const lista = document.getElementById("lista-twitter-admin");
-//   if (!lista) return;
-//   lista.innerHTML = '<div class="loading-box">Carregando perfis...</div>';
-//   try {
-//     const resposta = await fetch("/api/twitter-gerenciador");
-//     twitterCache = await resposta.json();
-//     const countEl = document.getElementById("twitter-count");
-//     if (countEl) countEl.textContent = `${twitterCache.length} item(ns)`;
-//     if (!twitterCache.length) {
-//       lista.innerHTML =
-//         '<div class="empty-box">Nenhum perfil cadastrado.</div>';
-//       return;
-//     }
-//     lista.innerHTML = twitterCache
-//       .map(
-//         (c) => `
-//       <div class="admin-game-row align-items-center">
-//         <div class="d-flex align-items-center gap-3">
-//           ${c.avatarUrl ? `<img src="${escapeHtml(c.avatarUrl)}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">` : `<div style="width:40px; height:40px; border-radius:50%; background:#ccc;"></div>`}
-//           <div>
-//             <strong>${escapeHtml(c.nome)}</strong>
-//             <span class="d-flex align-items-center gap-2 mt-1"><span class="status-dot ${c.ativo === false ? "offline" : "online"}"></span> ${escapeHtml(c.handle)}</span>
-//           </div>
-//         </div>
-//         <div class="d-flex gap-2">
-//           <button type="button" class="btn btn-outline-secondary btn-sm" onclick="editarTwitter('${c.id}')">Editar</button>
-//           <button type="button" class="btn btn-outline-danger btn-sm" onclick="excluirTwitter('${c.id}')">Excluir</button>
-//         </div>
-//       </div>
-//     `,
-//       )
-//       .join("");
-//   } catch {
-//     lista.innerHTML = '<div class="empty-box">Erro ao carregar perfis.</div>';
-//   }
-// }
-async function salvarTwitter(event) {
-  event.preventDefault();
-  const id = document.getElementById("twitter-id").value;
-  const payload = {
-    nome: document.getElementById("twitter-nome").value.trim(),
-    handle: document.getElementById("twitter-handle").value.trim(),
-    avatarUrl: document.getElementById("twitter-avatar").value.trim(),
-    ativo: document.getElementById("twitter-ativo").checked,
-  };
-  const resposta = await fetch(
-    id ? `/api/twitter-gerenciador/${id}` : "/api/twitter-gerenciador",
-    {
-      method: id ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    },
-  );
-  if (!resposta.ok) return mostrarToast("Erro ao salvar.", "danger");
-  limparFormularioTwitter();
-  mostrarToast("Perfil salvo.");
-  carregarTwitterAdmin();
-}
-window.editarTwitter = function (id) {
-  const c = twitterCache.find((x) => String(x.id) === String(id));
-  if (!c) return;
-  document.getElementById("twitter-id").value = c.id;
-  document.getElementById("twitter-nome").value = c.nome || "";
-  document.getElementById("twitter-handle").value = c.handle || "";
-  document.getElementById("twitter-avatar").value = c.avatarUrl || "";
-  document.getElementById("twitter-ativo").checked = c.ativo !== false;
-  document.getElementById("titulo-form-twitter").textContent = "Editar Perfil";
-  document.getElementById("btn-submit-twitter").textContent =
-    "Atualizar perfil";
-  document.getElementById("btn-cancelar-twitter").classList.remove("d-none");
-  window.scrollTo({ top: 0, behavior: "smooth" });
-};
-window.excluirTwitter = async function (id) {
-  if (!confirm("Deseja excluir este perfil?")) return;
-  const resposta = await fetch(`/api/twitter-gerenciador/${id}`, {
-    method: "DELETE",
-  });
-  if (resposta.ok) {
-    mostrarToast("Perfil excluído.");
-    carregarTwitterAdmin();
-  }
-};
-function limparFormularioTwitter() {
-  document.getElementById("form-twitter")?.reset();
-  document.getElementById("twitter-id").value = "";
-  document.getElementById("twitter-ativo").checked = true;
-  document.getElementById("titulo-form-twitter").textContent = "Novo Perfil";
-  document.getElementById("btn-submit-twitter").textContent = "Salvar perfil";
-  document.getElementById("btn-cancelar-twitter").classList.add("d-none");
-}
 
 // ==========================================
 // LIMPAR TODOS OS RASCUNHOS

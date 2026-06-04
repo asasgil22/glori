@@ -11,7 +11,6 @@ const ICONES_WIDGET = {
   relogio: { label: "Relogio / agenda" },
   lista: { label: "Lista" },
   play: { label: "Play / Vídeo" },
-  twitter: { label: "Twitter / X" },
 };
 
 const LAYOUTS_WIDGET = {
@@ -50,10 +49,6 @@ const LAYOUTS_WIDGET = {
   },
   portais: {
     lista: { label: "Lista Limpa", desc: "Links com ícones." },
-  },
-  twitter: {
-    cards: { label: "Cards", desc: "Estilo feed social nativo." },
-    lista: { label: "Lista Compacta", desc: "Apenas textos rápidos." },
   },
 };
 
@@ -100,12 +95,6 @@ const WIDGET_PADROES = {
     icone: "lista",
     layout: "lista",
   },
-  twitter: {
-    titulo: "Comunidade Alvinegra",
-    subtitulo: "O que estão falando no X",
-    icone: "twitter",
-    layout: "cards",
-  },
 };
 
 function normalizarWidgetsConfig(home = {}) {
@@ -148,8 +137,6 @@ function iconeWidgetSvg(tipo) {
     lista:
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12M5 6h.01M5 12h.01M5 18h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>',
-    twitter:
-      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1 2.25h3.437l5.021 6.661L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117l12.006 15.644z" fill="currentColor"/></svg>',
   };
   return icones[tipo] || icones.grafico;
 }

@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": "1780541275647",
+    "data": "2026-06-04T02:47:55.647Z",
+    "role": "usuario",
+    "texto": "isso funciona ?",
+    "noticiaId": "1780531256522",
+    "usuarioId": "1780541265804",
+    "usuarioNome": "Desafio v4"
+  },
+  {
+    "id": "1780541422088",
+    "data": "2026-06-04T02:50:22.088Z",
+    "role": "usuario",
+    "texto": "Isso é um teste",
+    "noticiaId": "rss-1zaWduaWZpY2Fkby1hbGd1bS8",
+    "usuarioId": "1780541412838",
+    "usuarioNome": "Sérgio Gil Comercial"
+  },
+  {
+    "id": "1780544501734",
+    "noticiaId": "rss-1zaWduaWZpY2Fkby1hbGd1bS8",
+    "usuarioId": "1780544491159",
+    "usuarioNome": "Romulo SEP",
+    "role": "usuario",
+    "texto": "Isso aqui funciona?",
+    "data": "2026-06-04T03:41:41.734Z",
+    "likes": []
+  }
+]

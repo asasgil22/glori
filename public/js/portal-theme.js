@@ -96,7 +96,11 @@ function aplicarTemaPortal(config = {}) {
 }
 
 function initDarkMode() {
-  const isDark = localStorage.getItem("portalDarkMode") === "true";
+  const isAreaAdmin =
+    window.location.pathname.includes("admin.html") ||
+    window.location.pathname.includes("login.html");
+  const isDark =
+    localStorage.getItem("portalDarkMode") === "true" && !isAreaAdmin;
   const iconSun = document.getElementById("icon-sun");
   const iconMoon = document.getElementById("icon-moon");
 

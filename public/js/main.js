@@ -115,7 +115,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   setTimeout(() => {
     carregarWidgetOdds();
     carregarWidgetVideos();
-    // carregarWidgetTwitter(); // Desabilitado: API do Twitter instável e propensa a bloqueios
   }, 800);
 
   iniciarContadorAtualizacao();
@@ -216,7 +215,6 @@ function aplicarLayoutHome(config) {
   alternarBloco("[data-widget='tabela']", home.mostrarTabela !== false);
   alternarBloco("[data-widget='odds']", home.mostrarOdds !== false);
   alternarBloco("[data-widget='videos']", home.mostrarVideos !== false);
-  alternarBloco("[data-widget='twitter']", home.mostrarTwitter !== false);
   alternarBloco("[data-widget='portais']", home.mostrarPortais !== false);
 
   const sidebar = document.getElementById("sidebar-home");
@@ -228,7 +226,6 @@ function aplicarLayoutHome(config) {
     home.mostrarTabela !== false ||
     home.mostrarOdds !== false ||
     home.mostrarVideos !== false ||
-    home.mostrarTwitter !== false ||
     home.mostrarPortais !== false;
 
   if (sidebar) sidebar.classList.toggle("d-none", !mostrarSidebar);
@@ -1186,184 +1183,6 @@ function renderizarVideos(
   `;
 }
 
-async function carregarWidgetTwitter() {
-  if (estadoHome.config?.home?.mostrarTwitter === false) return;
-  const sidebar =
-    document.querySelector(".sticky-sidebar") ||
-    document.querySelector(".widgets-stack") ||
-    document.querySelector(".col-lg-4");
-  if (!sidebar) return;
-
-  let container = document.querySelector('[data-widget="twitter"]');
-  if (!container) {
-    container = document.createElement("div");
-    container.dataset.widget = "twitter";
-    container.className = "widget-card widget-card--twitter";
-    sidebar.appendChild(container);
-  }
-
-  const cfg = estadoHome.config?.home?.widgets?.twitter || {
-    titulo: "Comunidade Alvinegra",
-    subtitulo: "O que estão falando no X",
-    icone: "twitter",
-    layout: "carrossel",
-    tempoExibicao: 5,
-    tipoTransicao: "slide",
-    velocidadeTransicao: 500,
-    mostrarMidia: true,
-  };
-  const iconeHtml =
-    typeof htmlIconeWidget === "function" ? htmlIconeWidget(cfg.icone) : "";
-
-  container.innerHTML = `
-    <header class="widget-card__head">
-      ${iconeHtml}
-      <div><h2>${escapeHtml(cfg.titulo)}</h2><p>${escapeHtml(cfg.subtitulo)}</p></div>
-    </header>
-    <div id="widget-twitter-content" class="p-3"><div class="text-center text-muted">Carregando feed...</div></div>
-  `;
-
-  if (typeof aplicarConfigWidgets === "function") {
-    aplicarConfigWidgets(estadoHome.config);
-    aplicarLayoutHome(estadoHome.config);
-  }
-
-  const list = document.getElementById("widget-twitter-content");
-  try {
-    const resposta = await fetch("/api/twitter");
-    const tweets = await resposta.json();
-
-    if (!tweets || !tweets.length) {
-      list.innerHTML =
-        '<div class="empty-box p-3 text-muted small text-center">Nenhuma postagem recente.</div>';
-      return;
-    }
-
-    if (cfg.layout === "carrossel") {
-      const carouselId = "twitterCarousel" + Date.now();
-      const interval = (cfg.tempoExibicao || 5) * 1000;
-      const transitionClass =
-        cfg.tipoTransicao === "fade" ? "carousel-fade" : "";
-      const speed = cfg.velocidadeTransicao || 500;
-      const style = `<style>#${carouselId} .carousel-item { transition-duration: ${speed}ms !important; }</style>`;
-
-      list.innerHTML =
-        style +
-        `<div id="${carouselId}" class="carousel slide ${transitionClass}" data-bs-ride="carousel" data-bs-interval="${interval}">
-        <div class="carousel-inner">
-          ${tweets
-            .map((t, i) => {
-              const diffEmMinutos = Math.floor(
-                (new Date() - new Date(t.data)) / 60000,
-              );
-              const dataFmt =
-                diffEmMinutos < 1
-                  ? "Agora"
-                  : diffEmMinutos < 60
-                    ? `${diffEmMinutos}m`
-                    : diffEmMinutos < 1440
-                      ? `${Math.floor(diffEmMinutos / 60)}h`
-                      : new Date(t.data)
-                          .toLocaleDateString("pt-BR", {
-                            day: "2-digit",
-                            month: "short",
-                          })
-                          .replace(".", "");
-              const iconX =
-                '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1 2.25h3.437l5.021 6.661L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117l12.006 15.644z"/></svg>';
-              const mediaHtml =
-                cfg.mostrarMidia && t.mediaUrl
-                  ? `<img src="${escapeAttr(t.mediaUrl)}" class="w-100 rounded border border-secondary border-opacity-10 mt-2" style="max-height: 200px; object-fit: cover;">`
-                  : "";
-              return `
-            <div class="carousel-item ${i === 0 ? "active" : ""}">
-              <a href="${escapeAttr(t.link)}" target="_blank" rel="noopener noreferrer" class="text-decoration-none d-block p-3 rounded-3 border" style="background: var(--surface-muted); color: var(--ink); border-color: var(--line);">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                  <div class="d-flex align-items-center gap-2">
-                    ${t.autorAvatar ? `<img src="${escapeAttr(t.autorAvatar)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">` : `<div style="width:32px; height:32px; border-radius:50%; background:var(--line);"></div>`}
-                    <div class="d-flex flex-column lh-1">
-                      <strong style="font-size: 0.85rem;">${escapeHtml(t.autorNome)}</strong>
-                      <span class="text-muted" style="font-size: 0.7rem;">${escapeHtml(t.autorHandle)}</span>
-                    </div>
-                  </div>
-                  <div class="text-muted d-flex align-items-center gap-2"><span style="font-size: 0.7rem;">${dataFmt}</span>${iconX}</div>
-                </div>
-                <p class="mb-0 text-break" style="font-size: 0.85rem; line-height: 1.45; white-space: pre-wrap;">${escapeHtml(t.texto)}</p>
-                ${mediaHtml}
-              </a>
-            </div>`;
-            })
-            .join("")}
-        </div>
-      </div>`;
-      const carouselEl = document.getElementById(carouselId);
-      if (carouselEl)
-        new bootstrap.Carousel(carouselEl, {
-          interval: interval,
-          ride: "carousel",
-        });
-      return;
-    }
-
-    list.innerHTML =
-      '<div class="d-flex flex-column gap-3">' +
-      tweets
-        .map((t) => {
-          const diffEmMinutos = Math.floor(
-            (new Date() - new Date(t.data)) / 60000,
-          );
-          const dataFmt =
-            diffEmMinutos < 1
-              ? "Agora"
-              : diffEmMinutos < 60
-                ? `${diffEmMinutos}m`
-                : diffEmMinutos < 1440
-                  ? `${Math.floor(diffEmMinutos / 60)}h`
-                  : new Date(t.data)
-                      .toLocaleDateString("pt-BR", {
-                        day: "2-digit",
-                        month: "short",
-                      })
-                      .replace(".", "");
-          const iconX =
-            '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1 2.25h3.437l5.021 6.661L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117l12.006 15.644z"/></svg>';
-
-          const mediaHtml =
-            cfg.mostrarMidia && t.mediaUrl
-              ? `<img src="${escapeAttr(t.mediaUrl)}" class="w-100 rounded border border-secondary border-opacity-10 mt-2" style="max-height: 200px; object-fit: cover;">`
-              : "";
-
-          if (cfg.layout === "lista") {
-            return `
-          <a href="${escapeAttr(t.link)}" target="_blank" rel="noopener noreferrer" class="text-decoration-none border-bottom pb-2" style="color: var(--ink);">
-            <div class="d-flex align-items-center justify-content-between mb-1"><strong class="small">${escapeHtml(t.autorNome)}</strong><span class="text-muted" style="font-size: 0.65rem;">${dataFmt}</span></div>
-            <p class="mb-0 small" style="line-height: 1.4;">${escapeHtml(t.texto)}</p>
-            ${mediaHtml}
-          </a>`;
-          }
-
-          return `
-        <a href="${escapeAttr(t.link)}" target="_blank" rel="noopener noreferrer" class="text-decoration-none d-block p-3 rounded-3 border" style="background: var(--surface-muted); color: var(--ink); border-color: var(--line); transition: transform 0.2s ease, box-shadow 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-soft)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-          <div class="d-flex align-items-center justify-content-between mb-2">
-            <div class="d-flex align-items-center gap-2">
-              ${t.autorAvatar ? `<img src="${escapeAttr(t.autorAvatar)}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">` : `<div style="width:32px; height:32px; border-radius:50%; background:var(--line);"></div>`}
-              <div class="d-flex flex-column lh-1"><strong style="font-size: 0.85rem;">${escapeHtml(t.autorNome)}</strong><span class="text-muted" style="font-size: 0.7rem;">${escapeHtml(t.autorHandle)}</span></div>
-            </div>
-            <div class="text-muted d-flex align-items-center gap-2"><span style="font-size: 0.7rem;">${dataFmt}</span>${iconX}</div>
-          </div>
-          <p class="mb-0 text-break" style="font-size: 0.85rem; line-height: 1.45; white-space: pre-wrap;">${escapeHtml(t.texto)}</p>
-          ${mediaHtml}
-        </a>
-      `;
-        })
-        .join("") +
-      "</div>";
-  } catch (e) {
-    list.innerHTML =
-      '<div class="empty-box p-3 text-danger small text-center">Erro ao carregar o feed.</div>';
-  }
-}
-
 async function carregarWidgetOutrosPortais() {
   if (estadoHome.config?.home?.mostrarPortais === false) return;
 
@@ -1479,7 +1298,6 @@ function iniciarContadorAtualizacao() {
       carregarWidgetTabela();
       carregarWidgetOdds();
       carregarWidgetVideos();
-      carregarWidgetTwitter();
       carregarWidgetOutrosPortais();
     }
   }, 1000);

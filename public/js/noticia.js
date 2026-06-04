@@ -123,11 +123,19 @@ async function carregarNoticia() {
     const htmlComentariosAuth = statusAuth.logado
       ? `
       <div class="glass-panel p-3 rounded-4 mb-4" style="border: 1px solid var(--line); background: var(--surface-muted);">
-          <div class="d-flex align-items-center gap-2 mb-2">
-              <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" style="width: 32px; height: 32px; background: var(--accent);">${iniciais(statusAuth.user?.usuario)}</div>
-              <strong class="small" style="color: var(--ink);">${escapeHtml(statusAuth.user?.usuario)}</strong>
+          <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-2">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm" style="width: 32px; height: 32px; background: var(--accent);">${iniciais(statusAuth.user?.usuario)}</div>
+                  <strong class="small" style="color: var(--ink);">${escapeHtml(statusAuth.user?.usuario)}</strong>
+              </div>
+              <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none" onclick="logoutComentario()" title="Sair da conta">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              </button>
           </div>
-          <textarea id="comment-text" class="form-control rounded-3 border-secondary border-opacity-25 mb-2" rows="3" placeholder="Deixe sua opinião sobre a matéria..." style="resize: none;"></textarea>
+          <div class="position-relative mb-2">
+              <textarea id="comment-text" class="form-control rounded-3 border-secondary border-opacity-25 pb-4" rows="3" placeholder="Deixe sua opinião sobre a matéria..." style="resize: none;" maxlength="500" oninput="document.getElementById('char-count').innerText = this.value.length + '/500'"></textarea>
+              <div class="position-absolute bottom-0 end-0 p-2 text-muted fw-bold" style="font-size: 0.65rem;" id="char-count">0/500</div>
+          </div>
           <div class="d-flex justify-content-between align-items-center">
               <small class="text-muted" style="font-size: 0.7rem;">Evite links e palavras ofensivas.</small>
               <button class="btn btn-sm text-white fw-bold px-4 rounded-pill shadow-sm" style="background: var(--ink);" onclick="enviarComentario('${noticia.id}')">Comentar</button>
@@ -270,8 +278,14 @@ window.carregarComentarios = async function (noticiaId) {
   const list = document.getElementById("comments-list");
   if (!list) return;
   try {
-    const res = await fetch(`/api/comentarios/noticia/${noticiaId}`);
+    const [res, resAuth] = await Promise.all([
+      fetch(`/api/comentarios/noticia/${noticiaId}`),
+      fetch("/api/status"),
+    ]);
     const comentarios = await res.json();
+    const statusAuth = await resAuth.json();
+    const userId = statusAuth.user ? statusAuth.user.id : null;
+
     if (comentarios.length === 0) {
       list.innerHTML = `<div class="text-muted text-center small py-4">Seja o primeiro a deixar um comentário nesta matéria!</div>`;
       return;
@@ -280,21 +294,34 @@ window.carregarComentarios = async function (noticiaId) {
       .map((c) => {
         const isAutor = c.role === "admin" || c.role === "super_admin";
         const badgeAutor = isAutor
-          ? `<span class="badge rounded-pill ms-2" style="font-size: 0.55rem; background: linear-gradient(135deg, #f70068, #d40059) !important; box-shadow: 0 2px 5px rgba(247,0,104,0.3);">AUTOR</span>`
+          ? `<span class="badge rounded-pill ms-2" style="font-size: 0.55rem; background: linear-gradient(135deg, #f8db52, #d4b51c) !important; color: #111 !important; box-shadow: 0 2px 5px rgba(248,219,82,0.4);">AUTOR</span>`
           : "";
         const borderStyle = isAutor
-          ? `border: 1px solid rgba(247,0,104,0.3); background: color-mix(in srgb, #f70068 3%, var(--surface));`
+          ? `border: 1px solid rgba(248,219,82,0.4); background: color-mix(in srgb, #f8db52 5%, var(--surface));`
           : `border: 1px solid var(--line); background: var(--surface);`;
+
+        const curtidas = c.likes ? c.likes.length : 0;
+        const curtidoPorMim =
+          c.likes && userId ? c.likes.includes(userId) : false;
+        const heartFill = curtidoPorMim ? "#f70068" : "none";
+        const heartColor = curtidoPorMim ? "#f70068" : "currentColor";
+
         return `
         <div class="glass-panel p-3 rounded-4 shadow-sm" style="${borderStyle}">
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <div class="d-flex align-items-center gap-2">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 28px; height: 28px; background: ${isAutor ? "#f70068" : "var(--line)"}; color: ${isAutor ? "#fff" : "var(--ink)"}; font-size: 0.7rem;">${iniciais(c.usuarioNome)}</div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 28px; height: 28px; background: ${isAutor ? "#111" : "var(--line)"}; color: ${isAutor ? "#f8db52" : "var(--ink)"}; font-size: 0.7rem;">${iniciais(c.usuarioNome)}</div>
                     <strong class="small" style="color: var(--ink);">${escapeHtml(c.usuarioNome)} ${badgeAutor}</strong>
                 </div>
-                <span class="text-muted" style="font-size: 0.65rem;">${formatarData(c.data)}</span>
+                    <span class="text-muted" style="font-size: 0.65rem;" title="${formatarData(c.data)}">${tempoRelativo(c.data)}</span>
             </div>
-            <p class="m-0 small" style="color: var(--ink); line-height: 1.45;">${escapeHtml(c.texto).replace(/\n/g, "<br>")}</p>
+                <p class="m-0 small mb-3" style="color: var(--ink); line-height: 1.45;">${escapeHtml(c.texto).replace(/\n/g, "<br>")}</p>
+                <div class="d-flex align-items-center gap-3 border-top border-secondary border-opacity-10 pt-2">
+                    <button class="btn btn-link p-0 text-decoration-none d-flex align-items-center gap-1" style="color: ${heartColor}; font-size: 0.75rem;" onclick="curtirComentario('${c.id}', '${noticiaId}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="${heartFill}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        <span class="fw-bold">${curtidas}</span>
+                    </button>
+                </div>
         </div>
       `;
       })
@@ -303,6 +330,33 @@ window.carregarComentarios = async function (noticiaId) {
     list.innerHTML = `<div class="text-danger small text-center">Erro ao carregar comentários.</div>`;
   }
 };
+
+window.curtirComentario = async function (comentarioId, noticiaId) {
+  try {
+    const res = await fetch(`/api/comentarios/like/${comentarioId}`, {
+      method: "POST",
+    });
+    if (res.status === 401) {
+      mostrarNotificacaoLeitor("Faça login para curtir comentários.", "danger");
+      return;
+    }
+    if (res.ok) {
+      carregarComentarios(noticiaId);
+    }
+  } catch (e) {
+    mostrarNotificacaoLeitor("Erro de conexão.", "danger");
+  }
+};
+
+function tempoRelativo(dataISO) {
+  const diffMin = Math.floor((new Date() - new Date(dataISO)) / 60000);
+  if (diffMin < 1) return "Agora mesmo";
+  if (diffMin < 60) return `Há ${diffMin} min`;
+  const diffHoras = Math.floor(diffMin / 60);
+  if (diffHoras < 24) return `Há ${diffHoras} h`;
+  const diffDias = Math.floor(diffHoras / 24);
+  return `Há ${diffDias} d`;
+}
 
 window.enviarComentario = async function (noticiaId) {
   const txtArea = document.getElementById("comment-text");
@@ -330,6 +384,16 @@ window.enviarComentario = async function (noticiaId) {
   } finally {
     btn.innerHTML = txtOrig;
     btn.disabled = false;
+  }
+};
+
+window.logoutComentario = async function () {
+  if (!confirm("Deseja sair da sua conta?")) return;
+  try {
+    await fetch("/api/logout");
+    window.location.reload();
+  } catch (e) {
+    window.location.reload();
   }
 };
 

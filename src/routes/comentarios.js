@@ -45,11 +45,9 @@ router.post("/noticia/:noticiaId", async (req, res) => {
 
   // Trava Metralhadora: Exige 60s entre um comentário e outro
   if (rateLimits[userId] && now - rateLimits[userId] < 60000) {
-    return res
-      .status(429)
-      .json({
-        erro: "Aguarde 1 minuto antes de enviar outro comentário para evitar spam.",
-      });
+    return res.status(429).json({
+      erro: "Aguarde 1 minuto antes de enviar outro comentário para evitar spam.",
+    });
   }
 
   let texto = req.body.texto || "";
@@ -71,11 +69,9 @@ router.post("/noticia/:noticiaId", async (req, res) => {
     texto.toLowerCase().includes(word),
   );
   if (hasBadWord)
-    return res
-      .status(400)
-      .json({
-        erro: "Seu comentário contém palavras impróprias que violam as regras da comunidade.",
-      });
+    return res.status(400).json({
+      erro: "Seu comentário contém palavras impróprias que violam as regras da comunidade.",
+    });
 
   rateLimits[userId] = now;
 
@@ -88,6 +84,7 @@ router.post("/noticia/:noticiaId", async (req, res) => {
     role: req.session.user.role,
     texto: texto,
     data: new Date().toISOString(),
+    likes: [],
   };
 
   comentarios.push(novo);
@@ -95,6 +92,30 @@ router.post("/noticia/:noticiaId", async (req, res) => {
 
   await salvarJSON(PATH_COMENTARIOS, comentarios);
   res.status(201).json(novo);
+});
+
+// Rota Protegida: Curtir/Descurtir Comentário
+router.post("/like/:id", async (req, res) => {
+  if (!estaLogado(req))
+    return res.status(401).json({ erro: "Faça login para curtir." });
+
+  const userId = req.session.user.id;
+  const comentarios = await lerJSON(PATH_COMENTARIOS, []);
+  const idx = comentarios.findIndex(
+    (c) => String(c.id) === String(req.params.id),
+  );
+
+  if (idx === -1)
+    return res.status(404).json({ erro: "Comentário não encontrado." });
+  if (!comentarios[idx].likes) comentarios[idx].likes = [];
+
+  const likeIdx = comentarios[idx].likes.indexOf(userId);
+  if (likeIdx === -1)
+    comentarios[idx].likes.push(userId); // Curtiu
+  else comentarios[idx].likes.splice(likeIdx, 1); // Descurtiu
+
+  await salvarJSON(PATH_COMENTARIOS, comentarios);
+  res.json({ likes: comentarios[idx].likes.length });
 });
 
 // Rotas do Painel Administrativo
