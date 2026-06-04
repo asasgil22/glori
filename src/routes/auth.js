@@ -48,8 +48,12 @@ router.post("/login/social", async (req, res) => {
         .json({ erro: "Autenticação social falhou ou expirou." });
     }
 
-    const email = data.user.email;
-    const nome = data.user.user_metadata?.full_name || email.split("@")[0];
+    const email = data.user.email || "";
+    const nome =
+      data.user.user_metadata?.full_name ||
+      (email
+        ? email.split("@")[0]
+        : "Torcedor_" + Math.floor(Math.random() * 10000));
     const avatarUrl =
       data.user.user_metadata?.avatar_url ||
       data.user.user_metadata?.picture ||
@@ -57,7 +61,10 @@ router.post("/login/social", async (req, res) => {
 
     const usuarios = await lerJSON(PATH_USUARIOS, []);
     let user = usuarios.find(
-      (u) => u.email === email || u.usuario === email || u.usuario === nome,
+      (u) =>
+        (email && u.email === email) ||
+        (email && u.usuario === email) ||
+        u.usuario === nome,
     );
 
     // Se é a primeira vez desse usuário, cria uma conta automática de 'Redator'
