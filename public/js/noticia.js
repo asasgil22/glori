@@ -8,6 +8,8 @@ function obterIdentificadorNoticia() {
 const identificador = obterIdentificadorNoticia();
 const container = document.getElementById("noticia-detalhe");
 let configPortal = null;
+let ordemComentarios = "recentes";
+let intervaloLiveComentarios = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
   const hash = window.location.hash;
@@ -235,7 +237,13 @@ async function carregarNoticia() {
       </div>
       
       <div class="comments-section mt-5 border-top border-secondary border-opacity-10 pt-5 mx-auto" style="max-width: 760px;">
-          <h4 class="fw-bolder mb-4 text-uppercase" style="letter-spacing: -0.5px; color: var(--ink);">💬 Tribuna Alvinegra</h4>
+          <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+              <h4 class="fw-bolder m-0 text-uppercase" style="letter-spacing: -0.5px; color: var(--ink);">💬 Tribuna Alvinegra</h4>
+              <div class="d-flex bg-secondary bg-opacity-10 rounded-pill p-1 border border-secondary border-opacity-10" style="font-size: 0.75rem; font-weight: 700;">
+                  <button id="btn-ordem-recentes" class="btn btn-sm rounded-pill px-3 py-1 bg-white shadow-sm text-dark" style="border: none;" onclick="mudarOrdemComentarios('recentes', '${noticia.id}')">Recentes</button>
+                  <button id="btn-ordem-alta" class="btn btn-sm rounded-pill px-3 py-1 text-muted" style="border: none;" onclick="mudarOrdemComentarios('alta', '${noticia.id}')">Em Alta 🔥</button>
+              </div>
+          </div>
           ${htmlComentariosAuth}
           <div id="comments-list" class="mt-4 d-flex flex-column gap-3"></div>
       </div>
@@ -268,13 +276,36 @@ async function carregarNoticia() {
     if (typeof initHighlightShare === "function") initHighlightShare();
     if (typeof initSmartHeaderNoticia === "function") initSmartHeaderNoticia();
     carregarComentarios(noticia.id);
+
+    // FEED LIVE: Atualização fantasma a cada 15 segundos!
+    if (intervaloLiveComentarios) clearInterval(intervaloLiveComentarios);
+    intervaloLiveComentarios = setInterval(() => {
+      carregarComentarios(noticia.id, true);
+    }, 15000);
   } catch {
     container.innerHTML =
       '<div class="empty-box">Nao foi possivel carregar esta noticia.</div>';
   }
 }
 
-window.carregarComentarios = async function (noticiaId) {
+window.mudarOrdemComentarios = function (ordem, noticiaId) {
+  ordemComentarios = ordem;
+  const btnRecentes = document.getElementById("btn-ordem-recentes");
+  const btnAlta = document.getElementById("btn-ordem-alta");
+  if (btnRecentes && btnAlta) {
+    btnRecentes.className =
+      ordem === "recentes"
+        ? "btn btn-sm rounded-pill px-3 py-1 bg-white shadow-sm text-dark"
+        : "btn btn-sm rounded-pill px-3 py-1 text-muted";
+    btnAlta.className =
+      ordem === "alta"
+        ? "btn btn-sm rounded-pill px-3 py-1 bg-white shadow-sm text-dark"
+        : "btn btn-sm rounded-pill px-3 py-1 text-muted";
+  }
+  carregarComentarios(noticiaId);
+};
+
+window.carregarComentarios = async function (noticiaId, silent = false) {
   const list = document.getElementById("comments-list");
   if (!list) return;
   try {
@@ -282,12 +313,32 @@ window.carregarComentarios = async function (noticiaId) {
       fetch(`/api/comentarios/noticia/${noticiaId}`),
       fetch("/api/status"),
     ]);
-    const comentarios = await res.json();
+    let comentarios = await res.json();
     const statusAuth = await resAuth.json();
     const userId = statusAuth.user ? statusAuth.user.id : null;
+    const isUserAdmin =
+      statusAuth.user &&
+      ["admin", "super_admin"].includes(statusAuth.user.role);
+
+    const fixado = comentarios.find((c) => c.fixado);
+    if (fixado) {
+      comentarios = comentarios.filter(
+        (c) => String(c.id) !== String(fixado.id),
+      );
+    }
+
+    if (ordemComentarios === "alta") {
+      comentarios.sort(
+        (a, b) => (b.likes?.length || 0) - (a.likes?.length || 0),
+      );
+    } else {
+      comentarios.sort((a, b) => new Date(b.data) - new Date(a.data));
+    }
+    if (fixado) comentarios.unshift(fixado);
 
     if (comentarios.length === 0) {
-      list.innerHTML = `<div class="text-muted text-center small py-4">Seja o primeiro a deixar um comentário nesta matéria!</div>`;
+      if (!silent)
+        list.innerHTML = `<div class="text-muted text-center small py-4">Seja o primeiro a deixar um comentário nesta matéria!</div>`;
       return;
     }
     list.innerHTML = comentarios
@@ -296,9 +347,16 @@ window.carregarComentarios = async function (noticiaId) {
         const badgeAutor = isAutor
           ? `<span class="badge rounded-pill ms-2" style="font-size: 0.55rem; background: linear-gradient(135deg, #f8db52, #d4b51c) !important; color: #111 !important; box-shadow: 0 2px 5px rgba(248,219,82,0.4);">AUTOR</span>`
           : "";
-        const borderStyle = isAutor
-          ? `border: 1px solid rgba(248,219,82,0.4); background: color-mix(in srgb, #f8db52 5%, var(--surface));`
-          : `border: 1px solid var(--line); background: var(--surface);`;
+        const isFixado = c.fixado;
+        const badgeFixado = isFixado
+          ? `<span class="badge bg-dark rounded-pill ms-2 text-white" style="font-size: 0.55rem; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">📌 FIXADO</span>`
+          : "";
+
+        const borderStyle = isFixado
+          ? `border: 2px solid var(--ink); background: var(--surface);`
+          : isAutor
+            ? `border: 1px solid rgba(248,219,82,0.4); background: color-mix(in srgb, #f8db52 5%, var(--surface));`
+            : `border: 1px solid var(--line); background: var(--surface);`;
 
         const curtidas = c.likes ? c.likes.length : 0;
         const curtidoPorMim =
@@ -306,12 +364,29 @@ window.carregarComentarios = async function (noticiaId) {
         const heartFill = curtidoPorMim ? "#f70068" : "none";
         const heartColor = curtidoPorMim ? "#f70068" : "currentColor";
 
+        const btnApagar =
+          c.usuarioId === userId && !isFixado
+            ? `
+            <button class="btn btn-link p-0 text-muted d-flex align-items-center" title="Apagar meu comentário" onclick="apagarMeuComentario('${c.id}', '${noticiaId}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+        `
+            : "";
+
+        const btnFixar = isUserAdmin
+          ? `
+            <button class="btn btn-link p-0 ${isFixado ? "text-dark" : "text-muted"} d-flex align-items-center ms-auto" title="Fixar/Desfixar comentário" onclick="fixarComentario('${c.id}', '${noticiaId}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFixado ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.68V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3v4.68a2 2 0 0 1-1.11 1.87l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+            </button>
+        `
+          : "";
+
         return `
         <div class="glass-panel p-3 rounded-4 shadow-sm" style="${borderStyle}">
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <div class="d-flex align-items-center gap-2">
                         <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 28px; height: 28px; background: ${isAutor ? "#111" : "var(--line)"}; color: ${isAutor ? "#f8db52" : "var(--ink)"}; font-size: 0.7rem;">${iniciais(c.usuarioNome)}</div>
-                    <strong class="small" style="color: var(--ink);">${escapeHtml(c.usuarioNome)} ${badgeAutor}</strong>
+                    <strong class="small" style="color: var(--ink);">${escapeHtml(c.usuarioNome)} ${badgeAutor} ${badgeFixado}</strong>
                 </div>
                     <span class="text-muted" style="font-size: 0.65rem;" title="${formatarData(c.data)}">${tempoRelativo(c.data)}</span>
             </div>
@@ -321,13 +396,16 @@ window.carregarComentarios = async function (noticiaId) {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="${heartFill}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                         <span class="fw-bold">${curtidas}</span>
                     </button>
+                    ${btnApagar}
+                    ${btnFixar}
                 </div>
         </div>
       `;
       })
       .join("");
   } catch (e) {
-    list.innerHTML = `<div class="text-danger small text-center">Erro ao carregar comentários.</div>`;
+    if (!silent)
+      list.innerHTML = `<div class="text-danger small text-center">Erro ao carregar comentários.</div>`;
   }
 };
 
@@ -346,6 +424,26 @@ window.curtirComentario = async function (comentarioId, noticiaId) {
   } catch (e) {
     mostrarNotificacaoLeitor("Erro de conexão.", "danger");
   }
+};
+
+window.apagarMeuComentario = async function (id, noticiaId) {
+  if (!confirm("Deseja apagar sua mensagem?")) return;
+  try {
+    const res = await fetch(`/api/comentarios/meu/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      mostrarNotificacaoLeitor("Mensagem apagada.", "success");
+      carregarComentarios(noticiaId);
+    } else {
+      mostrarNotificacaoLeitor("Erro ao apagar.", "danger");
+    }
+  } catch (e) {}
+};
+
+window.fixarComentario = async function (id, noticiaId) {
+  try {
+    const res = await fetch(`/api/comentarios/fixar/${id}`, { method: "POST" });
+    if (res.ok) carregarComentarios(noticiaId);
+  } catch (e) {}
 };
 
 function tempoRelativo(dataISO) {

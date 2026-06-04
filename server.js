@@ -57,6 +57,9 @@ try {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// 🚀 Tática "Quebra-Cache" Extrema: Força celulares a baixarem a versão mais nova a cada reinicialização
+const VERSAO_APP = Date.now();
+
 const DATA_DIR = path.resolve(__dirname, "data");
 const PUBLIC_DIR = path.resolve(__dirname, "public");
 const UPLOADS_DIR = path.resolve(PUBLIC_DIR, "uploads");
@@ -842,7 +845,19 @@ async function servirHtmlComSeo(res, arquivo, metaHtml) {
   const html = template.includes("<!-- PORTAL_SEO -->")
     ? template.replace("<!-- PORTAL_SEO -->", conteudoHead)
     : template.replace("</head>", `  ${conteudoHead}\n</head>`);
-  res.type("html").send(html);
+
+  // Impede agressivamente que o Safari/Mobile use a versão velha do Javascript
+  const htmlCacheBusted = html
+    .replace(/src="([^"]+\.js)"/g, `src="$1?v=${VERSAO_APP}"`)
+    .replace(/href="([^"]+\.css)"/g, `href="$1?v=${VERSAO_APP}"`);
+
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate",
+  );
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  res.type("html").send(htmlCacheBusted);
 }
 
 app.use(exigirLoginPagina);

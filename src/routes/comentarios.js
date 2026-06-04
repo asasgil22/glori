@@ -118,6 +118,44 @@ router.post("/like/:id", async (req, res) => {
   res.json({ likes: comentarios[idx].likes.length });
 });
 
+// Rota Protegida: Fixar Comentário (Admin)
+router.post("/fixar/:id", exigirPermissaoAdmin, async (req, res) => {
+  const comentarios = await lerJSON(PATH_COMENTARIOS, []);
+  const idx = comentarios.findIndex(
+    (c) => String(c.id) === String(req.params.id),
+  );
+  if (idx === -1)
+    return res.status(404).json({ erro: "Comentário não encontrado." });
+
+  const isFixado = !comentarios[idx].fixado;
+  // Desfixa qualquer outro comentário da mesma notícia
+  comentarios.forEach((c) => {
+    if (c.noticiaId === comentarios[idx].noticiaId) c.fixado = false;
+  });
+  comentarios[idx].fixado = isFixado;
+
+  await salvarJSON(PATH_COMENTARIOS, comentarios);
+  res.json(comentarios[idx]);
+});
+
+// Rota Protegida: Usuário Apaga o Próprio Comentário
+router.delete("/meu/:id", async (req, res) => {
+  if (!estaLogado(req)) return res.status(401).json({ erro: "Faça login." });
+  const userId = req.session.user.id;
+  let comentarios = await lerJSON(PATH_COMENTARIOS, []);
+
+  const idx = comentarios.findIndex(
+    (c) =>
+      String(c.id) === String(req.params.id) &&
+      String(c.usuarioId) === String(userId),
+  );
+  if (idx === -1) return res.status(404).json({ erro: "Ação não autorizada." });
+
+  comentarios.splice(idx, 1);
+  await salvarJSON(PATH_COMENTARIOS, comentarios);
+  res.json({ mensagem: "Comentário excluído." });
+});
+
 // Rotas do Painel Administrativo
 router.get("/", exigirPermissaoAdmin, async (req, res) => {
   const comentarios = await lerJSON(PATH_COMENTARIOS, []);
