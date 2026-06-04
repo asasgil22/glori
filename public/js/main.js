@@ -15,6 +15,31 @@ window.estadoHome = estadoHome; // Expõe o estado globalmente para o carrossel 
 let timeoutBusca = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Processa o retorno do login social se o Supabase redirecionar para a raiz
+  const hash = window.location.hash;
+  if (hash && hash.includes("access_token")) {
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get("access_token");
+    if (accessToken) {
+      try {
+        const res = await fetch("/api/login/social", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token: accessToken }),
+        });
+        if (res.ok) {
+          history.replaceState(null, null, " ");
+          const redirectBack = localStorage.getItem("redirect_after_login");
+          if (redirectBack) {
+            localStorage.removeItem("redirect_after_login");
+            window.location.href = redirectBack;
+            return; // Interrompe o carregamento da Home
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
   const formFiltros = document.getElementById("form-filtros");
   if (formFiltros) {
     formFiltros.addEventListener("submit", (e) => {

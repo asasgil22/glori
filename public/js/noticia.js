@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
         if (res.ok) {
           history.replaceState(null, null, " ");
+          localStorage.removeItem("redirect_after_login");
           mostrarNotificacaoLeitor("Login realizado com sucesso!", "success");
         }
       } catch (e) {}
@@ -503,7 +504,15 @@ window.loginSocialComentario = async function (provedor) {
       mostrarNotificacaoLeitor("Supabase não configurado.", "danger");
       return;
     }
-    const redirectTo = encodeURIComponent(window.location.href.split("#")[0]);
+
+    // Salva a URL da notícia para voltar após o login
+    localStorage.setItem(
+      "redirect_after_login",
+      window.location.href.split("#")[0],
+    );
+
+    // Envia o usuário para a raiz (Index) para evitar bloqueio de URL no Supabase
+    const redirectTo = encodeURIComponent(window.location.origin + "/");
     const oauthUrl = `${conf.supabaseUrl}/auth/v1/authorize?provider=${provedor}&redirect_to=${redirectTo}`;
     window.location.href = oauthUrl;
   } catch (e) {
